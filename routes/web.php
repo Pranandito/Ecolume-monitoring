@@ -11,7 +11,7 @@ Route::redirect('/', '/login');
 
 Route::get('/beranda', [BerandaController::class, 'index'])->middleware(['auth', 'verified'])->name('beranda');
 Route::get('/dashboard/{device_name}/{device_id}', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
-Route::get('/dashboard/line-chart/{device_id}', [DashboardController::class, 'getChartData'])->name('dashboard.line-chart');
+// Route::get('/dashboard/line-chart/{device_id}', [DashboardController::class, 'getChartData'])->name('dashboard.line-chart');
 
 
 
