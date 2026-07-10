@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Device;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -154,9 +155,10 @@ class DashboardController extends Controller
 
         $devices = Device::select('id', 'owner_id', 'serial_number', 'device_name', 'online_status')->where('owner_id', Auth::id())->get();
         $id = $device_id;
+        $name = $device_name;
 
         // dd($device);
-        return view('dashboard', compact('device', 'latest', 'logs', 'today', 'avgSuhu', 'devices', 'id'));
+        return view('dashboard', compact('device', 'latest', 'logs', 'today', 'avgSuhu', 'devices', 'id', 'name'));
     }
 
     public function getChartData($device_id)
@@ -222,5 +224,76 @@ class DashboardController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function getHeatMapData($deviceId)
+    {
+        $queryApi = InfluxDB::createQueryApi();
+
+        $fluxQuery = <<<FLUX
+            from(bucket: "PTSP_AllTime")
+            |> range(start: -30d)
+            |> filter(fn: (r) => r["_measurement"] == "IoT_PTSP")
+            |> filter(fn: (r) => r["Device_Id"] == "{$deviceId}")
+            |> filter(fn: (r) => r["_field"] == "Durasi_Operasional_delta" or r["_field"] == "Volume_total" or r["_field"] == "Volume_delta")
+            |> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
+            |> sort(columns: ["_time"], desc: false)
+            |> keep(columns: ["_time", "Durasi_Operasional_delta", "Volume_total", "Volume_delta"])
+        FLUX;
+
+        $tables = $queryApi->query($fluxQuery);
+
+        $recordsByDate = [];
+        $volumeFirst = null;
+        $volumeLast = null;
+        $count = 0;
+
+        foreach ($tables as $table) {
+            foreach ($table->records as $record) {
+                $time = Carbon::parse($record->values['_time'])->timezone('Asia/Jakarta');
+                $dateKey = $time->format('Y-m-d');
+
+                $durasi = $record->values['Durasi_Operasional_delta'] ?? 0;
+                $volume = $record->values['Volume_total'] ?? null;
+
+                $recordsByDate[$dateKey] = $durasi > 0;
+                if ($durasi > 0) {
+                    $count++;
+                }
+
+                if ($volume !== null) {
+                    $volumeFirst ??= $volume;
+                    $volumeDeltaFirst ??= $record->values['Volume_delta'] ?? 0;
+                    $volumeLast = $volume;
+                }
+            }
+        }
+
+        // Bangun kerangka 30 hari penuh, default tidak digunakan
+        $heatmap = [];
+        $start = Carbon::now('Asia/Jakarta')->subDays(29)->startOfDay();
+
+        for ($i = 0; $i < 30; $i++) {
+            $date = $start->copy()->addDays($i);
+            $dateKey = $date->format('Y-m-d');
+
+            $heatmap[] = [
+                'date' => $dateKey,
+                'used' => $recordsByDate[$dateKey] ?? false,
+            ];
+        }
+
+        $monthlyVolume = 0;
+        if ($volumeFirst !== null && $volumeLast !== null) {
+            $volumeFirst -= $volumeDeltaFirst;
+            $selisihVolume = $volumeLast - $volumeFirst;
+            $monthlyVolume = round($selisihVolume / 1000, 1);
+        }
+
+        return response()->json([
+            'heatmap' => $heatmap,
+            'volume_delta_30d' => $monthlyVolume,
+            'count' => $count
+        ]);
     }
 }

@@ -175,15 +175,15 @@
                 </svg>
             </button>
             <div class="ml-5 mt-2 border-l border-gray-700 pl-7 space-y-2">
-                @foreach($devices as $device)
-                <a href="{{ route('dashboard', ['device_id' => $device->id, 'device_name' => $device->device_name]) }}" class="flex gap-2 py-2 hover:text-white hover:underline">
-                    <span>{{ $device->device_name }}</span>
-                    <span class="w-[6px] h-[7px] rounded-full {{ $device->online_status ? 'bg-[#00A451]' : 'bg-[#DC2626]'}}"></span>
+                @foreach($devices as $device_)
+                <a href="{{ route('dashboard', ['device_id' => $device_->id, 'device_name' => $device_->device_name]) }}" class="flex gap-2 py-2 hover:text-white hover:underline">
+                    <span>{{ $device_->device_name }}</span>
+                    <span class="w-[6px] h-[7px] rounded-full {{ $device_->online_status ? 'bg-[#00A451]' : 'bg-[#DC2626]'}}"></span>
                 </a>
                 @endforeach
             </div>
         </div>
-        <a href="" class="block my-3">
+        <a href="{{ route('ramalan-cuaca', ['device_name' => $devices[0]->device_name, 'device_id' => $devices[0]->id]) }}" class="block my-3">
             <div class="group flex items-center gap-[13px]  px-3 py-2 hover:bg-[#2A2A2A] text-[#979797] hover:text-white rounded-xl">
                 <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg" class="fill-[#979797] group-hover:fill-white">
                     <path d="M15.4097 8.3125C15.9045 8.3125 16.3683 8.40527 16.8013 8.59082C17.2342 8.77637 17.6146 9.02686 17.9424 9.34229C18.2702 9.65771 18.5269 10.035 18.7124 10.4741C18.8979 10.9132 18.9938 11.3802 19 11.875C19 12.3698 18.9072 12.8306 18.7217 13.2573C18.5361 13.6841 18.2826 14.0614 17.9609 14.3892C17.6393 14.717 17.259 14.9736 16.8198 15.1592C16.3807 15.3447 15.9199 15.4375 15.4375 15.4375H4.75C4.0944 15.4375 3.479 15.3138 2.90381 15.0664C2.32861 14.819 1.82454 14.4819 1.3916 14.0552C0.958659 13.6284 0.61849 13.1243 0.371094 12.543C0.123698 11.9616 0 11.3431 0 10.6875C0 10.0319 0.123698 9.4165 0.371094 8.84131C0.61849 8.26611 0.955566 7.76204 1.38232 7.3291C1.80908 6.89616 2.31315 6.55599 2.89453 6.30859C3.47591 6.0612 4.0944 5.9375 4.75 5.9375C5.03451 5.9375 5.3221 5.96533 5.61279 6.021C5.86019 5.63753 6.14469 5.29427 6.46631 4.99121C6.78792 4.68815 7.14355 4.42839 7.5332 4.21191C7.92285 3.99544 8.33105 3.83464 8.75781 3.72949C9.18457 3.62435 9.62988 3.56868 10.0938 3.5625C10.7803 3.5625 11.4266 3.68311 12.0327 3.92432C12.6388 4.16553 13.18 4.49642 13.6562 4.91699C14.1325 5.33757 14.519 5.84163 14.8159 6.4292C15.1128 7.01676 15.3107 7.64453 15.4097 8.3125ZM15.4375 14.25C15.7653 14.25 16.0715 14.1882 16.356 14.0645C16.6405 13.9408 16.894 13.7707 17.1167 13.5542C17.3394 13.3377 17.5094 13.0872 17.627 12.8027C17.7445 12.5182 17.8063 12.209 17.8125 11.875C17.8125 11.5472 17.7507 11.241 17.627 10.9565C17.5033 10.672 17.3332 10.4185 17.1167 10.1958C16.9002 9.97314 16.6497 9.80306 16.3652 9.68555C16.0807 9.56803 15.7715 9.50619 15.4375 9.5H14.25V8.90625C14.25 8.33105 14.1418 7.79297 13.9253 7.29199C13.7088 6.79102 13.4119 6.3488 13.0347 5.96533C12.6574 5.58187 12.2183 5.28499 11.7173 5.07471C11.2163 4.86442 10.6751 4.75618 10.0938 4.75C9.66081 4.75 9.24333 4.81494 8.84131 4.94482C8.43929 5.07471 8.07129 5.25716 7.7373 5.49219C7.40332 5.72721 7.10335 6.00863 6.8374 6.33643C6.57145 6.66423 6.36426 7.03532 6.21582 7.44971C5.75195 7.23324 5.26335 7.125 4.75 7.125C4.25521 7.125 3.79443 7.21777 3.36768 7.40332C2.94092 7.58887 2.56364 7.84245 2.23584 8.16406C1.90804 8.48568 1.65137 8.86605 1.46582 9.30518C1.28027 9.7443 1.1875 10.2051 1.1875 10.6875C1.1875 11.1823 1.28027 11.6431 1.46582 12.0698C1.65137 12.4966 1.90495 12.8739 2.22656 13.2017C2.54818 13.5295 2.92546 13.7861 3.3584 13.9717C3.79134 14.1572 4.25521 14.25 4.75 14.25H15.4375Z" />
@@ -1102,8 +1102,8 @@
                     <p class="text-[#979797] text-sm">Terasa: 30.2 °C</p>
                 </div>
             </div>
-            <div class="text-[#979797] mt-6 border border-[#373737] rounded-full text-center p-1">
-                <a href="/">
+            <div class="text-[#979797] mt-6 border border-[#373737] rounded-full text-center p-1 hover:bg-[#121212]">
+                <a href="{{ route('ramalan-cuaca', ['device_name' => $name, 'device_id' => $id]) }}">
                     <h1>Detail Selengkapnya ⤍</h1>
                 </a>
             </div>
@@ -1265,7 +1265,7 @@
             <hr class="border-[#373737] mt-3">
         </div>
         <div class="col-span-3 col-start-3 p-6 bg-[#171717] rounded-2xl flex">
-            <div class="w-1/2">
+            <div class="w-1/2 flex flex-col justify-between">
                 <!-- Header -->
                 <div class="flex items-center gap-5">
                     <div class="w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center text-zinc-300">
@@ -1277,14 +1277,14 @@
                     </div>
                     <div>
                         <h3 class="text-lg text-white">Aktivitas Bulan Ini</h3>
-                        <p class="text-[#979797] text-sm">13 aktivitas pompa terekam bulan ini</p>
+                        <p class="text-[#979797] text-sm"><span id="monthlyCount">0</span> aktivitas pompa terekam bulan ini</p>
                     </div>
                 </div>
 
                 <!-- Value -->
                 <div class="flex justify-center items-baseline mt-10">
-                    <span class="text-white text-4xl font-light leading-none">
-                        10.5
+                    <span id="monthlyVolume" class="text-white text-4xl font-light leading-none">
+                        0
                     </span>
                     <span class="text-white text-xl ml-2 mt-2">
                         m³
@@ -1316,68 +1316,98 @@
             </div>
 
             <script>
-                // 1 = digunakan
-                // 0 = tidak digunakan
+                const deviceId = "{{ $id }}"
 
-                const activityData = [
-                    1, 1, 1, 0, 0, 1, 1, 1, 1, 0,
-                    0, 1, 0, 1, 0, 0, 1, 0, 0, 1,
-                    0, 0, 1, 0, 1, 0, 0, 0, 0, 0
-                ];
-
-                function renderHeatmap() {
+                async function renderHeatmap(deviceId) {
                     const container = document.getElementById('heatmap-container');
+                    const volumeTag = document.getElementById('monthlyVolume');
+                    const countTag = document.getElementById('monthlyCount');
 
-                    container.innerHTML = activityData.map((value, index) => `
-            <div
-                class="
-                    w-7
-                    h-7
-                    rounded-full
-                    transition-all
-                    duration-300
-                    hover:scale-110
-                    cursor-pointer
-                    relative
-                    group
-                "
-                style="
-                    background-color: ${value ? '#10B981' : '#262626'};
-                "
-            >
-                <div
-                    class="
-                        absolute
-                        bottom-full
-                        left-1/2
-                        -translate-x-1/2
-                        mb-2
-                        hidden
-                        group-hover:block
-                        z-10
-                    "
-                >
+                    try {
+                        const res = await fetch(`/device/test/{{ $id }}`);
+                        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+                        const {
+                            heatmap,
+                            volume_delta_30d,
+                            count
+                        } = await res.json();
+
+                        container.innerHTML = heatmap.map((day) => {
+                            const tanggal = new Date(day.date).toLocaleDateString('id-ID', {
+                                day: 'numeric',
+                                month: 'long',
+                                year: 'numeric'
+                            });
+
+                            return `
                     <div
                         class="
-                            bg-black
-                            text-white
-                            text-xs
-                            rounded-lg
-                            px-3
-                            py-2
-                            whitespace-nowrap
+                            w-8
+                            h-8
+                            rounded-full
+                            transition-all
+                            duration-300
+                            hover:scale-110
+                            cursor-pointer
+                            relative
+                            group
                         "
+                        style="background-color: ${day.used ? '#10B981' : '#262626'};"
                     >
-                        Hari ${index + 1}
-                        <br>
-                        ${value ? 'Digunakan' : 'Tidak digunakan'}
+                        <div
+                            class="
+                                absolute
+                                bottom-full
+                                left-1/2
+                                -translate-x-1/2
+                                mb-2
+                                hidden
+                                group-hover:block
+                                z-10
+                            "
+                        >
+                            <div
+                                class="
+                                    bg-black
+                                    text-white
+                                    text-xs
+                                    rounded-lg
+                                    px-3
+                                    py-2
+                                    whitespace-nowrap
+                                "
+                            >
+                                ${tanggal}
+                                <br>
+                                ${day.used ? 'Digunakan' : 'Tidak digunakan'}
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-        `).join('');
+                `;
+                        }).join('');
+
+
+                        if (volumeTag) {
+                            volumeTag.textContent = volume_delta_30d !== null ?
+                                `${volume_delta_30d}` :
+                                '—';
+                        }
+
+                        if (countTag) {
+                            countTag.textContent = count !== null ?
+                                `${count.toLocaleString('id-ID')}` :
+                                '—';
+                        }
+
+                    } catch (err) {
+                        console.error('Gagal memuat data heatmap/volume:', err);
+                        container.innerHTML = '<p class="text-red-400 text-sm">Gagal memuat data</p>';
+                        if (volumeTag) volumeTag.textContent = '—';
+                    }
                 }
 
-                renderHeatmap();
+                renderHeatmap(deviceId);
             </script>
 
             <div class="w-1/2">
@@ -1424,8 +1454,8 @@
             </div>
             <div class="flex items-center gap-8">
                 <a href="{{ route('beranda') }}" class="hover:underline">Beranda</a>
-                <a href="" class="hover:underline">Dashboard</a>
-                <a href="" class="hover:underline">Ramalan Cuaca</a>
+                <a href="{{ route('dashboard', ['device_name' => $devices[0]->device_name, 'device_id' => $devices[0]->id]) }}" class="hover:underline">Dashboard</a>
+                <a href="{{ route('ramalan-cuaca', ['device_name' => $devices[0]->device_name, 'device_id' => $devices[0]->id]) }}" class="hover:underline">Ramalan Cuaca</a>
                 <a href="" class="hover:underline">Laporan Analitik</a>
             </div>
             <h1 class="text-xl">@Ecolume.id</h1>

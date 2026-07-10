@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BerandaController;
+use App\Http\Controllers\CuacaController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\MQTTController;
@@ -11,6 +12,8 @@ Route::redirect('/', '/login');
 
 Route::get('/beranda', [BerandaController::class, 'index'])->middleware(['auth', 'verified'])->name('beranda');
 Route::get('/dashboard/{device_name}/{device_id}', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/ramalan-cuaca/{device_name}/{device_id}', [CuacaController::class, 'index'])->middleware(['auth', 'verified'])->name('ramalan-cuaca');
+
 // Route::get('/dashboard/line-chart/{device_id}', [DashboardController::class, 'getChartData'])->name('dashboard.line-chart');
 
 
@@ -26,7 +29,7 @@ Route::patch('/device/update/{id}', [DeviceController::class, 'update'])->name('
 
 
 Route::get('/device/tes', [BerandaController::class, 'test']);
-Route::get('/device/test/{device_id}', [DashboardController::class, 'tes']);
+Route::get('/device/test/{device_id}', [DashboardController::class, 'getHeatMapData']);
 Route::get('/device/line-chart/{device_id}', [DashboardController::class, 'getChartData'])->name('dashboard.line-chart');
 
 
