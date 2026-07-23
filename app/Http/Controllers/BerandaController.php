@@ -106,7 +106,8 @@ class BerandaController extends Controller
                 "Daya" => $latestData["Daya"] ?? 0,
                 "Debit" => $latestData["Debit"] ?? 0,
                 "Time" => !empty($latestData["_time"])
-                    ? \Carbon\Carbon::parse($latestData["_time"])
+                    ? \Carbon\Carbon::parse($latestData["_time"], 'UTC')
+                    ->timezone('Asia/Jakarta')
                     ->locale('id')
                     ->translatedFormat('d F H:i')
                     : '-',

@@ -142,7 +142,7 @@ class DashboardController extends Controller
 
     public function index($device_name, $device_id)
     {
-        $device = Device::where("id", $device_id)->select('id', 'owner_id', 'device_name', 'online_status', 'created_at')->with('device_config')->first();
+        $device = Device::where("id", $device_id)->select('id', 'owner_id', 'device_name', 'online_status', 'serial_number', 'created_at')->with('device_config')->first();
         $latest = $this->getLatestData($device_id);
         $logs = $this->getDailyLogs($device_id);
         $first = $this->getFirstData($latest['_time'], $device_id);

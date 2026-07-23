@@ -448,8 +448,8 @@
             <div class="bg-[#171717] rounded-2xl p-3 mt-6 relative">
                 <div class="location-bar-container">
                     @foreach($devices as $device)
-                    <div class="location-bar">
-                        <a href="{{ route('dashboard', ['device_id' => $device->id, 'device_name' => $device->device_name]) }}">
+                    <a href="{{ route('dashboard', ['device_id' => $device->id, 'device_name' => $device->device_name]) }}">
+                        <div class="location-bar">
                             <div class="flex items-center justify-between bg-[#444444]/44 rounded-lg w-60 hover:scale-[1.01] transition-transform">
                                 <div class="font-normal">
                                     <h1>{{$device->device_name}}</h1>
@@ -471,8 +471,8 @@
                                     </svg>
                                 </a>
                             </div>
-                        </a>
-                    </div>
+                        </div>
+                    </a>
                     @endforeach
                 </div>
 

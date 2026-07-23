@@ -4,6 +4,7 @@ use App\Http\Controllers\BerandaController;
 use App\Http\Controllers\CuacaController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeviceController;
+use App\Http\Controllers\DeviceModeController;
 use App\Http\Controllers\MQTTController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -32,7 +33,6 @@ Route::get('/device/tes', [BerandaController::class, 'test']);
 Route::get('/device/test/{device_id}', [DashboardController::class, 'getHeatMapData']);
 Route::get('/device/line-chart/{device_id}', [DashboardController::class, 'getChartData'])->name('dashboard.line-chart');
 
-
-
+Route::POST('/device/mode/{device_id}/{serial_number}', [DeviceModeController::class, 'update'])->name('device.mode');
 
 require __DIR__ . '/auth.php';

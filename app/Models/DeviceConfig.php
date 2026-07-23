@@ -12,7 +12,12 @@ class DeviceConfig extends Model
         'mode',
         'lat',
         'long',
-        'location'
+        'location',
+        'timer_start',
+        'timer_end',
+        'volume_limit',
+        'prev_mode',
+        'job_confirmed'
     ];
 
     public function device()

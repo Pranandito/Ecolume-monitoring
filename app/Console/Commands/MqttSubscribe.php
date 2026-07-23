@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Services\MQTTStoreService;
-use App\Models\SensorData;
 use Illuminate\Console\Command;
 use PhpMqtt\Client\Facades\MQTT;
 
@@ -39,12 +38,13 @@ class MqttSubscribe extends Command
             $topics = explode('/', $topic);
             $serial_number = $topics[1];
             $id = $topics[2];
-            $savingStatus = $service->MQTTStore($message, $serial_number, $id);
+            [$savingStatus, $dbLoc] = $service->MQTTStore($message, $serial_number, $id);
 
             // 4. Pindahkan output info ke DALAM sini
             // Panggil spesifik properti misalnya $save->id, atau ubah jadi json
             if ($savingStatus) {
                 $this->info("Berhasil disimpan");
+                $this->info("Lokasi Penyimpanan : {$dbLoc}");
                 $this->info(date('Y-m-d H:i:s', time()));
             } else {
                 $this->error("Gagal menyimpan data");

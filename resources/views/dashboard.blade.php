@@ -224,7 +224,9 @@
     </div>
 </aside>
 
-<section id="overlay" class="hidden fixed top-0 bottom-0 left-0 right-0 bg-black/30 z-[1112]"></section>
+<section id="overlay" class="hidden fixed top-0 bottom-0 left-0 right-0 bg-black/75 z-[1112]"></section>
+
+<x-mode.select :id="$id" :serial_number="$device->serial_number" />
 
 <body class="my-12 mx-16 text-white">
     <nav class="flex items-center justify-between bg-[#121212] text-white w-full">
@@ -304,7 +306,10 @@
 
             <!-- Last Update Text -->
             <p class="text-[#979797] text-sm">
-                Terakhir Update : {{ \Carbon\Carbon::parse($latest['_time'])->locale('id')->translatedFormat('d F Y H:i:s') }}
+                Terakhir Update : {{ \Carbon\Carbon::parse($latest['_time'], 'UTC')
+                                ->timezone('Asia/Jakarta')
+                                ->locale('id')
+                                ->translatedFormat('d F Y H:i:s') }}
             </p>
 
         </div>
@@ -386,72 +391,12 @@
             </div>
         </div>
 
-        <div class="bg-[#171717] rounded-2xl p-6 flex flex-col relative overflow-hidden h-full">
-            <div class="absolute -top-10 -right-10 w-40 h-40 bg-zinc-800/30 rounded-full blur-3xl"></div>
-
-            <div class="flex justify-between items-center relative z-10">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center text-zinc-300">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="3"></circle>
-                            <path
-                                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
-                            </path>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg text-white">Mode: Timer Volume</h3>
-                </div>
-                <div class="flex items-center gap-3">
-                    <button
-                        class="bg-white text-black hover:bg-zinc-200 transition-colors px-3 py-1.5 rounded-full text-xs font-semibold">
-                        Batalkan
-                    </button>
-                    <button class="text-zinc-400 hover:text-white transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="4" y1="21" x2="4" y2="14"></line>
-                            <line x1="4" y1="10" x2="4" y2="3"></line>
-                            <line x1="12" y1="21" x2="12" y2="12"></line>
-                            <line x1="12" y1="8" x2="12" y2="3"></line>
-                            <line x1="20" y1="21" x2="20" y2="16"></line>
-                            <line x1="20" y1="12" x2="20" y2="3"></line>
-                            <line x1="1" y1="14" x2="7" y2="14"></line>
-                            <line x1="9" y1="8" x2="15" y2="8"></line>
-                            <line x1="17" y1="16" x2="23" y2="16"></line>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <div class="mt-3 flex items-baseline gap-1 relative z-10">
-                <span class="text-4xl text-white">79</span>
-                <span class="text-sm text-zinc-400">L</span>
-            </div>
-
-            <div class="mt-auto pt-2 relative z-10">
-                <div class="flex justify-between items-end mb-2">
-                    <span class="text-xs text-zinc-400">Limit timer volume</span>
-                    <span class="text-sm text-white">45%</span>
-                </div>
-
-                <div class="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden">
-                    <div class="bg-gradient-to-r from-sky-500 to-cyan-200 h-1.5 rounded-full w-[45%]"></div>
-                </div>
-
-                <div class="flex justify-between mt-3">
-                    <div class="flex flex-col gap-0.5">
-                        <span class="text-[11px] text-zinc-500">Volume terpompa</span>
-                        <span class="text-xs font-semibold text-white">36 L</span>
-                    </div>
-                    <div class="flex flex-col gap-0.5 text-right">
-                        <span class="text-[11px] text-zinc-500">Sisa volume</span>
-                        <span class="text-xs font-semibold text-white">43 L</span>
-                    </div>
-                </div>
-            </div>
+        <div class="device-mode-card" data-device-id="{{ $device->id }}">
+            <x-dynamic-component
+                :component="'mode.'.Str::of($device->device_config->mode)->kebab()"
+                :device_config="$device->device_config"
+                :tegangan="$latest['Tegangan']" />
         </div>
-
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
@@ -1473,10 +1418,24 @@
 </body>
 
 <script>
+    document.addEventListener('pump-mode-updated', (e) => {
+        const {
+            device_id,
+            html
+        } = e.detail; // sesuaikan struktur payload di bawah
+        const card = document.querySelector(`.device-mode-card[data-device-id="${device_id}"]`);
+        if (card) card.innerHTML = html;
+    });
+</script>
+
+<script>
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('overlay');
-    const btnOpen = document.getElementById('btn-open-sidebar');
-    const btnClose = document.getElementById('btn-close-sidebar');
+    const btnOpenSideBar = document.getElementById('btn-open-sidebar');
+    const btnCloseSideBar = document.getElementById('btn-close-sidebar');
+
+    const modeSelect = document.getElementById('mode-select-card');
+    const btnCloseModeSelect = document.getElementById('btn-close-mode-select');
 
     function openSidebar() {
         sidebar.classList.remove('-translate-x-full');
@@ -1490,9 +1449,35 @@
         overlay.classList.add('hidden');
     }
 
-    btnOpen.addEventListener('click', openSidebar);
-    btnClose.addEventListener('click', closeSidebar);
-    overlay.addEventListener('click', closeSidebar);
+    function openModeSelect() {
+        overlay.classList.remove('hidden');
+        modeSelect.classList.remove('hidden');
+    }
+
+    function closeModeSelect() {
+        overlay.classList.add('hidden');
+        modeSelect.classList.add('hidden');
+    }
+
+    function overlayClick() {
+        overlay.classList.add('hidden');
+        modeSelect.classList.add('hidden');
+
+        sidebar.classList.add('-translate-x-full');
+        sidebar.classList.remove('translate-x-0');
+    }
+
+    btnOpenSideBar.addEventListener('click', openSidebar);
+    btnCloseSideBar.addEventListener('click', closeSidebar);
+
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('#btn-open-mode-select')) {
+            openModeSelect();
+        }
+    });
+    btnCloseModeSelect.addEventListener('click', closeModeSelect);
+
+    overlay.addEventListener('click', overlayClick);
 </script>
 
 </html>

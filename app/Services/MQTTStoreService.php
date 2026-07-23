@@ -64,10 +64,14 @@ class MQTTStoreService
     }
 
     private string $bucket;
+    private string $bucketAllTime;
 
     public function __construct()
     {
-        $this->bucket = env('INFLUXDB_BUCKET');
+        $this->bucket        = env('INFLUXDB_BUCKET');
+        // Bucket downsample tanpa retention pendek, dipakai sebagai fallback
+        // ketika data di $this->bucket sudah kadaluarsa (retention 30 hari)
+        $this->bucketAllTime = env('INFLUXDB_BUCKET_ALLTIME', 'PTSP_AllTime');
     }
 
     /**
@@ -77,7 +81,7 @@ class MQTTStoreService
      * @return array                Data yang sudah divalidasi
      * @throws \InvalidArgumentException  Jika JSON tidak valid atau field wajib kurang
      */
-    private function parseAndValidate(string $jsonPayload): array
+    public function ParseAndValidate(string $jsonPayload): array
     {
         // 1. Decode JSON
         $data = json_decode($jsonPayload, true);
@@ -142,13 +146,94 @@ class MQTTStoreService
     }
 
     /**
+     * Ambil nilai kumulatif terakhir (Energi, Volume, Durasi_Operasional) dari sebuah
+     * bucket InfluxDB tertentu. Dipakai baik untuk bucket utama (retention pendek)
+     * maupun bucket fallback (PTSP_AllTime) yang punya nama field berbeda.
+     *
+     * @param  string $bucket       Nama bucket yang di-query
+     * @param  string $id           Device_Id (tag) yang dicari
+     * @param  string $fieldEnergi  Nama field Energi pada bucket ini
+     * @param  string $fieldVolume  Nama field Volume pada bucket ini
+     * @param  string $fieldDurasi  Nama field Durasi_Operasional pada bucket ini
+     * @param  string $range        Rentang waktu query (Flux duration), default -30d
+     * @return array{found: bool, energi: float, volume: float, durasi: int, ts: ?int}
+     */
+    private function getLastCumulative(
+        string $bucket,
+        string $id,
+        string $fieldEnergi,
+        string $fieldVolume,
+        string $fieldDurasi,
+        string $range = '-30d'
+    ): array {
+        $result = [
+            'found'  => false,
+            'energi' => 0.0,
+            'volume' => 0.0,
+            'durasi' => 0,
+            'ts'     => null,
+        ];
+
+        try {
+            $queryApi = InfluxDB::createQueryApi();
+
+            $fluxQuery = <<<FLUX
+            from(bucket: "{$bucket}")
+            |> range(start: {$range})
+            |> filter(fn: (r) => r._measurement == "IoT_PTSP")
+            |> filter(fn: (r) => r.Device_Id == "{$id}")
+            |> filter(fn: (r) => r._field == "{$fieldEnergi}" or r._field == "{$fieldVolume}" or r._field == "{$fieldDurasi}")
+            |> last()
+            FLUX;
+
+            $tables = $queryApi->query($fluxQuery);
+
+            foreach ($tables as $table) {
+                foreach ($table->records as $record) {
+                    $field = $record->getField();
+                    $value = $record->getValue();
+
+                    if ($field === $fieldEnergi) {
+                        $result['energi'] = (float) $value;
+                        $result['found']  = true;
+
+                        // Parse timestamp secara defensif
+                        $timeValue = $record->getTime();
+                        if ($timeValue instanceof \DateTimeInterface) {
+                            $result['ts'] = $timeValue->getTimestamp();
+                        } elseif (is_string($timeValue) && $timeValue !== '') {
+                            try {
+                                $result['ts'] = (new \DateTime($timeValue))->getTimestamp();
+                            } catch (\Exception) {
+                                $result['ts'] = null;
+                            }
+                        }
+                    }
+                    if ($field === $fieldVolume) {
+                        $result['volume'] = (float) $value;
+                        $result['found']  = true;
+                    }
+                    if ($field === $fieldDurasi) {
+                        $result['durasi'] = (int) $value;
+                        $result['found']  = true;
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            // Query gagal → kembalikan hasil default (found = false)
+        }
+
+        return $result;
+    }
+
+    /**
      * Simpan data pompa dari payload MQTT ke InfluxDB.
      *
      * @param  string $jsonPayload  Raw string JSON dari broker MQTT
      * @return bool                 true jika berhasil, false jika gagal tulis ke InfluxDB
      * @throws \InvalidArgumentException  Jika payload tidak valid
      */
-    public function MQTTStore(string $jsonPayload, string $serial_number, $id): bool
+    public function MQTTStore(string $jsonPayload, string $serial_number, $id)
     {
         // 1. Parse & validasi JSON payload
         $validated = $this->parseAndValidate($jsonPayload);
@@ -168,50 +253,35 @@ class MQTTStoreService
         $prevDurasi = 0;
         $prevTs     = null;
 
-        try {
-            $queryApi = InfluxDB::createQueryApi();
+        // 2a. Coba ambil dari bucket utama (retention 30 hari)
+        $last = $this->getLastCumulative(
+            $this->bucket,
+            $id,
+            'Energi',
+            'Volume',
+            'Durasi_Operasional'
+        );
 
-            $fluxQuery = <<<FLUX
-            from(bucket: "{$this->bucket}")
-            |> range(start: -7d)
-            |> filter(fn: (r) => r._measurement == "Data_Pompa")
-            |> filter(fn: (r) => r.Device_id == "{$serial_number}")
-            |> filter(fn: (r) => r._field == "Energi" or r._field == "Volume" or r._field == "Durasi_Operasional")
-            |> last()
-            FLUX;
+        // 2b. Kalau tidak ketemu (mis. karena retention 30 hari sudah menghapus
+        //     data terakhir device ini), fallback ke bucket PTSP_AllTime.
+        //     Nama field di bucket ini sedikit berbeda (pakai suffix _delta)
+        //     walau isinya tetap nilai kumulatif terakhir.
+        if (!$last['found']) {
+            $last = $this->getLastCumulative(
+                $this->bucketAllTime,
+                $id,
+                'Energi_delta',
+                'Volume_delta',
+                'Durasi_Operasional_delta',
+                '-3650d' // bucket AllTime tidak dibatasi retention pendek
+            );
+        }
 
-            $tables = $queryApi->query($fluxQuery);
-
-            foreach ($tables as $table) {
-                foreach ($table->records as $record) {
-                    $field = $record->getField();
-                    $value = $record->getValue();
-
-                    if ($field === 'Energi') {
-                        $prevEnergi = (float) $value;
-
-                        // Parse timestamp secara defensif
-                        $timeValue = $record->getTime();
-                        if ($timeValue instanceof \DateTimeInterface) {
-                            $prevTs = $timeValue->getTimestamp();
-                        } elseif (is_string($timeValue) && $timeValue !== '') {
-                            try {
-                                $prevTs = (new \DateTime($timeValue))->getTimestamp();
-                            } catch (\Exception) {
-                                $prevTs = null;
-                            }
-                        }
-                    }
-                    if ($field === 'Volume') {
-                        $prevVolume = (float) $value;
-                    }
-                    if ($field === 'Durasi_Operasional') {
-                        $prevDurasi = (int) $value;
-                    }
-                }
-            }
-        } catch (\Exception $e) {
-            // Query gagal atau belum ada data → lanjut dengan nilai default
+        if ($last['found']) {
+            $prevEnergi = $last['energi'];
+            $prevVolume = $last['volume'];
+            $prevDurasi = $last['durasi'];
+            $prevTs     = $last['ts'];
         }
 
         // ----------------------------------------------------------------
@@ -248,9 +318,9 @@ class MQTTStoreService
         // ----------------------------------------------------------------
         // 6. Buat Point InfluxDB
         // ----------------------------------------------------------------
-        $point = Point::measurement('Data_Pompa')
+        $point = Point::measurement('IoT_PTSP')
             // Tags
-            ->addTag('Device_id', $serial_number)
+            ->addTag('Device_Id', $id)
             // Fields - float
             ->addField('Tegangan',           $validated['tegangan'])
             ->addField('Daya',               $daya)
@@ -261,7 +331,7 @@ class MQTTStoreService
             // Fields - integer
             ->addField('Durasi_Operasional', $totalDurasi)
             // Metadata tambahan (opsional, berguna untuk debug)
-            ->addField('Interval_S',         $intervalS)
+            // ->addField('Interval_S',         $intervalS)
             // Timestamp (presisi detik)
             ->time($nowTs);
 
@@ -286,9 +356,9 @@ class MQTTStoreService
             $writeApi->write($point);
             // InfluxDB::close();
 
-            return true;
+            return [true, "{$this->bucket}/IoT_PTSP/{$id}"];
         } catch (\Exception $e) {
-            return false;
+            return [false . ""];
         }
     }
 }
