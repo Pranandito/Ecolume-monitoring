@@ -161,48 +161,122 @@ class DashboardController extends Controller
         return view('dashboard', compact('device', 'latest', 'logs', 'today', 'avgSuhu', 'devices', 'id', 'name'));
     }
 
-    public function getChartData($device_id)
+    public function getPumpPerformance($lastTime, $device_id)
+    {
+        $firstData = $this->getFirstData($lastTime, $device_id);
+
+        return $firstData;
+    }
+
+    public function getChartData(Request $request, $device_id)
     {
         $queryApi = InfluxDB::createQueryApi();
-        $fluxQuery = <<<FLUX
-        from(bucket: "PTSP_Raw")
-            |> range(start: 0)
-            |> filter(fn: (r) => r._measurement == "IoT_PTSP")
-            |> filter(fn: (r) => r["Device_Id"] == "$device_id")
-            |> filter(fn: (r) => r._field == "Debit" or r._field == "Daya")
-            |> sort(columns: ["_time"], desc: true)
-            |> limit(n: 200)
-            |> sort(columns: ["_time"], desc: false)
-            |> yield(name: "results")
-        FLUX;
 
+        $allowedFields = ['Daya', 'Debit', 'Durasi_Operasional', 'Energi', 'Suhu', 'Tegangan', 'Volume'];
+
+        // ---- Validasi fields ----
+        $requestedFields = $request->query('fields');
+        if (empty($requestedFields)) {
+            $fields = ['Debit', 'Daya'];
+        } else {
+            if (is_string($requestedFields)) {
+                $requestedFields = explode(',', $requestedFields);
+            }
+            $fields = array_values(array_intersect($allowedFields, $requestedFields));
+            if (empty($fields)) {
+                return response()->json([
+                    'error' => 'Parameter fields tidak valid',
+                    'allowed_fields' => $allowedFields
+                ], 422);
+            }
+        }
+
+        $fieldFilter = implode(' or ', array_map(fn($f) => "r._field == \"$f\"", $fields));
+
+        // ---- Validasi range ----
+        // 1H = 1 hari terakhir (relatif ke data terakhir, bukan hari kalender ini)
+        // 1M = 7 hari terakhir (relatif ke data terakhir)
+        // CUSTOM = 250 data point terakhir, tanpa batas waktu
+        $range = $request->query('range', '1H');
+        if (!in_array($range, ['1H', '1M', 'CUSTOM'])) {
+            $range = '1H';
+        }
 
         try {
-            // 5. Eksekusi Query
+            if ($range === 'CUSTOM') {
+                // Ambil 250 data terakhir per-field
+                $fluxQuery = <<<FLUX
+            from(bucket: "PTSP_Raw")
+                |> range(start: 0)
+                |> filter(fn: (r) => r._measurement == "IoT_PTSP")
+                |> filter(fn: (r) => r["Device_Id"] == "$device_id")
+                |> filter(fn: (r) => $fieldFilter)
+                |> sort(columns: ["_time"], desc: true)
+                |> limit(n: 250)
+                |> sort(columns: ["_time"], desc: false)
+                |> yield(name: "results")
+            FLUX;
+            } else {
+                // Langkah 1: cari waktu data TERAKHIR yang benar-benar ada (bukan waktu sekarang),
+                // supaya "1 hari" / "7 hari" dihitung mundur dari data, bukan dari jam kalender.
+                $lastTimeFlux = <<<FLUX
+            from(bucket: "PTSP_Raw")
+                |> range(start: 0)
+                |> filter(fn: (r) => r._measurement == "IoT_PTSP")
+                |> filter(fn: (r) => r["Device_Id"] == "$device_id")
+                |> filter(fn: (r) => $fieldFilter)
+                |> last()
+            FLUX;
+
+                $lastTables = $queryApi->query($lastTimeFlux);
+
+                $lastTime = null;
+                foreach ($lastTables as $table) {
+                    foreach ($table->records as $record) {
+                        $t = $record->getTime();
+                        if ($lastTime === null || strtotime($t) > strtotime($lastTime)) {
+                            $lastTime = $t;
+                        }
+                    }
+                }
+
+                if ($lastTime === null) {
+                    // Device belum punya data sama sekali untuk field yang diminta
+                    return response()->json([], 200);
+                }
+
+                $durationDays = $range === '1M' ? 7 : 1;
+                $stopTs  = strtotime($lastTime);
+                $startTs = $stopTs - ($durationDays * 86400);
+
+                // Format RFC3339 (time literal Flux, tanpa tanda kutip)
+                $startRFC3339 = gmdate('Y-m-d\TH:i:s\Z', $startTs);
+                $stopRFC3339  = gmdate('Y-m-d\TH:i:s\Z', $stopTs + 1); // +1 detik agar titik data terakhir ikut
+
+                $fluxQuery = <<<FLUX
+                from(bucket: "PTSP_Raw")
+                    |> range(start: $startRFC3339, stop: $stopRFC3339)
+                    |> filter(fn: (r) => r._measurement == "IoT_PTSP")
+                    |> filter(fn: (r) => r["Device_Id"] == "$device_id")
+                    |> filter(fn: (r) => $fieldFilter)
+                    |> sort(columns: ["_time"], desc: false)
+                    |> yield(name: "results")
+                FLUX;
+            }
+
             $tables = $queryApi->query($fluxQuery);
 
-            // 6. Siapkan struktur dasar untuk JSON
-            $seriesData = [
-                'Debit' => [
-                    'name' => 'Debit',
-                    'data' => []
-                ],
-                'Daya' => [
-                    'name' => 'Daya',
-                    'data' => []
-                ]
-            ];
+            $seriesData = [];
+            foreach ($fields as $field) {
+                $seriesData[$field] = ['name' => $field, 'data' => []];
+            }
 
             foreach ($tables as $table) {
                 foreach ($table->records as $record) {
-                    $field = $record->getField(); // 'debit' atau 'daya'
-
-                    // InfluxDB mereturn time dalam string ISO8601 (misal: "2023-10-27T10:00:00Z")
-                    // Kita harus mengubahnya ke UNIX Epoch dalam milidetik (ms) untuk ApexCharts
+                    $field = $record->getField();
                     $timeMs = strtotime($record->getTime()) * 1000;
                     $value = $record->getValue();
 
-                    // Masukkan ke array field yang sesuai
                     if (isset($seriesData[$field])) {
                         $seriesData[$field]['data'][] = [
                             'x' => $timeMs,
@@ -212,13 +286,8 @@ class DashboardController extends Controller
                 }
             }
 
-            // 8. Hapus key string 'debit' & 'daya', ubah menjadi array numerik biasa (karena ApexCharts butuh array of objects)
-            $finalResponse = array_values($seriesData);
-
-            // Return sebagai response JSON
-            return response()->json($finalResponse, 200);
+            return response()->json(array_values($seriesData), 200);
         } catch (\Exception $e) {
-            // Tangani error jika koneksi/query InfluxDB gagal
             return response()->json([
                 'error' => 'Gagal mengambil data dari InfluxDB',
                 'message' => $e->getMessage()

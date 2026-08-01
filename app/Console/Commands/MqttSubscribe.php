@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Services\MQTTStoreService;
+use App\Services\JobConfirm as ServicesJobConfirm;
 use Illuminate\Console\Command;
 use PhpMqtt\Client\Facades\MQTT;
 
@@ -20,34 +21,53 @@ class MqttSubscribe extends Command
      *
      * @var string
      */
-    protected $description = 'Subscribe to MQTT topics and save to database';
+    protected $description = 'Subscribe to all MQTT topics (Data & Job Confirm) and save to database';
 
     /**
      * Execute the console command.
      */
-    public function handle(MQTTStoreService $service)
+    public function handle(ServicesJobConfirm $jobService, MQTTStoreService $storeService)
     {
         $this->info('Subscribing to MQTT topics...');
 
-        // Ambil koneksi client dulu
-        $mqtt = MQTT::connection();
+        // Ambil koneksi client
+        $mqtt = MQTT::connection('subscriber');
         $mqtt->connect();
 
-        // Subscribe ke topic
-        $mqtt->subscribe('ecolumeIoT/#', function (string $topic, string $message) use ($service) {
+        // Subscribe ke wildcard utama (ecolumeIoT/#)
+        $mqtt->subscribe('ecolumeIoT/#', function (string $topic, string $message) use ($jobService, $storeService) {
             $topics = explode('/', $topic);
-            $serial_number = $topics[1];
-            $id = $topics[2];
-            [$savingStatus, $dbLoc] = $service->MQTTStore($message, $serial_number, $id);
 
-            // 4. Pindahkan output info ke DALAM sini
-            // Panggil spesifik properti misalnya $save->id, atau ubah jadi json
-            if ($savingStatus) {
-                $this->info("Berhasil disimpan");
-                $this->info("Lokasi Penyimpanan : {$dbLoc}");
-                $this->info(date('Y-m-d H:i:s', time()));
-            } else {
-                $this->error("Gagal menyimpan data");
+            // 1. Logika untuk Job Confirm (ecolumeIoT/jobConfirm/{serial_number}/{id})
+            if (isset($topics[1]) && $topics[1] === 'jobConfirm') {
+                $serial_number = $topics[2] ?? null;
+                $id = $topics[3] ?? null;
+
+                if ($id) {
+                    $updateStatus = $jobService->JobConfirm($message, $id, $serial_number);
+                    if ($updateStatus) {
+                        $this->info("[JobConfirm] Berhasil disimpan | Device id : {$id}");
+                    } else {
+                        $this->error("[JobConfirm] Job usang | Device id : {$id}");
+                    }
+                }
+
+                // Hentikan eksekusi di sini agar tidak lanjut ke penyimpanan data sensor
+                return;
+            }
+
+            // 2. Logika untuk Data Sensor (ecolumeIoT/{serial_number}/{id})
+            $serial_number = $topics[1] ?? null;
+            $id = $topics[2] ?? null;
+
+            if ($serial_number && $id) {
+                [$savingStatus, $dbLoc] = $storeService->MQTTStore($message, $serial_number, $id);
+
+                if ($savingStatus) {
+                    $this->info("[SensorData] Berhasil disimpan | Lokasi : {$dbLoc} | " . date('Y-m-d H:i:s'));
+                } else {
+                    $this->error("[SensorData] Gagal menyimpan data | Device id : {$id}");
+                }
             }
         }, 1);
 

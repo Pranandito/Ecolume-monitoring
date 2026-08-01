@@ -4,9 +4,13 @@ namespace App\Services;
 
 use App\Models\DeviceConfig;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use InfluxDB2\Point;
 use InfluxDB2\WriteType;
+use PhpMqtt\Client\Facades\MQTT;
 use RikoDEV\InfluxDB\Facades\InfluxDB;
+use App\Services\MQTTPublish;
+
 
 class MQTTStoreService
 {
@@ -66,8 +70,10 @@ class MQTTStoreService
     private string $bucket;
     private string $bucketAllTime;
 
-    public function __construct()
-    {
+    public function __construct(
+        protected MQTTPublish $mqttPublish,
+        protected StatusUpdate $statusUpdate
+    ) {
         $this->bucket        = env('INFLUXDB_BUCKET');
         // Bucket downsample tanpa retention pendek, dipakai sebagai fallback
         // ketika data di $this->bucket sudah kadaluarsa (retention 30 hari)
@@ -106,6 +112,7 @@ class MQTTStoreService
             'suhu'      => 'numeric',   // Celsius
             'latitude'  => 'numeric',   // Derajat desimal, misal: -7.558
             'longitude' => 'numeric',   // Derajat desimal, misal: 110.856
+            'job_id' => 'numeric',   // int
         ];
 
         $errors = [];
@@ -142,6 +149,7 @@ class MQTTStoreService
             'suhu'      => (float)   $data['suhu'],
             'latitude'  => round((float) $data['latitude'],  7),
             'longitude' => round((float) $data['longitude'], 7),
+            'job_id'      => (int)   $data['job_id'],
         ];
     }
 
@@ -339,14 +347,35 @@ class MQTTStoreService
         // ----------------------------------------------------------------
         // 7. Simpan Data InfluxDB & MySql
         // ----------------------------------------------------------------
+        $this->statusUpdate->DeviceStatusUpdate($id);
 
-        $loc = $this->getLocation($validated['latitude'], $validated['longitude']);
+        $device_config = DeviceConfig::where('device_id', $id)->select('job_id', 'volume_limit', 'volume_progress', 'mode', 'timer_start', 'timer_end', 'lat', 'long')->first();
 
-        $locUpdate = DeviceConfig::where('id', $id)->update([
-            "lat" => $validated['latitude'],
-            "long" => $validated['longitude'],
-            "location" => $loc['kota'] . ", " . $loc['kecamatan']
-        ]);
+        $latChanged = (float) $device_config->lat !== (float) $validated['latitude'];
+        $longChanged = (float) $device_config->long !== (float) $validated['longitude'];
+
+        if ($latChanged || $longChanged) {
+            $loc = $this->getLocation($validated['latitude'], $validated['longitude']);
+
+            $locUpdate = DeviceConfig::where('device_id', $id)->update([
+                "lat" => $validated['latitude'],
+                "long" => $validated['longitude'],
+                "location" => $loc['kota'] . ", " . $loc['kecamatan']
+            ]);
+        }
+
+        if (!$device_config) {
+            return [false, "DeviceConfig tidak ditemukan untuk id {$id}"];
+        }
+
+        if ($validated['job_id'] != $device_config->job_id) {
+            $this->mqttPublish->publishMode($id, $serial_number, $device_config, 1);
+        } else {
+            if ($device_config->mode == "Timer Volume") {
+                $update = DeviceConfig::where('device_id', $id)->increment('volume_progress', $deltaVolume);
+                $this->mqttPublish->publishVolProgress($device_config->volume_progress + $deltaVolume, $device_config->job_id, $serial_number, $id);
+            }
+        }
 
         try {
             $writeApi = InfluxDB::createWriteApi([

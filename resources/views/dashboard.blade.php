@@ -400,7 +400,6 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-
         <div class="bg-[#171717] rounded-2xl p-6 lg:col-span-2 flex flex-col h-full">
 
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
@@ -414,28 +413,55 @@
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <button
-                        class="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-zinc-800/50 border border-zinc-700 text-sm text-zinc-300 hover:text-white transition-colors">
-                        Data
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="m6 9 6 6 6-6" />
-                        </svg>
-                    </button>
-                    <div class="flex items-center p-0.5 rounded-lg bg-zinc-800/50 border border-zinc-700">
-                        <button
-                            class="px-3 py-1 text-xs font-medium text-white bg-zinc-700 rounded-md shadow">1H</button>
-                        <button
-                            class="px-3 py-1 text-xs font-medium text-zinc-400 hover:text-white transition-colors">1M</button>
-                        <button
-                            class="px-3 py-1 text-xs font-medium text-zinc-400 hover:text-white transition-colors">Custom</button>
+                    <div class="relative" id="data-dropdown-wrapper">
+                        <button id="data-dropdown-btn" type="button"
+                            class="flex items-center gap-2 px-5 py-1.5 rounded-lg bg-[#171717] border border-[#242424] text-sm text-white relative z-50">
+                            Data
+                            <svg id="data-dropdown-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                style="transition: transform .2s ease;">
+                                <path d="m6 9 6 6 6-6" />
+                            </svg>
+                        </button>
+
+                        <!-- Overlay: klik di sini = cancel (tutup tanpa apply) -->
+                        <div id="data-dropdown-overlay" class="hidden fixed inset-0 z-40" style="background:rgba(0,0,0,0.15);"></div>
+
+                        <div id="data-dropdown-menu"
+                            class="hidden absolute left-0 mt-2 w-64 rounded-2xl bg-[#2c2c2e] border border-[#3f3f46] p-3 z-50"
+                            style="box-shadow:0 10px 40px rgba(0,0,0,0.4);">
+                            <div class="text-[11px] font-semibold text-zinc-500 uppercase tracking-wide px-2 pb-2">
+                                Pilih Data
+                            </div>
+                            <div id="data-dropdown-list" class="flex flex-col gap-1 max-h-72 overflow-y-auto"></div>
+                            <div class="flex items-center justify-between mt-3 pt-3 border-t border-[#3f3f46] px-2">
+                                <button id="data-dropdown-cancel" type="button"
+                                    class="text-xs text-zinc-500 hover:text-white transition-colors">
+                                    Batal
+                                </button>
+                                <button id="data-dropdown-apply" type="button"
+                                    class="px-4 py-1.5 text-xs font-medium text-white rounded-lg transition-colors"
+                                    style="background:#f97316;">
+                                    Terapkan
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center p-0.5 rounded-lg bg-[#242424] border border-[#242424]" id="range-filter-group">
+                        <button type="button" data-range="1H"
+                            class="range-filter-btn px-3 py-1.5 text-xs font-medium text-white bg-[#171717] rounded-md shadow">1H</button>
+                        <button type="button" data-range="1M"
+                            class="range-filter-btn px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-white transition-colors">1M</button>
+                        <button type="button" data-range="CUSTOM"
+                            class="range-filter-btn px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-white transition-colors">Custom</button>
                     </div>
                 </div>
             </div>
 
             <div id="chart" class="h-max"></div>
 
-            <div class="flex justify-center items-center gap-6 mt-6">
+            <!-- <div class="flex justify-center items-center gap-6 mt-6">
                 <div class="flex items-center gap-2">
                     <span class="w-3 h-3 rounded-full bg-[#00A451]"></span>
                     <span class="text-sm text-zinc-400">Daya (Watt)</span>
@@ -444,10 +470,62 @@
                     <span class="w-3 h-3 rounded-full bg-[#EAB308]"></span>
                     <span class="text-sm text-zinc-400">Debit Air (l/min)</span>
                 </div>
-            </div>
+            </div> -->
         </div>
 
+        <style>
+            #chart .apexcharts-legend {
+                margin-top: 32px;
+                /* atur sesuai kebutuhan, mis. 16px, 24px, 32px */
+            }
+        </style>
+
         <script>
+            // =========================================================
+            // 0. SUMBER KEBENARAN: label, satuan, warna tiap data
+            //    (dipakai bareng oleh chart, tooltip, dan dropdown)
+            // =========================================================
+            var FIELD_META = {
+                'Daya': {
+                    label: 'Daya',
+                    unit: 'W',
+                    color: '#f97316'
+                },
+                'Debit': {
+                    label: 'Debit',
+                    unit: 'l/min',
+                    color: '#0ea5e9'
+                },
+                'Durasi_Operasional': {
+                    label: 'Durasi Operasional',
+                    unit: 'jam',
+                    color: '#8b5cf6'
+                },
+                'Energi': {
+                    label: 'Energi',
+                    unit: 'kWh',
+                    color: '#f59e0b'
+                },
+                'Suhu': {
+                    label: 'Suhu',
+                    unit: '°C',
+                    color: '#f43f5e'
+                },
+                'Tegangan': {
+                    label: 'Tegangan',
+                    unit: 'V',
+                    color: '#06b6d4'
+                },
+                'Volume': {
+                    label: 'Volume',
+                    unit: 'L',
+                    color: '#10b981'
+                }
+            };
+            // Urutan kanonis (dipakai untuk urutan legend & urutan checkbox dropdown)
+            var ALL_FIELDS = ['Debit', 'Daya', 'Suhu', 'Tegangan', 'Energi', 'Volume', 'Durasi_Operasional'];
+            var DEFAULT_FIELDS = ['Debit', 'Daya'];
+
             var CONFIG = {
                 MAX_VISIBLE_POINTS: 500,
                 REFRESH_INTERVAL_MS: 30000,
@@ -455,13 +533,20 @@
             };
 
             var rawSeriesData = [];
-            var currentRange = '5D'; // Atur sesuai kebutuhan UI Anda
-            var SERIES_COLORS = ['#EAB308', '#00A451', '#a855f7', '#22c55e', '#facc15'];
-            var SERIES_UNITS = ['l/min', 'W', '', '', ''];
+            var currentRange = '1H';
+            var appliedFields = DEFAULT_FIELDS.slice(); // field yang BENAR-BENAR dipakai chart (hanya berubah saat Terapkan)
+            var selectedFields = DEFAULT_FIELDS.slice(); // draft sementara di dalam dropdown (berubah saat klik checkbox)
 
-            // 1. Fungsi Normalisasi (Menjadikan Y axis 0-100%)
+            // Urutkan field terpilih sesuai urutan kanonis ALL_FIELDS
+            function getOrderedFields(fields) {
+                return ALL_FIELDS.filter(function(f) {
+                    return fields.indexOf(f) !== -1;
+                });
+            }
+
+            // 1. Fungsi Normalisasi (Y axis 0-100%)
             function normalizeSeries(seriesArray) {
-                rawSeriesData = seriesArray; // Simpan data asli untuk tooltip
+                rawSeriesData = seriesArray;
                 return seriesArray.map(function(s) {
                     var values = s.data.map(function(p) {
                         return p.y;
@@ -490,12 +575,16 @@
                 };
                 var time = pad(d.getHours()) + ':' + pad(d.getMinutes());
                 var date = pad(d.getDate()) + ' ' + ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'][d.getMonth()];
-                if (range === '1D') return time;
-                if (range === '5D') return date + ' ' + time;
-                return date + (range === '1A' ? ' ' + d.getFullYear() : '');
+
+                if (range === '1H') {
+                    // Window ~1 hari: waktu saja sudah cukup jelas
+                    return time;
+                }
+                // 1M (7 hari) & CUSTOM (250 titik, bisa lintas beberapa hari): tampilkan tanggal + waktu
+                return date + ' ' + time;
             }
 
-            // 3. Algoritma LTTB untuk Downsampling (Agar chart tidak lag jika data ribuan)
+            // 3. Algoritma LTTB untuk Downsampling
             function lttb(data, threshold) {
                 var n = data.length;
                 if (threshold <= 0 || n <= threshold) return data;
@@ -540,7 +629,7 @@
 
             // 4. Konfigurasi Chart Utama
             var chartOptions = {
-                series: [], // Dikosongkan di awal, akan diisi oleh API
+                series: [],
                 chart: {
                     id: 'ptsp-chart',
                     height: 500,
@@ -565,7 +654,9 @@
                 theme: {
                     mode: 'dark'
                 },
-                colors: SERIES_COLORS,
+                colors: DEFAULT_FIELDS.map(function(f) {
+                    return FIELD_META[f].color;
+                }), // warna awal, akan di-update dinamis
                 dataLabels: {
                     enabled: false
                 },
@@ -641,7 +732,29 @@
                     }
                 },
                 legend: {
-                    show: false
+                    show: true,
+                    position: 'bottom',
+                    horizontalAlign: 'center',
+                    fontSize: '14px',
+                    fontFamily: 'inherit',
+                    fontWeight: 400,
+                    itemMargin: {
+                        horizontal: 12,
+                        vertical: 8
+                    },
+                    markers: {
+                        width: 12,
+                        height: 12,
+                        radius: 12,
+                        offsetX: 0,
+                        offsetY: 0
+                    },
+                    labels: {
+                        colors: '#a1a1aa',
+                        useSeriesColors: false
+                    }
+                    // reverseSeriesOrder dihapus: urutan series sekarang sudah diatur lewat
+                    // getOrderedFields() / ALL_FIELDS, jadi tidak perlu hack pembalik urutan lagi.
                 },
                 markers: {
                     size: 0,
@@ -669,6 +782,13 @@
 
                         var rows = '';
                         for (var si = 0; si < series.length; si++) {
+                            var fieldKey = seriesNames[si];
+                            var meta = FIELD_META[fieldKey] || {
+                                label: fieldKey,
+                                unit: '',
+                                color: '#e4e4e7'
+                            };
+
                             var rawArr = rawSeriesData[si] ? rawSeriesData[si].data : [];
                             var rawVal = null;
                             if (rawArr.length > 0) {
@@ -684,16 +804,13 @@
                                 }
                                 rawVal = best.y;
                             }
-                            var color = SERIES_COLORS[si] || '#e4e4e7';
-                            var unit = SERIES_UNITS[si] || '';
 
                             if (rawVal != null) {
-                                var displayVal = unit === 'l/min' ? parseFloat(rawVal).toFixed(1) : Math.round(rawVal);
-                                var name = seriesNames[si] || ('Seri ' + (si + 1));
+                                var displayVal = meta.unit === 'l/min' ? parseFloat(rawVal).toFixed(1) : Math.round(rawVal);
 
-                                rows += '<div style="border-left:3px solid ' + color + ';padding-left:10px;line-height:1.3;">' +
-                                    '<div style="font-size:11px;color:#71717a;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em;">' + name + '</div>' +
-                                    '<div style="font-weight:600;color:#e4e4e7;font-size:14px;">' + displayVal + ' <span style="font-size:11px;color:#71717a;">' + unit + '</span></div>' +
+                                rows += '<div style="border-left:3px solid ' + meta.color + ';padding-left:10px;line-height:1.3;">' +
+                                    '<div style="font-size:11px;color:#71717a;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em;">' + meta.label + '</div>' +
+                                    '<div style="font-weight:600;color:#e4e4e7;font-size:14px;">' + displayVal + ' <span style="font-size:11px;color:#71717a;">' + meta.unit + '</span></div>' +
                                     '</div>';
                             }
                         }
@@ -708,20 +825,17 @@
             var apexChart = new ApexCharts(document.querySelector('#chart'), chartOptions);
             apexChart.render();
 
-            // 5. Fungsi Mengambil Data dari API InfluxDB
+            // 5. Ambil data dari API sesuai field yang dipilih
             async function loadDataFromAPI() {
                 try {
-                    // Anda bisa mengirim parameter range ke API melalui query string
-                    const response = await fetch(`${CONFIG.API_ENDPOINT}`);
+                    var ordered = getOrderedFields(appliedFields);
+                    var url = CONFIG.API_ENDPOINT + '?fields=' + ordered.join(',') + '&range=' + currentRange;
+                    const response = await fetch(url);
 
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
                     const fetchedData = await response.json();
-                    // fetchedData harus array sesuai format JSON di atas
 
-                    // Downsample data menggunakan LTTB sebelum di-render
                     const downsampledData = fetchedData.map(function(s) {
                         return {
                             name: s.name,
@@ -729,14 +843,17 @@
                         };
                     });
 
-                    // Normalisasi data (mengubah Y menjadi persentase 0-100)
                     const finalSeries = normalizeSeries(downsampledData);
 
-                    // Update Chart
+                    const chartColors = fetchedData.map(function(s) {
+                        return (FIELD_META[s.name] && FIELD_META[s.name].color) || '#a1a1aa';
+                    });
+
+                    apexChart.updateOptions({
+                        colors: chartColors,
+                        series: finalSeries
+                    }, true, true);
                     apexChart.updateSeries(finalSeries);
-                    console.log(fetchedData);
-                    console.log(downsampledData);
-                    console.log(finalSeries);
 
                 } catch (error) {
                     console.error("Gagal mengambil data dari API InfluxDB:", error);
@@ -746,6 +863,122 @@
             // 6. Inisialisasi awal dan auto-refresh
             loadDataFromAPI();
             setInterval(loadDataFromAPI, CONFIG.REFRESH_INTERVAL_MS);
+
+            // =========================================================
+            // 7. LOGIKA DROPDOWN "Data"
+            // =========================================================
+            var ddBtn = document.getElementById('data-dropdown-btn');
+            var ddMenu = document.getElementById('data-dropdown-menu');
+            var ddOverlay = document.getElementById('data-dropdown-overlay');
+            var ddIcon = document.getElementById('data-dropdown-icon');
+            var ddList = document.getElementById('data-dropdown-list');
+
+            function renderFieldOptions() {
+                ddList.innerHTML = '';
+                ALL_FIELDS.forEach(function(key) {
+                    var meta = FIELD_META[key];
+                    var isChecked = selectedFields.indexOf(key) !== -1;
+
+                    var item = document.createElement('div');
+                    item.className = 'flex items-center gap-3 px-2.5 py-2 rounded-lg hover:bg-[#242424] cursor-pointer transition-colors';
+                    item.style.borderLeft = '3px solid ' + meta.color;
+
+                    item.innerHTML =
+                        '<span class="field-checkbox-box w-4 h-4 rounded-md border flex items-center justify-center transition-colors" ' +
+                        'style="border-color:' + meta.color + ';background:' + (isChecked ? meta.color : 'transparent') + ';">' +
+                        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" ' +
+                        'stroke-linecap="round" stroke-linejoin="round" style="opacity:' + (isChecked ? '1' : '0') + '">' +
+                        '<path d="M20 6 9 17l-5-5"/></svg>' +
+                        '</span>' +
+                        '<span class="flex-1 text-[11px] font-semibold text-zinc-400 uppercase tracking-wide">' + meta.label + '</span>' +
+                        '<span class="text-[11px]" style="color:#52525b;">' + meta.unit + '</span>';
+
+                    // Klik checkbox HANYA mengubah draft (selectedFields), tidak menutup dropdown
+                    item.addEventListener('click', function() {
+                        var idx = selectedFields.indexOf(key);
+                        if (idx === -1) {
+                            selectedFields.push(key);
+                        } else {
+                            if (selectedFields.length === 1) return; // minimal 1 data harus aktif
+                            selectedFields.splice(idx, 1);
+                        }
+                        renderFieldOptions();
+                    });
+
+                    ddList.appendChild(item);
+                });
+            }
+
+            function openDropdown() {
+                selectedFields = appliedFields.slice(); // mulai draft dari state yang sedang aktif
+                renderFieldOptions();
+                ddMenu.classList.remove('hidden');
+                ddOverlay.classList.remove('hidden');
+                ddIcon.style.transform = 'rotate(180deg)';
+            }
+
+            function closeDropdownCancel() {
+                // Batal: buang perubahan draft, kembalikan ke state applied terakhir
+                selectedFields = appliedFields.slice();
+                ddMenu.classList.add('hidden');
+                ddOverlay.classList.add('hidden');
+                ddIcon.style.transform = 'rotate(0deg)';
+            }
+
+            function closeDropdownApply() {
+                appliedFields = selectedFields.slice();
+                ddMenu.classList.add('hidden');
+                ddOverlay.classList.add('hidden');
+                ddIcon.style.transform = 'rotate(0deg)';
+                loadDataFromAPI(); // muat ulang chart dengan field yang baru diterapkan
+            }
+
+            renderFieldOptions();
+
+            // Tombol "Data": toggle. Kalau lagi terbuka, klik lagi = cancel (sesuai request)
+            ddBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var isOpen = !ddMenu.classList.contains('hidden');
+                if (isOpen) {
+                    closeDropdownCancel();
+                } else {
+                    openDropdown();
+                }
+            });
+
+            // Klik overlay (area luar card, di bawah card dropdown) = cancel
+            ddOverlay.addEventListener('click', closeDropdownCancel);
+
+            // Klik "Batal" di dalam card = cancel juga, tapi TANPA menutup (biar user bisa langsung pilih ulang)
+            document.getElementById('data-dropdown-cancel').addEventListener('click', function() {
+                selectedFields = appliedFields.slice();
+                renderFieldOptions();
+            });
+
+            document.getElementById('data-dropdown-apply').addEventListener('click', closeDropdownApply);
+
+            // =========================================================
+            // 8. LOGIKA FILTER WAKTU (1H / 1M / Custom)
+            // =========================================================
+            var rangeButtons = document.querySelectorAll('.range-filter-btn');
+
+            rangeButtons.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var newRange = btn.getAttribute('data-range');
+                    if (newRange === currentRange) return; // sudah aktif, tidak perlu reload
+
+                    currentRange = newRange;
+
+                    rangeButtons.forEach(function(b) {
+                        b.classList.remove('text-white', 'bg-[#171717]', 'shadow');
+                        b.classList.add('text-zinc-400');
+                    });
+                    btn.classList.remove('text-zinc-400');
+                    btn.classList.add('text-white', 'bg-[#171717]', 'shadow');
+
+                    loadDataFromAPI();
+                });
+            });
         </script>
 
 

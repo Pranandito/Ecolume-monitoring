@@ -16,8 +16,9 @@ class DeviceConfig extends Model
         'timer_start',
         'timer_end',
         'volume_limit',
-        'prev_mode',
-        'job_confirmed'
+        'volume_progress',
+        'job_confirmed',
+        'job_id'
     ];
 
     public function device()

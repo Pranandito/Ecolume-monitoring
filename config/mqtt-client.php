@@ -119,7 +119,20 @@ return [
     //     ],
 
     // ],
+    // 'connections' => [
+    //     'default' => [
+    //         'host'      => env('MQTT_HOST', '127.0.0.1'),
+    //         'port'      => env('MQTT_PORT', 1883),
+    //         'client_id' => env('MQTT_CLIENT_ID', 'laravel-app'),
+    //         'username'  => env('MQTT_USERNAME', null),
+    //         'password'  => env('MQTT_PASSWORD', null),
+    //         'clean_session' => env('MQTT_CLEAN_SESSION', true),
+    //         'last_will' => null,
+    //     ],
+    // ],
+
     'connections' => [
+
         'default' => [
             'host'      => env('MQTT_HOST', '127.0.0.1'),
             'port'      => env('MQTT_PORT', 1883),
@@ -129,6 +142,29 @@ return [
             'clean_session' => env('MQTT_CLEAN_SESSION', true),
             'last_will' => null,
         ],
+
+        // Dipakai oleh command mqtt:subscribe (long-running, harus stabil)
+        'subscriber' => [
+            'host'      => env('MQTT_HOST', '127.0.0.1'),
+            'port'      => env('MQTT_PORT', 1883),
+            'client_id' => env('MQTT_SUBSCRIBER_CLIENT_ID', 'ecolume-subscriber'),
+            'username'  => env('MQTT_USERNAME', null),
+            'password'  => env('MQTT_PASSWORD', null),
+            'clean_session' => env('MQTT_CLEAN_SESSION', true),
+            'last_will' => null,
+        ],
+
+        // Dipakai oleh MQTTPublish (short-lived, connect-publish-disconnect per request)
+        'publisher' => [
+            'host'      => env('MQTT_HOST', '127.0.0.1'),
+            'port'      => env('MQTT_PORT', 1883),
+            'client_id' => env('MQTT_PUBLISHER_CLIENT_ID', 'ecolume-publisher') . '-' . uniqid(),
+            'username'  => env('MQTT_USERNAME', null),
+            'password'  => env('MQTT_PASSWORD', null),
+            'clean_session' => env('MQTT_CLEAN_SESSION', true),
+            'last_will' => null,
+        ],
+
     ],
 
 ];

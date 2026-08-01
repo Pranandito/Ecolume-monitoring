@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DeviceConfig;
+use App\Services\MQTTPublish;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
@@ -12,24 +13,9 @@ use PhpMqtt\Client\Facades\MQTT;
 
 class DeviceModeController extends Controller
 {
-    private function publishModeToMqtt(string $device_id, string $serial_number, DeviceConfig $config): void
-    {
-        try {
-            $payload = json_encode([
-                'mode'         => $config->mode,
-                'timer_start'  => $config->timer_start,
-                'timer_end'    => $config->timer_end,
-                'volume_limit' => $config->volume_limit,
-            ]);
-
-            $mqtt = MQTT::connection();
-            $mqtt->connect();
-            $mqtt->publish("ecolumeIoT/mode/{$serial_number}/{$device_id}", $payload, 1);
-            $mqtt->disconnect();
-        } catch (\Throwable $e) {
-            Log::error("Gagal publish mode ke MQTT untuk device {$device_id}: {$e->getMessage()}");
-        }
-    }
+    public function __construct(
+        protected MQTTPublish $mqttPublish
+    ) {}
 
     public function update(Request $request, string $device_id, string $serial_number,)
     {
@@ -42,11 +28,13 @@ class DeviceModeController extends Controller
 
         $config = DeviceConfig::where('device_id', $device_id)->firstOrFail();
 
-        $config->prev_mode = $config->mode;
         $config->mode = $validated['mode'];
         $config->timer_start  = null;
         $config->timer_end    = null;
         $config->volume_limit = null;
+        $config->volume_progress = 0;
+        $config->job_confirmed = 0;
+        $config->job_id = ($config->job_id ?? 0) + 1;
 
         if ($validated['mode'] === 'Timer Waktu') {
             $config->timer_start = $validated['timer_start'];
@@ -57,7 +45,7 @@ class DeviceModeController extends Controller
         }
         $config->save();
 
-        $this->publishModeToMqtt($device_id, $serial_number, $config);
+        $this->mqttPublish->publishMode($device_id, $serial_number, $config, 1);
 
         $tegangan = $this->getLatestTegangan($device_id);
 
