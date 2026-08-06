@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class DeviceConfig extends Model
 {
     protected $table = 'devices_config';
+    protected $casts = [
+        'job_created' => 'datetime',
+    ];
     protected $fillable = [
         'device_id',
         'mode',
@@ -18,7 +21,8 @@ class DeviceConfig extends Model
         'volume_limit',
         'volume_progress',
         'job_confirmed',
-        'job_id'
+        'job_id',
+        'job_created'
     ];
 
     public function device()

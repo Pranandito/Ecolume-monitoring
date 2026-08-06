@@ -46,21 +46,21 @@
     <div class="mt-auto relative z-10">
         <div class="flex justify-between items-end mb-1">
             <span class="text-xs text-zinc-400">Limit timer volume</span>
-            <span class="text-sm text-white">45%</span>
+            <span class="text-sm text-white">{{ round($device_config->volume_progress/$device_config->volume_limit * 100) }}%</span>
         </div>
 
         <div class="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden">
-            <div class="bg-gradient-to-r from-sky-500 to-cyan-200 h-1.5 rounded-full w-[45%]"></div>
+            <div class="bg-gradient-to-r from-sky-500 to-cyan-200 h-1.5 rounded-full w-[{{ $device_config->volume_progress/$device_config->volume_limit * 100 }}%]"></div>
         </div>
 
         <div class="flex justify-between mt-1">
             <div class="flex flex-col gap-0.5">
                 <span class="text-[11px] text-zinc-500">Volume terpompa</span>
-                <span class="text-xs text-white">36 L</span>
+                <span class="text-xs text-white">{{ $device_config->volume_progress }} L</span>
             </div>
             <div class="flex flex-col gap-0.5 text-right">
                 <span class="text-[11px] text-zinc-500">Sisa volume</span>
-                <span class="text-xs text-white">43 L</span>
+                <span class="text-xs text-white">{{ $device_config->volume_limit - $device_config->volume_progress }} L</span>
             </div>
         </div>
     </div>

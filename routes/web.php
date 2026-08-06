@@ -32,6 +32,8 @@ Route::patch('/device/update/{id}', [DeviceController::class, 'update'])->name('
 Route::get('/device/tes', [BerandaController::class, 'test']);
 Route::get('/device/test/{device_id}', [DashboardController::class, 'getHeatMapData']);
 Route::get('/device/line-chart/{device_id}', [DashboardController::class, 'getChartData'])->name('dashboard.line-chart');
+Route::get('/device/{device_id}/kinerja-baseline', [DashboardController::class, 'kinerjaBaseline'])->name('kinerja.baseline');
+Route::get('/device/{device_id}/session-baseline', [DashboardController::class, 'sessionBaseline'])->name('device.session-baseline');
 
 Route::POST('/device/mode/{device_id}/{serial_number}', [DeviceModeController::class, 'update'])->name('device.mode');
 

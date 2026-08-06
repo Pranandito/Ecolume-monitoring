@@ -1,6 +1,10 @@
-@props(['device_config'])
+@props(['device_config', 'latest_volume' => null, 'latest_energi' => null])
 
-<div class="bg-[#171717] rounded-2xl p-6 flex flex-col relative overflow-hidden h-full">
+<div class="bg-[#171717] rounded-2xl p-6 flex flex-col relative overflow-hidden h-full js-session-card"
+    data-device-id="{{ $device_config->device_id }}"
+    data-job-created="{{ $device_config->job_created->toIso8601String() }}"
+    data-latest-volume="{{ $latest_volume ?? 0 }}"
+    data-latest-energi="{{ $latest_energi ?? 0 }}">
     <div class="absolute -top-10 -right-10 w-40 h-40 bg-zinc-800/30 rounded-full blur-3xl"></div>
 
     <div class="flex justify-between items-center relative z-10">
@@ -40,7 +44,7 @@
 
     <div class="my-3">
         <div class="mt-3 flex items-baseline gap-1.5 relative z-10">
-            <span class="text-4xl text-white">Lorem</span>
+            <span class="text-3xl text-white js-session-volume">-</span>
             <span class="text-lg text-zinc-400">L</span>
         </div>
         <p class="text-zinc-500 text-sm">Volume Terpompa Sesi ini</p>
@@ -49,11 +53,13 @@
     <div class="flex justify-between">
         <div class="flex flex-col gap-1">
             <span class="text-xs font-medium text-zinc-500">Produksi energi sesi</span>
-            <span class="text-sm font-medium text-white">Lorem Wh</span>
+            <span class="text-sm font-medium text-white">
+                <span class="js-session-energi">-</span> Wh
+            </span>
         </div>
         <div class="flex flex-col gap-1 text-right">
             <span class="text-xs text-zinc-500">Dimulai pada</span>
-            <span class="text-sm text-white">{{ $device_config->updated_at->locale('id')->translatedFormat('d M G:i') }}</span>
+            <span class="text-sm text-white">{{ $device_config->job_created->locale('id')->translatedFormat('d M G:i') }}</span>
         </div>
     </div>
 </div>

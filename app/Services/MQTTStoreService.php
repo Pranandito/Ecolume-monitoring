@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\DataUpdated;
 use App\Models\DeviceConfig;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -309,19 +310,25 @@ class MQTTStoreService
         }
 
         // ----------------------------------------------------------------
-        // 4. Hitung delta energi dan volume dari interval ini
+        // 4. Hitung delta energi, volume, dan durasi dari interval ini
         //    Energi (Wh) = Daya (W) × waktu (jam)
         //    Volume (L)  = Debit (L/s) × waktu (s)
+        //    Durasi (s)  = waktu berjalan HANYA jika pompa menyala (Daya > 0)
+        //
+        //    Field-field delta ini disimpan apa adanya (bukan hasil difference()
+        //    Flux di kemudian hari) supaya query "pemakaian dalam periode X"
+        //    cukup pakai sum(), tanpa perlu snapshot-diff nilai kumulatif.
         // ----------------------------------------------------------------
         $deltaEnergi = $daya  * ($intervalS / 3600.0); // Wh
         $deltaVolume = $debit * $intervalS;             // liter
+        $deltaDurasi = $daya > 0 ? $intervalS : 0;       // detik
 
         // ----------------------------------------------------------------
         // 5. Nilai kumulatif (terus ditambahkan)
         // ----------------------------------------------------------------
         $totalEnergi = $prevEnergi + $deltaEnergi;
         $totalVolume = $prevVolume + $deltaVolume;
-        $totalDurasi = $prevDurasi + ($daya > 0 ? $intervalS : 0);
+        $totalDurasi = $prevDurasi + $deltaDurasi;
 
         // ----------------------------------------------------------------
         // 6. Buat Point InfluxDB
@@ -338,6 +345,12 @@ class MQTTStoreService
             ->addField('Volume',             round($totalVolume, 4))
             // Fields - integer
             ->addField('Durasi_Operasional', $totalDurasi)
+            // Fields - delta (nilai pertambahan pada interval ini saja).
+            // Nama field disamakan dengan bucket PTSP_AllTime supaya query
+            // dashboard bisa konsisten pakai suffix "_delta" di kedua bucket.
+            ->addField('Energi_delta',             round($deltaEnergi, 4))
+            ->addField('Volume_delta',             round($deltaVolume, 4))
+            ->addField('Durasi_Operasional_delta', $deltaDurasi)
             // Metadata tambahan (opsional, berguna untuk debug)
             // ->addField('Interval_S',         $intervalS)
             // Timestamp (presisi detik)
@@ -384,6 +397,22 @@ class MQTTStoreService
 
             $writeApi->write($point);
             // InfluxDB::close();
+            broadcast(new DataUpdated(
+                $id,
+                [
+                    'Tegangan' => $validated['tegangan'],
+                    'Daya' => $daya,
+                    'Debit' => $debit,
+                    'Suhu' => $validated['suhu'],
+                    'Energi' => round($totalEnergi, 4),
+                    'Volume' => round($totalVolume, 4),
+                    'Durasi_Operasional' => $totalDurasi,
+                    'Energi_delta' => round($deltaEnergi, 4),
+                    'Volume_delta' => round($deltaVolume, 4),
+                    'Durasi_Operasional_delta' => $deltaDurasi,
+                    '_Time' => $nowTs,
+                ]
+            ));
 
             return [true, "{$this->bucket}/IoT_PTSP/{$id}"];
         } catch (\Exception $e) {

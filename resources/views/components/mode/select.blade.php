@@ -101,7 +101,7 @@
         }
     </style>
 
-    <div id="mode-select-card" class="hidden w-full max-w-md bg-[#171717] rounded-2xl p-6 sm:p-7 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[1112]">
+    <div id="mode-select-card" class="hidden w-full max-w-md bg-[#171717] rounded-2xl p-6 sm:p-7 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[1113]">
         <div class="flex justify-between items-center">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center text-zinc-300">
@@ -447,7 +447,7 @@
         const END_HOUR = 18; // batas atas jendela waktu
         const MIN_GAP = 30; // minimum gap between start & end, in minutes
         const STEP = 1; // snap step, in minutes (per-minute precision)
-        const TIME_RATE = 154 / 270; // liter per menit, derived to match reference design
+        const TIME_RATE = 500; // liter per menit, derived to match reference design
 
         const waktuSlider = document.getElementById('waktuSlider');
         const waktuFill = document.getElementById('waktuFill');

@@ -1,6 +1,9 @@
-@props(['device_config'])
-
-<div class="bg-[#171717] rounded-2xl p-6 flex flex-col relative overflow-hidden h-full">
+@props(['device_config', 'latest_volume' => null, 'latest_energi' => null, 'tegangan' => null])
+<div
+    class="js-session-card bg-[#171717] rounded-2xl p-6 flex flex-col relative overflow-hidden h-full"
+    data-device-id="{{ $device_config->device_id }}"
+    data-job-created="{{ $device_config->job_created->toIso8601String() }}"
+    data-latest-volume="{{ $latest_volume ?? 0 }}">
     <div class="absolute -top-10 -right-10 w-40 h-40 bg-zinc-800/30 rounded-full blur-3xl"></div>
 
     <div class="flex justify-between items-center relative z-10">
@@ -39,12 +42,15 @@
     </div>
 
     <div class="my-3 flex items-baseline gap-1 relative z-10">
-        <span class="text-4xl text-white">
+        <span class="text-2xl text-white">
             @php
-            $diff = \Carbon\Carbon::parse($device_config->timer_start)
-            ->diff(\Carbon\Carbon::parse($device_config->timer_end));
+            $start = \Carbon\Carbon::parse($device_config->timer_start);
+            $end = \Carbon\Carbon::parse($device_config->timer_end);
+
+            $diff = $start->diff($end);
             @endphp
-            {{ $diff->h }}:{{ sprintf('%02d', $diff->i) }}
+
+            {{ $start->format('H:i') }} - {{ $end->format('H:i') }}
         </span>
         <span class="text-sm text-zinc-400"></span>
     </div>
@@ -52,21 +58,43 @@
     <div class="mt-auto relative z-10">
         <div class="flex justify-between items-end mb-1">
             <span class="text-xs text-zinc-400">Limit timer waktu</span>
-            <span class="text-sm text-white">45%</span>
+            <span class="text-sm text-white">@php
+                use Carbon\Carbon;
+
+                $start = Carbon::parse($device_config->timer_start);
+                $end = Carbon::parse($device_config->timer_end);
+                $now = Carbon::now();
+
+                $totalDuration = $start->diffInSeconds($end);
+
+                if ($now->lte($start)) {
+                $progress = 0;
+                } elseif ($now->gte($end)) {
+                $progress = 100;
+                } else {
+                $elapsed = $start->diffInSeconds($now);
+                $progress = round(($elapsed / $totalDuration) * 100, 1);
+                }
+                @endphp
+
+                {{ $progress }}%</span>
         </div>
 
         <div class="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden">
-            <div class="bg-gradient-to-r from-sky-500 to-cyan-200 h-1.5 rounded-full w-[45%]"></div>
+            <div class="bg-gradient-to-r from-sky-500 to-cyan-200 h-1.5 rounded-full w-[{{ $progress }}%]"></div>
         </div>
 
         <div class="flex justify-between mt-1">
             <div class="flex flex-col gap-0.5">
                 <span class="text-[11px] text-zinc-500">Volume terpompa</span>
-                <span class="text-xs font-semibold text-white">36 L</span>
+                <div class="flex text-xs text-white ">
+                    <span class="js-session-volume">–</span>
+                    <p>&nbspL</p>
+                </div>
             </div>
             <div class="flex flex-col gap-0.5 text-right">
                 <span class="text-[11px] text-zinc-500">Sisa durasi</span>
-                <span class="text-xs font-semibold text-white">1jam 20menit</span>
+                <span class="text-xs text-white">{{ $diff->h }} jam {{ $diff->i }} menit</span>
             </div>
         </div>
     </div>

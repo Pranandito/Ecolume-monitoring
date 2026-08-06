@@ -45,15 +45,8 @@
         </div>
         <p class="text-zinc-500 text-xs">Tegangan panel surya {{ $tegangan > 150 ? "" : "kurang" }} optimal untuk beroperasi</p>
     </div>
-
-    <div class="flex justify-between">
-        <div class="flex flex-col gap-1">
-            <span class="text-xs text-zinc-500">Alasan:</span>
-            <span class="text-sm text-white">Durasi timer selesai</span>
-        </div>
-        <div class="flex flex-col gap-1 text-right">
-            <span class="text-xs text-zinc-500">Dihentikan Pada</span>
-            <span class="text-sm text-white">{{ $device_config->updated_at->locale('id')->translatedFormat('d M G:i') }}</span>
-        </div>
+    <div class="flex flex-col gap-1">
+        <span class="text-xs text-zinc-500">Dihentikan Pada</span>
+        <span class="text-sm text-white">{{ $device_config->job_created->locale('id')->translatedFormat('d M G:i') }}</span>
     </div>
 </div>

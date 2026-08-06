@@ -120,9 +120,10 @@
             stroke-width: 2 !important;
         }
     </style>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<aside id="sidebar" class="fixed left-0 top-0 bottom-0 h-lvh w-[400px] bg-[#171717]  z-[1113] p-11 flex flex-col justify-between  -translate-x-full transition-transform duration-300">
+<aside id="sidebar" class="fixed left-0 top-0 bottom-0 h-lvh w-[400px] bg-[#171717]  z-[1114] p-11 flex flex-col justify-between  -translate-x-full transition-transform duration-300">
     <div>
         <div class=" flex items-center justify-between">
             <div class="flex items-center gap-4 text-2xl">
@@ -224,7 +225,8 @@
     </div>
 </aside>
 
-<section id="overlay" class="hidden fixed top-0 bottom-0 left-0 right-0 bg-black/75 z-[1112]"></section>
+<section id="overlay" class="hidden fixed top-0 bottom-0 left-0 right-0 bg-black/75 z-[1113]"></section>
+<section id="overlay-timepicker" class="hidden fixed top-0 bottom-0 left-0 right-0 bg-black/75 z-[1110]"></section>
 
 <x-mode.select :id="$id" :serial_number="$device->serial_number" />
 
@@ -395,12 +397,143 @@
             <x-dynamic-component
                 :component="'mode.'.Str::of($device->device_config->mode)->kebab()"
                 :device_config="$device->device_config"
-                :tegangan="$latest['Tegangan']" />
+                :tegangan="$latest['Tegangan']"
+                :latest_energi="$latest['Energi']"
+                :latest_volume="$latest['Volume']" />
         </div>
+
+        <script>
+            // taruh SEKALI di layout utama, bukan di dalam component yang di-loop/di-swap
+            window.initSessionCard = async function(card) {
+                const deviceId = card.dataset.deviceId;
+                const jobCreated = card.dataset.jobCreated;
+                const volumeEl = card.querySelector('.js-session-volume');
+                const energiEl = card.querySelector('.js-session-energi'); // opsional, gak ada di card timer-waktu
+
+                try {
+                    const res = await fetch(`/device/${encodeURIComponent(deviceId)}/session-baseline?job_created=${encodeURIComponent(jobCreated)}`);
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+                    const {
+                        baseline
+                    } = await res.json();
+
+                    // cache baseline di elemen -> dipakai ulang tiap ada data baru dari Echo,
+                    // tanpa perlu fetch session-baseline lagi
+                    card.dataset.baseVolume = parseFloat(baseline.Volume ?? 0);
+                    card.dataset.baseEnergi = parseFloat(baseline.Energi ?? 0);
+
+                    window.renderSessionCard(card);
+                } catch (err) {
+                    console.error(`Gagal ambil baseline untuk device ${deviceId}:`, err);
+                    if (volumeEl) volumeEl.textContent = 'N/A';
+                    if (energiEl) energiEl.textContent = 'N/A';
+                }
+            };
+
+            // render ulang pakai data-latest-* + baseline yang sudah ke-cache
+            window.renderSessionCard = function(card) {
+                const volumeEl = card.querySelector('.js-session-volume');
+                const energiEl = card.querySelector('.js-session-energi');
+
+                const baseVolume = parseFloat(card.dataset.baseVolume ?? 0);
+                const baseEnergi = parseFloat(card.dataset.baseEnergi ?? 0);
+                const latestVolume = parseFloat(card.dataset.latestVolume ?? 0);
+                const latestEnergi = parseFloat(card.dataset.latestEnergi ?? 0);
+
+                if (volumeEl) {
+                    volumeEl.textContent = Math.max(latestVolume - baseVolume, 0).toLocaleString('id-ID', {
+                        maximumFractionDigits: 0
+                    });
+                }
+                if (energiEl) {
+                    energiEl.textContent = Math.max(latestEnergi - baseEnergi, 0).toLocaleString('id-ID', {
+                        maximumFractionDigits: 2
+                    });
+                }
+            };
+
+            // dipanggil dari listener Echo saat data baru masuk untuk device tertentu
+            window.updateSessionCardsForDevice = function(deviceId, latest) {
+                document.querySelectorAll(`.js-session-card[data-device-id="${deviceId}"]`).forEach(card => {
+                    if (card.dataset.baseVolume === undefined) return; // baseline belum siap, biarin initSessionCard yg urus
+                    card.dataset.latestVolume = latest.Volume ?? card.dataset.latestVolume;
+                    card.dataset.latestEnergi = latest.Energi ?? card.dataset.latestEnergi;
+                    window.renderSessionCard(card);
+                });
+            };
+
+            document.addEventListener('DOMContentLoaded', () => {
+                document.querySelectorAll('.js-session-card').forEach(window.initSessionCard);
+            });
+        </script>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-        <div class="bg-[#171717] rounded-2xl p-6 lg:col-span-2 flex flex-col h-full">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6 relative">
+        <div id="time-filter-panel"
+            class="hidden absolute right-0 w-[475px] max-h-[665px] z-[1113] bg-[#171717] rounded-2xl p-6">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center text-zinc-300">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 12H17V17H12V12ZM19 3H18V1H16V3H8V1H6V3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM19 5V7H5V5H19ZM5 19V9H19V19H5Z" fill="white" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg text-white">Pengaturan Filter Waktu</h3>
+                </div>
+                <button id="btn-close-time-filter-chart">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M16.6673 16.6667L3.33398 3.33334M16.6673 3.33334L3.33398 16.6667" stroke="#C2C2C2" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                </button>
+            </div>
+            <div class="mt-6">
+                <div class="flex items-center gap-2 mb-4">
+                    <button id="tf-preset-5" type="button" data-preset="5" class="tf-preset-chip px-3 py-1.5 rounded-lg border border-[#3f3f46] text-xs font-medium text-zinc-400 hover:text-white hover:border-zinc-500 transition-colors">5 Hari Terakhir</button>
+                    <button id="tf-preset-30" type="button" data-preset="30" class="tf-preset-chip px-3 py-1.5 rounded-lg border border-[#3f3f46] text-xs font-medium text-zinc-400 hover:text-white hover:border-zinc-500 transition-colors">30 Hari Terakhir</button>
+                    <button id="tf-preset-month" type="button" data-preset="month" class="tf-preset-chip px-3 py-1.5 rounded-lg border border-[#3f3f46] text-xs font-medium text-zinc-400 hover:text-white hover:border-zinc-500 transition-colors">Bulan Ini</button>
+                </div>
+                <div class="bg-[#2c2c2e] border border-[#3f3f46] rounded-2xl p-5 relative">
+                    <div class="flex items-center justify-between mb-4">
+                        <button id="tf-prev-month" type="button" class="text-zinc-400 hover:text-white transition-colors p-1">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M15 18l-6-6 6-6" />
+                            </svg>
+                        </button>
+                        <div id="tf-month-label" class="text-sm font-semibold text-white"></div>
+                        <button id="tf-next-month" type="button" class="text-zinc-400 hover:text-white transition-colors p-1">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 18l6-6-6-6" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-7 text-center text-[11px] text-zinc-500 font-medium mb-2">
+                        <div>Min</div>
+                        <div>Sen</div>
+                        <div>Sel</div>
+                        <div>Rab</div>
+                        <div>Kam</div>
+                        <div>Jum</div>
+                        <div>Sab</div>
+                    </div>
+                    <div id="tf-days-grid" class="grid grid-cols-7 text-center text-sm"></div>
+                </div>
+
+                <!-- Blok resolusi: disembunyikan otomatis saat context = 'kinerja' -->
+                <div id="tf-resolution-wrapper" class="mt-5">
+                    <div class="text-base text-zinc-500 mb-2 px-1">Resolusi Data</div>
+                    <div class="flex items-center p-0.5 rounded-lg bg-[#242424] border border-[#242424]" id="tf-resolution-group">
+                        <button type="button" data-resolution="detail" class="tf-resolution-btn flex-1 px-3 py-1.5 text-xs font-medium text-white bg-[#171717] rounded-md shadow transition-colors">Detail</button>
+                        <button type="button" data-resolution="harian" class="tf-resolution-btn flex-1 px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-white rounded-md transition-colors">Harian</button>
+                    </div>
+                </div>
+
+                <button id="tf-apply-btn" type="button" class="w-full mt-4 py-2.5 rounded-xl border border-[#5a5a5a] text-sm text-zinc-200 hover:text-white hover:border-zinc-400 transition-colors">
+                    Terapkan
+                </button>
+            </div>
+        </div>
+        <div class="bg-[#171717] z-[1111] rounded-2xl p-6 lg:col-span-2 flex flex-col h-full" id="chart-card-container">
 
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                 <div class="flex items-center gap-3">
@@ -452,26 +585,94 @@
                         <button type="button" data-range="1H"
                             class="range-filter-btn px-3 py-1.5 text-xs font-medium text-white bg-[#171717] rounded-md shadow">1H</button>
                         <button type="button" data-range="1M"
-                            class="range-filter-btn px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-white transition-colors">1M</button>
+                            class="range-filter-btn px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-white rounded-md transition-colors">1M</button>
                         <button type="button" data-range="CUSTOM"
-                            class="range-filter-btn px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-white transition-colors">Custom</button>
+                            class="range-filter-btn px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-white rounded-md transition-colors">Custom</button>
                     </div>
                 </div>
             </div>
-
             <div id="chart" class="h-max"></div>
 
-            <!-- <div class="flex justify-center items-center gap-6 mt-6">
-                <div class="flex items-center gap-2">
-                    <span class="w-3 h-3 rounded-full bg-[#00A451]"></span>
-                    <span class="text-sm text-zinc-400">Daya (Watt)</span>
+            <!-- <div id="time-filter-panel"
+                class="hidden absolute top-0 -right-6 translate-x-full w-[475px] h-[665px] z-[1112] bg-[#171717] rounded-2xl p-6 transition-transform duration-300 ease-out">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center text-zinc-300">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M12 12H17V17H12V12ZM19 3H18V1H16V3H8V1H6V3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM19 5V7H5V5H19ZM5 19V9H19V19H5Z"
+                                    fill="white" />
+                            </svg>
+                        </div>
+                        <h3 class="text-lg text-white">Pengaturan Filter Waktu</h3>
+                    </div>
+                    <button id="btn-close-time-filter-chart" class="">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M16.6673 16.6667L3.33398 3.33334M16.6673 3.33334L3.33398 16.6667" stroke="#C2C2C2" stroke-width="2" stroke-linecap="round" />
+                        </svg>
+                    </button>
                 </div>
-                <div class="flex items-center gap-2">
-                    <span class="w-3 h-3 rounded-full bg-[#EAB308]"></span>
-                    <span class="text-sm text-zinc-400">Debit Air (l/min)</span>
+                <div class="mt-6">
+                    <div class="flex items-center gap-2 mb-4">
+                        <button id="tf-preset-5" type="button" data-preset="5"
+                            class="tf-preset-chip px-3 py-1.5 rounded-lg border border-[#3f3f46] text-xs font-medium text-zinc-400 hover:text-white hover:border-zinc-500 transition-colors">
+                            5 Hari Terakhir
+                        </button>
+                        <button id="tf-preset-30" type="button" data-preset="30"
+                            class="tf-preset-chip px-3 py-1.5 rounded-lg border border-[#3f3f46] text-xs font-medium text-zinc-400 hover:text-white hover:border-zinc-500 transition-colors">
+                            30 Hari Terakhir
+                        </button>
+                        <button id="tf-preset-month" type="button" data-preset="month"
+                            class="tf-preset-chip px-3 py-1.5 rounded-lg border border-[#3f3f46] text-xs font-medium text-zinc-400 hover:text-white hover:border-zinc-500 transition-colors">
+                            Bulan Ini
+                        </button>
+                    </div>
+                    <div class="bg-[#2c2c2e] border border-[#3f3f46] rounded-2xl p-5 relative">
+                        <div class="flex items-center justify-between mb-4">
+                            <button id="tf-prev-month" type="button" class="text-zinc-400 hover:text-white transition-colors p-1">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M15 18l-6-6 6-6" />
+                                </svg>
+                            </button>
+                            <div id="tf-month-label" class="text-sm font-semibold text-white"></div>
+                            <button id="tf-next-month" type="button" class="text-zinc-400 hover:text-white transition-colors p-1">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M9 18l6-6-6-6" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-7 text-center text-[11px] text-zinc-500 font-medium mb-2">
+                            <div>Min</div>
+                            <div>Sen</div>
+                            <div>Sel</div>
+                            <div>Rab</div>
+                            <div>Kam</div>
+                            <div>Jum</div>
+                            <div>Sab</div>
+                        </div>
+                        <div id="tf-days-grid" class="grid grid-cols-7 text-center text-sm"></div>
+                    </div>
+                    <div class="mt-5">
+                        <div class="text-base text-zinc-500 mb-2 px-1">Resolusi Data</div>
+                        <div class="flex items-center p-0.5 rounded-lg bg-[#242424] border border-[#242424]" id="tf-resolution-group">
+                            <button type="button" data-resolution="detail"
+                                class="tf-resolution-btn flex-1 px-3 py-1.5 text-xs font-medium text-white bg-[#171717] rounded-md shadow transition-colors">
+                                Detail
+                            </button>
+                            <button type="button" data-resolution="harian"
+                                class="tf-resolution-btn flex-1 px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-white rounded-md transition-colors">
+                                Harian
+                            </button>
+                        </div>
+                    </div>
+                    <button id="tf-apply-btn" type="button"
+                        class="w-full mt-4 py-2.5 rounded-xl border border-[#5a5a5a] text-sm text-zinc-200 hover:text-white hover:border-zinc-400 transition-colors">
+                        Terapkan
+                    </button>
                 </div>
             </div> -->
         </div>
+
 
         <style>
             #chart .apexcharts-legend {
@@ -498,12 +699,12 @@
                 },
                 'Durasi_Operasional': {
                     label: 'Durasi Operasional',
-                    unit: 'jam',
+                    unit: 'menit',
                     color: '#8b5cf6'
                 },
                 'Energi': {
                     label: 'Energi',
-                    unit: 'kWh',
+                    unit: 'Wh',
                     color: '#f59e0b'
                 },
                 'Suhu': {
@@ -830,6 +1031,10 @@
                 try {
                     var ordered = getOrderedFields(appliedFields);
                     var url = CONFIG.API_ENDPOINT + '?fields=' + ordered.join(',') + '&range=' + currentRange;
+                    if (currentRange === 'CUSTOM' && tfApplied.start && tfApplied.end) {
+                        url += '&start=' + tfFormatDateParam(tfApplied.start) + '&end=' + tfFormatDateParam(tfApplied.end);
+                        url += '&resolution=' + tfAppliedResolution; // 'detail' atau 'harian'
+                    }
                     const response = await fetch(url);
 
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -965,8 +1170,11 @@
             rangeButtons.forEach(function(btn) {
                 btn.addEventListener('click', function() {
                     var newRange = btn.getAttribute('data-range');
+                    if (newRange === 'CUSTOM') {
+                        tfOpenPanel();
+                        return;
+                    }
                     if (newRange === currentRange) return; // sudah aktif, tidak perlu reload
-
                     currentRange = newRange;
 
                     rangeButtons.forEach(function(b) {
@@ -980,9 +1188,382 @@
                 });
             });
         </script>
+        <script>
+            // =========================================================
+            // 9. DATEPICKER RANGE — "Pengaturan Filter Waktu"
+            // Dipakai bersama oleh: Line Chart Tren Aktual (context: 'chart')
+            //                        Card Kinerja Pompa Air (context: 'kinerja')
+            // =========================================================
+            var MONTH_NAMES_ID = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+            var tfPanel = document.getElementById('time-filter-panel');
+            var tfOverlay = document.getElementById('overlay-timepicker');
+            var tfMonthLabel = document.getElementById('tf-month-label');
+            var tfDaysGrid = document.getElementById('tf-days-grid');
+            var tfResolutionWrapper = document.getElementById('tf-resolution-wrapper'); // TAMBAHAN
+            var tfViewDate = new Date(); // bulan yang sedang ditampilkan
+            var tfToday = new Date();
+            tfToday.setHours(0, 0, 0, 0); // batas maksimal tanggal yang boleh dipilih = hari ini
+
+            var tfDraft = {
+                start: null,
+                end: null
+            }; // seleksi sementara (belum ditekan Terapkan)
+
+            var tfApplied = {
+                start: null,
+                end: null
+            }; // seleksi yang sudah aktif dipakai chart (dipertahankan untuk kompatibilitas loadDataFromAPI)
+
+            // >>> TAMBAHAN: dukungan multi-context (chart vs kinerja)
+            var tfContext = 'chart'; // context yang sedang aktif saat panel dibuka
+
+            var tfAppliedByContext = {
+                chart: {
+                    start: null,
+                    end: null,
+                    resolution: 'detail'
+                },
+                kinerja: {
+                    start: null,
+                    end: null
+                }
+            };
+
+            var TF_POSITION_CLASSES = {
+                chart: ['right-0'],
+                kinerja: ['right-6', '-translate-x-full']
+            };
+            var TF_ALL_POSITION_CLASSES = ['right-0', 'right-6', '-translate-x-full'];
+
+            var tfContainers = {
+                chart: document.getElementById('chart-card-container'),
+                kinerja: document.getElementById('kinerja-card-container')
+            };
+            // <<< /TAMBAHAN
+
+            // >>> TAMBAHAN: state resolusi data ('detail' = data mentah, 'harian' = 1 hari 1 data)
+            var tfResolutionButtons = document.querySelectorAll('.tf-resolution-btn');
+            var tfDraftResolution = 'detail';
+            var tfAppliedResolution = 'detail';
+
+            function tfSyncResolutionButtons() {
+                tfResolutionButtons.forEach(function(b) {
+                    var active = b.getAttribute('data-resolution') === tfDraftResolution;
+                    b.classList.toggle('text-white', active);
+                    b.classList.toggle('bg-[#171717]', active);
+                    b.classList.toggle('shadow', active);
+                    b.classList.toggle('text-zinc-400', !active);
+                });
+            }
+
+            tfResolutionButtons.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    tfDraftResolution = btn.getAttribute('data-resolution');
+                    tfSyncResolutionButtons();
+                });
+            });
+            // <<< /TAMBAHAN
+
+            // >>> TAMBAHAN: preset rentang cepat
+            var tfPresetChips = document.querySelectorAll('.tf-preset-chip');
+
+            function tfComputePresetRange(preset) {
+                var end = new Date(tfToday);
+                var start;
+                if (preset === 'month') {
+                    start = new Date(tfToday.getFullYear(), tfToday.getMonth(), 1);
+                } else {
+                    start = new Date(tfToday);
+                    start.setDate(start.getDate() - (parseInt(preset, 10) - 1));
+                }
+                return {
+                    start: start,
+                    end: end
+                };
+            }
+
+            function tfUpdatePresetChips() {
+                tfPresetChips.forEach(function(chip) {
+                    var range = tfComputePresetRange(chip.getAttribute('data-preset'));
+                    var isActive = tfSameDate(tfDraft.start, range.start) && tfSameDate(tfDraft.end, range.end);
+                    if (isActive) {
+                        chip.classList.add('border-blue-600', 'text-white', 'bg-[#3f3f46]');
+                        chip.classList.remove('border-[#3f3f46]', 'text-zinc-400');
+                    } else {
+                        chip.classList.remove('border-blue-600', 'text-white', 'bg-[#3f3f46]');
+                        chip.classList.add('border-[#3f3f46]', 'text-zinc-400');
+                    }
+                });
+            }
+
+            tfPresetChips.forEach(function(chip) {
+                chip.addEventListener('click', function() {
+                    var range = tfComputePresetRange(chip.getAttribute('data-preset'));
+                    tfDraft.start = range.start;
+                    tfDraft.end = range.end;
+                    tfViewDate = new Date(range.end);
+                    tfRenderCalendar();
+                });
+            });
+            // <<< /TAMBAHAN
+
+            function tfSameDate(a, b) {
+                return a && b && a.getFullYear() === b.getFullYear() &&
+                    a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+            }
+
+            function tfFormatDateParam(d) {
+                var pad = function(v) {
+                    return v < 10 ? '0' + v : '' + v;
+                };
+                return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+            }
+
+            // >>> TAMBAHAN: format tanggal + jam untuk dikirim ke endpoint kinerja-baseline (?start=&stop=)
+            function tfFormatDateTimeParam(d, endOfDay) {
+                return tfFormatDateParam(d) + (endOfDay ? ' 23:59:59' : ' 00:00:00');
+            }
+            // <<< /TAMBAHAN
+
+            function tfBuildMonthCells(year, month) {
+                var firstDay = new Date(year, month, 1);
+                var startWeekday = firstDay.getDay();
+                var daysInMonth = new Date(year, month + 1, 0).getDate();
+                var daysInPrevMonth = new Date(year, month, 0).getDate();
+                var cells = [];
+
+                for (var i = startWeekday - 1; i >= 0; i--) {
+                    cells.push({
+                        date: new Date(year, month - 1, daysInPrevMonth - i),
+                        currentMonth: false
+                    });
+                }
+                for (var d = 1; d <= daysInMonth; d++) {
+                    cells.push({
+                        date: new Date(year, month, d),
+                        currentMonth: true
+                    });
+                }
+                while (cells.length < 42) {
+                    var lastDate = cells[cells.length - 1].date;
+                    var nextDate = new Date(lastDate);
+                    nextDate.setDate(lastDate.getDate() + 1);
+                    cells.push({
+                        date: nextDate,
+                        currentMonth: false
+                    });
+                }
+                return cells;
+            }
+
+            function tfRenderCalendar() {
+                var year = tfViewDate.getFullYear();
+                var month = tfViewDate.getMonth();
+                tfMonthLabel.textContent = MONTH_NAMES_ID[month] + ' ' + year;
+
+                var cells = tfBuildMonthCells(year, month);
+                tfDaysGrid.innerHTML = '';
+
+                cells.forEach(function(cell, idx) {
+                    var col = idx % 7;
+                    var isStart = tfSameDate(cell.date, tfDraft.start);
+                    var isEnd = tfSameDate(cell.date, tfDraft.end);
+                    var inRange = tfDraft.start && tfDraft.end &&
+                        cell.date > tfDraft.start && cell.date < tfDraft.end;
+
+                    var isFuture = cell.date > tfToday; // tanggal setelah hari ini tidak boleh dipilih
+
+                    var wrap = document.createElement('div');
+                    wrap.className = 'py-1';
+                    if (!isFuture && (inRange || (isStart && tfDraft.end) || (isEnd && tfDraft.start))) {
+                        wrap.classList.add('bg-[#3f3f46]');
+                        if (col === 0) wrap.classList.add('rounded-l-full');
+                        if (col === 6) wrap.classList.add('rounded-r-full');
+                    }
+
+                    var num = document.createElement('div');
+                    num.textContent = cell.date.getDate();
+                    num.className = 'w-9 h-9 mx-auto flex items-center justify-center rounded-full select-none transition-colors';
+
+                    if (isFuture) {
+                        num.classList.add('text-zinc-700', 'cursor-not-allowed');
+                    } else if (isStart || isEnd) {
+                        num.classList.add('bg-blue-600', 'text-white', 'font-semibold', 'cursor-pointer');
+                    } else if (!cell.currentMonth) {
+                        num.classList.add('text-zinc-600', 'hover:bg-[#3f3f46]', 'cursor-pointer');
+                    } else {
+                        num.classList.add('text-zinc-200', 'hover:bg-[#3f3f46]', 'cursor-pointer');
+                    }
+
+                    if (!isFuture) {
+                        num.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            tfHandleDayClick(cell.date);
+                        });
+                    }
+
+                    wrap.appendChild(num);
+                    tfDaysGrid.appendChild(wrap);
+                });
+
+                tfUpdateNavButtons();
+                tfUpdatePresetChips();
+            }
+
+            function tfUpdateNavButtons() {
+                var nextBtn = document.getElementById('tf-next-month');
+                var isCurrentMonth = tfViewDate.getFullYear() === tfToday.getFullYear() &&
+                    tfViewDate.getMonth() === tfToday.getMonth();
+
+                if (isCurrentMonth) {
+                    nextBtn.classList.add('opacity-30', 'cursor-not-allowed', 'pointer-events-none');
+                } else {
+                    nextBtn.classList.remove('opacity-30', 'cursor-not-allowed', 'pointer-events-none');
+                }
+            }
+
+            function tfHandleDayClick(date) {
+                if (!tfDraft.start || (tfDraft.start && tfDraft.end)) {
+                    tfDraft.start = date;
+                    tfDraft.end = null;
+                } else if (date < tfDraft.start) {
+                    tfDraft.end = tfDraft.start;
+                    tfDraft.start = date;
+                } else {
+                    tfDraft.end = date;
+                }
+                tfRenderCalendar();
+            }
+
+            document.getElementById('tf-prev-month').addEventListener('click', function() {
+                tfViewDate.setMonth(tfViewDate.getMonth() - 1);
+                tfRenderCalendar();
+            });
+
+            document.getElementById('tf-next-month').addEventListener('click', function() {
+                tfViewDate.setMonth(tfViewDate.getMonth() + 1);
+                tfRenderCalendar();
+            });
+
+            // >>> TAMBAHAN: tfOpenPanel sekarang menerima context ('chart' | 'kinerja')
+            function tfOpenPanel(context) {
+                tfContext = (context === 'kinerja') ? 'kinerja' : 'chart';
+                var applied = tfAppliedByContext[tfContext];
+
+                tfDraft.start = applied.start;
+                tfDraft.end = applied.end;
+                tfDraftResolution = applied.resolution || 'detail';
+                tfSyncResolutionButtons();
+
+                // reposisi panel sesuai context — tanpa pindah elemen antar container
+                tfPanel.classList.remove.apply(tfPanel.classList, TF_ALL_POSITION_CLASSES);
+                tfPanel.classList.add.apply(tfPanel.classList, TF_POSITION_CLASSES[tfContext]);
+
+                // card kinerja tidak punya opsi resolusi data
+                tfResolutionWrapper.classList.toggle('hidden', tfContext === 'kinerja');
+
+                tfViewDate = applied.start ? new Date(applied.start) : new Date();
+                tfRenderCalendar();
+                tfPanel.classList.remove('hidden');
+                tfOverlay.classList.remove('hidden');
+                if (tfContext === 'kinerja') {
+                    tfContainers.chart.classList.remove('z-[1111]');
+                }
+            }
+
+            // dipicu tombol Custom line chart maupun tombol Custom kinerja
+            document.addEventListener('tf:open', function(e) {
+                tfOpenPanel(e.detail && e.detail.context);
+            });
+            // <<< /TAMBAHAN
+
+            function tfClosePanel() {
+                var applied = tfAppliedByContext[tfContext]; // TAMBAHAN: reset draft sesuai context aktif
+                tfDraft.start = applied.start;
+                tfDraft.end = applied.end;
+                tfDraftResolution = applied.resolution || tfDraftResolution;
+                tfSyncResolutionButtons();
+                tfPanel.classList.add('hidden');
+                tfOverlay.classList.add('hidden');
+                tfContainers.chart.classList.add('z-[1111]');
+            }
+
+            document.getElementById('btn-close-time-filter-chart').addEventListener('click', function() {
+                tfClosePanel();
+            });
+
+            tfOverlay.addEventListener('click', function() {
+                tfClosePanel();
+            });
+
+            document.getElementById('tf-apply-btn').addEventListener('click', function() {
+                if (!tfDraft.start || !tfDraft.end) return; // minimal harus pilih 2 tanggal
+
+                var applied = tfAppliedByContext[tfContext];
+                applied.start = tfDraft.start;
+                applied.end = tfDraft.end;
+                if (tfContext === 'chart') applied.resolution = tfDraftResolution;
+
+                tfPanel.classList.add('hidden');
+                tfOverlay.classList.add('hidden');
+
+                if (tfContext === 'chart') {
+                    // >>> perilaku asli, dipertahankan agar loadDataFromAPI() tetap jalan seperti sebelumnya
+                    tfApplied.start = applied.start;
+                    tfApplied.end = applied.end;
+                    tfAppliedResolution = applied.resolution;
+                    currentRange = 'CUSTOM';
+
+                    rangeButtons.forEach(function(b) {
+                        b.classList.remove('text-white', 'bg-[#171717]', 'shadow');
+                        b.classList.add('text-zinc-400');
+                    });
+                    var customBtn = document.querySelector('.range-filter-btn[data-range="CUSTOM"]');
+                    customBtn.classList.remove('text-zinc-400');
+                    customBtn.classList.add('text-white', 'bg-[#171717]', 'shadow');
+
+                    loadDataFromAPI();
+                } else {
+                    // >>> TAMBAHAN: context kinerja — broadcast ke script card kinerja (partial terpisah)
+                    document.dispatchEvent(new CustomEvent('tf:apply', {
+                        detail: {
+                            context: 'kinerja',
+                            start: applied.start,
+                            end: applied.end,
+                            startParam: tfFormatDateTimeParam(applied.start, false),
+                            stopParam: tfFormatDateTimeParam(applied.end, true)
+                        }
+                    }));
+                }
+            });
+
+            // klik di luar panel = batal, kembali ke seleksi yang sudah diterapkan sebelumnya
+            document.addEventListener('click', function(e) {
+                if (tfPanel.classList.contains('hidden')) return; // TAMBAHAN: perbaikan, sebelumnya cek class 'translate-x-full' yang tak pernah terpasang
+                if (tfPanel.contains(e.target)) return;
+                if (e.target.closest('[data-range="CUSTOM"], [data-range="custom"]')) return; // TAMBAHAN: cakup trigger chart & kinerja
+                tfClosePanel();
+            });
+
+            // >>> TAMBAHAN: buka panel dari tombol Custom line chart lewat event, bukan panggilan langsung
+            var tfChartCustomBtn = document.querySelector('.range-filter-btn[data-range="CUSTOM"]');
+            if (tfChartCustomBtn) {
+                tfChartCustomBtn.addEventListener('click', function() {
+                    document.dispatchEvent(new CustomEvent('tf:open', {
+                        detail: {
+                            context: 'chart'
+                        }
+                    }));
+                });
+            }
+            // <<< /TAMBAHAN
+
+            tfRenderCalendar();
+        </script>
 
 
-        <div class="bg-[#171717] rounded-2xl p-6 flex flex-col">
+        <div class="bg-[#171717] rounded-2xl p-6 flex flex-col z-[1111] relative" id="kinerja-card-container">
 
             <div class="flex items-center gap-3 mb-6">
                 <div class="w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center">
@@ -1002,81 +1583,250 @@
             </div>
 
             <p class="text-center text-[#a1a1aa] text-[15px] mb-7 leading-snug px-4">
-                Pompa air sedang berjalan <span class="text-orange-500">{{ round($latest['Debit']/8.33) }}</span>% dari kapasitas maksimum
+                Pompa air sedang berjalan <span class="text-orange-500">{{ round($latest['Debit']/5) }}</span>% dari kapasitas maksimum
             </p>
 
             <div class="h-px bg-zinc-700 w-full mb-7 opacity-50"></div>
 
             <div class="flex justify-center mb-8">
-                <div class="bg-[#242427] rounded-full p-1 flex">
-                    <button class="bg-[#3a3a3c] text-white text-[13px] py-1.5 px-6 rounded-full border-0 cursor-pointer">1H</button>
-                    <button class="text-gray-400 text-[13px] py-1.5 px-6 rounded-full border-0 bg-transparent cursor-pointer">1M</button>
-                    <button class="text-gray-400 text-[13px] py-1.5 px-6 rounded-full border-0 bg-transparent cursor-pointer">Custom</button>
+                <div class="bg-[#242424] rounded-full p-1 flex" id="kinerja-filter-group">
+                    <button type="button" data-range="1h" class="filter-btn bg-[#171717] text-white text-[13px] py-1.5 px-6 rounded-full border-0 cursor-pointer">1H</button>
+                    <button type="button" data-range="1m" class="filter-btn text-gray-400 text-[13px] py-1.5 px-6 rounded-full border-0 bg-transparent cursor-pointer">1M</button>
+                    <button type="button" data-range="custom" class="filter-btn text-gray-400 text-[13px] py-1.5 px-6 rounded-full border-0 bg-transparent cursor-pointer">Custom</button>
                 </div>
             </div>
 
-            <div class="flex justify-between items-end mb-10 px-1">
+            <div class="flex justify-between items-end mb-10 px-1" id="kinerja-stats">
                 <div>
                     <div class="flex items-baseline text-white">
-                        <span class="text-2xl">{{ $today['Volume'] }}</span>
+                        <span class="text-2xl" id="stat-volume">{{ number_format($today['Volume'], 1) }}</span>
                         <span class="text-xl text-gray-400 ml-1">L</span>
                     </div>
                     <div class="text-sm text-gray-400 mt-1">Volume</div>
                 </div>
                 <div class="text-center">
                     <div class="flex items-baseline text-white justify-center">
-                        <span class="text-2xl">{{ round($today['Energi']/1000, 2) }}</span>
+                        <span class="text-2xl" id="stat-energi">{{ number_format($today['Energi']/1000, 2) }}</span>
                         <span class="text-sm text-gray-400 ml-1">kWh</span>
                     </div>
                     <div class="text-sm text-gray-400 mt-1">Energi</div>
                 </div>
                 <div class="text-right">
                     <div class="flex items-baseline text-white justify-end">
-                        <span class="text-2xl">{{ floor($today['Durasi_Operasional']/3600) }}</span>
+                        <span class="text-2xl" id="stat-jam">{{ floor($today['Durasi_Operasional']/3600) }}</span>
                         <span class="text-xl text-gray-400 ml-0.5 mr-1.5">j</span>
-                        <span class="text-2xl">{{ gmdate('i', $today['Durasi_Operasional']) }}</span>
+                        <span class="text-2xl" id="stat-menit">{{ gmdate('i', $today['Durasi_Operasional']) }}</span>
                         <span class="text-xl text-gray-400 ml-0.5">m</span>
                     </div>
                     <div class="text-sm text-gray-400 mt-1">Operasional</div>
                 </div>
             </div>
-
             <div class="mb-5">
-                <div class="h-3 w-full flex rounded overflow-hidden mb-2.5">
-                    <div class="h-full bg-[#4ea8de] w-[15%]"></div>
-                    <div class="h-full bg-[#6a5acd] w-[20%]"></div>
-                    <div class="h-full bg-[#4ea8de] w-[5%]"></div>
-                    <div class="h-full bg-[#6a5acd] w-[25%]"></div>
-                    <div class="h-full bg-[#4ea8de] w-[8%]"></div>
-                    <div class="h-full bg-[#ff7f50] w-[12%]"></div>
-                    <div class="h-full bg-[#6a5acd] w-[10%]"></div>
-                    <div class="h-full bg-[#ff7f50] w-[2%]"></div>
-                    <div class="h-full bg-[#6a5acd] w-[3%]"></div>
+                <div class="h-3 w-full flex rounded overflow-hidden mb-2.5" id="pump-usage-bar">
                 </div>
                 <div class="flex justify-between text-[11px] text-gray-500 font-medium px-0.5">
-                    <span>09:00</span>
-                    <span>12:30</span>
-                    <span>16:30</span>
+                    <span>06:00</span>
+                    <span>12:00</span>
+                    <span>18:00</span>
                 </div>
             </div>
-
             <div class="flex justify-center gap-5 text-[11px] text-gray-400">
                 <div class="flex items-center gap-2">
                     <div class="w-2.5 h-2.5 rounded-full bg-[#6a5acd]"></div>
-                    <span>Operasi Penuh</span>
+                    <span>Debit Tinggi</span>
                 </div>
                 <div class="flex items-center gap-2">
                     <div class="w-2.5 h-2.5 rounded-full bg-[#4ea8de]"></div>
-                    <span>Operasi Sedang</span>
+                    <span>Debit Rendah</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <div class="w-2.5 h-2.5 rounded-full bg-[#ff7f50]"></div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-[#3f3f46]"></div>
                     <span>Mati</span>
                 </div>
             </div>
-
+            <div id="pump-usage-tooltip" class="hidden" style="position:fixed;z-index:50;background:#2c2c2e;border:1px solid #3f3f46;border-radius:10px;padding:8px 12px;font-size:11px;box-shadow:0 10px 40px rgba(0,0,0,0.4);pointer-events:none;"></div>
         </div>
     </div>
+
+    <script>
+        // =========================================================
+        // 9. CHART PENGGUNAAN POMPA — independen dari line chart
+        // =========================================================
+        document.addEventListener('DOMContentLoaded', function() {
+
+            var PUMP_CONFIG = {
+                FIELD: 'Debit',
+                RANGE: '1H', // selalu 1 hari terakhir, statis
+                FULL_THRESHOLD: 20, // Debit >= ini = Operasi Penuh
+                GAP_MATI_MS: 20 * 60 * 1000, // 10 menit tanpa data = Mati
+                REFRESH_INTERVAL_MS: 30000
+            };
+
+            var STATUS_COLOR = {
+                penuh: '#6a5acd',
+                sedang: '#4ea8de',
+                mati: '#3f3f46'
+            };
+            var STATUS_LABEL = {
+                penuh: 'Operasi Penuh',
+                sedang: 'Operasi Sedang',
+                mati: 'Mati'
+            };
+
+            var barEl = document.getElementById('pump-usage-bar');
+            var tooltipEl = document.getElementById('pump-usage-tooltip');
+
+            // guard: kalau elemen belum ada di halaman ini, hentikan tanpa error
+            if (!barEl || !tooltipEl) {
+                console.warn('Chart penggunaan pompa: elemen #pump-usage-bar / #pump-usage-tooltip tidak ditemukan di DOM.');
+                return;
+            }
+
+            function pad(v) {
+                return v < 10 ? '0' + v : '' + v;
+            }
+
+            function fmtTime(d) {
+                return pad(d.getHours()) + ':' + pad(d.getMinutes());
+            }
+
+            function classifyValue(y) {
+                return y >= PUMP_CONFIG.FULL_THRESHOLD ? 'penuh' : 'sedang';
+            }
+
+            function buildSegments(points, windowStart, windowEnd) {
+                var raw = [];
+
+                if (points.length === 0) {
+                    return [{
+                        start: windowStart,
+                        end: windowEnd,
+                        status: 'mati'
+                    }];
+                }
+
+                if (points[0].x > windowStart) {
+                    raw.push({
+                        start: windowStart,
+                        end: points[0].x,
+                        status: 'mati'
+                    });
+                }
+
+                for (var i = 0; i < points.length; i++) {
+                    var cur = points[i];
+                    var next = points[i + 1];
+                    var segEnd = next ? next.x : windowEnd;
+                    var gap = segEnd - cur.x;
+
+                    if (gap > PUMP_CONFIG.GAP_MATI_MS) {
+                        raw.push({
+                            start: cur.x,
+                            end: cur.x + PUMP_CONFIG.GAP_MATI_MS,
+                            status: classifyValue(cur.y)
+                        });
+                        raw.push({
+                            start: cur.x + PUMP_CONFIG.GAP_MATI_MS,
+                            end: segEnd,
+                            status: 'mati'
+                        });
+                    } else {
+                        raw.push({
+                            start: cur.x,
+                            end: segEnd,
+                            status: classifyValue(cur.y)
+                        });
+                    }
+                }
+
+                var merged = [];
+                raw.forEach(function(seg) {
+                    if (seg.end <= seg.start) return;
+                    var last = merged[merged.length - 1];
+                    if (last && last.status === seg.status) {
+                        last.end = seg.end;
+                    } else {
+                        merged.push({
+                            start: seg.start,
+                            end: seg.end,
+                            status: seg.status
+                        });
+                    }
+                });
+                return merged;
+            }
+
+            function renderSegments(segments, windowStart, windowEnd) {
+                var totalMs = windowEnd - windowStart;
+                barEl.innerHTML = '';
+                segments.forEach(function(seg) {
+                    var pct = ((seg.end - seg.start) / totalMs) * 100;
+                    if (pct <= 0) return;
+
+                    var div = document.createElement('div');
+                    div.className = 'h-full';
+                    div.style.width = pct + '%';
+                    div.style.backgroundColor = STATUS_COLOR[seg.status];
+                    div.style.cursor = 'pointer';
+                    div.addEventListener('mousemove', function(e) {
+                        showTooltip(e, seg);
+                    });
+                    div.addEventListener('mouseleave', hideTooltip);
+
+                    barEl.appendChild(div);
+                });
+            }
+
+            function showTooltip(e, seg) {
+                tooltipEl.innerHTML =
+                    '<div style="font-weight:600;color:#e4e4e7;margin-bottom:2px;">' + STATUS_LABEL[seg.status] + '</div>' +
+                    '<div style="color:#a1a1aa;">' + fmtTime(new Date(seg.start)) + ' – ' + fmtTime(new Date(seg.end)) + '</div>';
+                tooltipEl.style.left = (e.clientX + 12) + 'px';
+                tooltipEl.style.top = (e.clientY - 36) + 'px';
+                tooltipEl.classList.remove('hidden');
+            }
+
+            function hideTooltip() {
+                tooltipEl.classList.add('hidden');
+            }
+
+            async function loadPumpUsageData() {
+                try {
+                    var url = CONFIG.API_ENDPOINT + '?fields=' + PUMP_CONFIG.FIELD + '&range=' + PUMP_CONFIG.RANGE;
+                    var response = await fetch(url);
+                    if (!response.ok) throw new Error('HTTP error! status: ' + response.status);
+                    var fetchedData = await response.json();
+
+                    var series = fetchedData.find(function(s) {
+                        return s.name === PUMP_CONFIG.FIELD;
+                    });
+                    var allPoints = series ? series.data.slice().sort(function(a, b) {
+                        return a.x - b.x;
+                    }) : [];
+
+                    var refDate = allPoints.length ? new Date(allPoints[allPoints.length - 1].x) : new Date();
+                    var dayStart = new Date(refDate.getFullYear(), refDate.getMonth(), refDate.getDate()).getTime();
+
+                    // window hanya 06:00 - 18:00
+                    var windowStart = dayStart + 6 * 60 * 60 * 1000;
+                    var windowEnd = dayStart + 18 * 60 * 60 * 1000;
+
+                    // buang titik di luar jam 06:00-18:00
+                    var points = allPoints.filter(function(p) {
+                        return p.x >= windowStart && p.x <= windowEnd;
+                    });
+
+                    renderSegments(buildSegments(points, windowStart, windowEnd), windowStart, windowEnd);
+                } catch (error) {
+                    console.error('Gagal mengambil data penggunaan pompa:', error);
+                }
+            }
+
+            loadPumpUsageData();
+            setInterval(loadPumpUsageData, PUMP_CONFIG.REFRESH_INTERVAL_MS);
+
+        });
+    </script>
 
     <script>
         (function() {
@@ -1084,7 +1834,7 @@
             const ctx = canvasEl.getContext('2d');
 
             const value = parseFloat(document.getElementById('debit_card').dataset.debit);
-            const maxCapacity = 33.3;
+            const maxCapacity = 500;
 
             function draw() {
                 const wrap = canvasEl.parentElement;
@@ -1397,7 +2147,7 @@
                 </div>
             </div>
             <div class="flex items-baseline mx-auto w-fit my-12 gap-2">
-                <h1 class="text-4xl">{{ $latest['Volume']/1000 }}</h1>
+                <h1 class="text-4xl">{{ round($latest['Volume']/1000,1) }}</h1>
                 <p>m³</p>
             </div>
             <hr class="border-[#373737] my-3">
@@ -1599,11 +2349,13 @@
                 @continue($log['Volume_delta'] === null)
                 <hr class="border-[#373737] my-3">
                 <div class="flex items-center gap-5">
-                    <h1 class="px-3 py-4 text-white font-semibold rounded-full bg-[#262626]">{{ \Carbon\Carbon::parse($log['_time'])->locale('id')->translatedFormat('j/n') }}</h1>
+                    <h1 class="w-16 h-[52px] flex items-center justify-center text-white font-semibold rounded-full bg-[#262626]">
+                        {{ \Carbon\Carbon::parse($log['_time'])->locale('id')->translatedFormat('j/n') }}
+                    </h1>
                     <div class="w-full">
                         <h1 class="text-xl lg:text-base">{{ \Carbon\Carbon::parse($log['_time'])->locale('id')->translatedFormat('d F Y') }}</h1>
                         <div class=" items-center justify-between hidden lg:flex text-[#979797]">
-                            <h1>{{ $log['Volume_delta'] }} L</h1>
+                            <h1>{{ round($log['Volume_delta'], 1) }} L</h1>
                             <h1>•</h1>
                             <h1>{{ round($log['Durasi_Operasional_delta']/3600) }} jam</h1>
                             <h1>•</h1>
@@ -1647,7 +2399,115 @@
             </div>
         </div>
     </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
 
+            const state = {
+                deviceId: "{{ $id }}",
+                range: '1h',
+                first: @json($first),
+                latest: @json($latest),
+            };
+
+            function computeToday() {
+                return {
+                    Volume: state.latest.Volume - state.first.Volume,
+                    Energi: state.latest.Energi - state.first.Energi,
+                    Durasi_Operasional: state.latest.Durasi_Operasional - state.first.Durasi_Operasional,
+                };
+            }
+
+            function renderStats() {
+                const today = computeToday();
+                document.getElementById('stat-volume').textContent = today.Volume.toFixed(1);
+                document.getElementById('stat-energi').textContent = (today.Energi / 1000).toFixed(2);
+                document.getElementById('stat-jam').textContent = Math.floor(today.Durasi_Operasional / 3600);
+                document.getElementById('stat-menit').textContent =
+                    String(Math.floor((today.Durasi_Operasional % 3600) / 60)).padStart(2, '0');
+            }
+
+            function renderGauge(debit) {
+                const el = document.getElementById('debit_card');
+                el.textContent = debit;
+                el.dataset.debit = debit;
+                // updateGaugeChart(debit);
+            }
+
+            async function refreshBaseline(range) {
+                const res = await fetch(`/device/${state.deviceId}/kinerja-baseline?range=${range}`);
+                const data = await res.json();
+                state.first = data.first;
+                state.latest = data.latest;
+                state.range = range;
+                renderStats();
+                renderGauge(state.latest.Debit);
+            }
+
+            // --- Ganti filter ---
+            const filterGroup = document.getElementById('kinerja-filter-group');
+
+            if (!filterGroup) {
+                console.error('Element #kinerja-filter-group tidak ditemukan di DOM');
+                return;
+            }
+
+            filterGroup.addEventListener('click', function(e) {
+                const btn = e.target.closest('.filter-btn');
+                if (!btn) return;
+                const range = btn.dataset.range;
+
+                if (range === 'custom') {
+                    // buka panel timepicker dengan context 'kinerja'
+                    document.dispatchEvent(new CustomEvent('tf:open', {
+                        detail: {
+                            context: 'kinerja'
+                        }
+                    }));
+                    return;
+                }
+
+                this.querySelectorAll('.filter-btn').forEach(b => {
+                    b.classList.remove('bg-[#171717]', 'text-white');
+                    b.classList.add('text-gray-400', 'bg-transparent');
+                });
+                btn.classList.remove('text-gray-400', 'bg-transparent');
+                btn.classList.add('bg-[#171717]', 'text-white');
+
+                refreshBaseline(range);
+            });
+
+            // --- Terima hasil apply dari timepicker (context kinerja) ---
+            async function refreshBaselineCustom(startParam, stopParam) {
+                const res = await fetch(
+                    `/device/${state.deviceId}/kinerja-baseline?start=${encodeURIComponent(startParam)}&stop=${encodeURIComponent(stopParam)}`
+                );
+                const data = await res.json();
+                state.first = data.first;
+                state.latest = data.latest;
+                state.range = 'custom';
+                renderStats();
+                renderGauge(state.latest.Debit);
+            }
+
+            document.addEventListener('tf:apply', function(e) {
+                if (e.detail.context !== 'kinerja') return; // sebelumnya salah cek 'chart'
+
+                // set tombol Custom jadi aktif
+                filterGroup.querySelectorAll('.filter-btn').forEach(b => {
+                    b.classList.remove('bg-[#171717]', 'text-white');
+                    b.classList.add('text-gray-400', 'bg-transparent');
+                });
+                const customBtn = filterGroup.querySelector('.filter-btn[data-range="custom"]');
+                if (customBtn) {
+                    customBtn.classList.remove('text-gray-400', 'bg-transparent');
+                    customBtn.classList.add('bg-[#171717]', 'text-white');
+                }
+
+                refreshBaselineCustom(e.detail.startParam, e.detail.stopParam);
+            });
+
+        });
+    </script>
 </body>
 
 <script>

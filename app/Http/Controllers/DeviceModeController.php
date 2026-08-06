@@ -35,6 +35,7 @@ class DeviceModeController extends Controller
         $config->volume_progress = 0;
         $config->job_confirmed = 0;
         $config->job_id = ($config->job_id ?? 0) + 1;
+        $config->job_created = now();
 
         if ($validated['mode'] === 'Timer Waktu') {
             $config->timer_start = $validated['timer_start'];

@@ -332,7 +332,9 @@
             <hr class="border-[#373737] my-3">
             <a href="{{ route('dashboard', ['device_id' => $log['Device_Id'], 'device_name' => $logData[$log['Device_Id']]]) }}">
                 <div class="flex items-center gap-5 group">
-                    <h1 class="px-3 py-4 text-white font-semibold rounded-full bg-[#262626]">{{ \Carbon\Carbon::parse($log['_time'])->locale('id')->translatedFormat('j/n') }}</h1>
+                    <h1 class="w-16 h-[52px] flex items-center justify-center text-white font-semibold rounded-full bg-[#262626]">
+                        {{ \Carbon\Carbon::parse($log['_time'])->locale('id')->translatedFormat('j/n') }}
+                    </h1>
                     <div class="w-full">
                         <h1 class="text-xl lg:text-base text-white group-hover:underline">{{ $logData[$log['Device_Id']] }}</h1>
                         <div class=" items-center justify-between hidden lg:flex text-[#979797]">
