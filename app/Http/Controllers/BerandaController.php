@@ -85,14 +85,10 @@ class BerandaController extends Controller
 
     public function test()
     {
-        $devices = Device::select('id', 'owner_id', 'serial_number', 'device_name', 'online_status')->where('owner_id', 1)->get();
-
-        $logData = [];
-        foreach ($devices as $device) {
-            $logData[$device->id] = $device->device_name;
-        };
-
-        return $logData[2];
+        $id = 1;
+        $device = Device::where('id', $id)->select('id', 'API_keys')->with('device_config')->first();
+        $device_config = $device->device_config;
+        return $device_config->id;
     }
 
     public function index()

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Events\DataUpdated;
+use App\Models\Device;
 use App\Models\DeviceConfig;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -114,6 +115,7 @@ class MQTTStoreService
             'latitude'  => 'numeric',   // Derajat desimal, misal: -7.558
             'longitude' => 'numeric',   // Derajat desimal, misal: 110.856
             'job_id' => 'numeric',   // int
+            'API_keys' => 'string',   // string
         ];
 
         $errors = [];
@@ -151,6 +153,7 @@ class MQTTStoreService
             'latitude'  => round((float) $data['latitude'],  7),
             'longitude' => round((float) $data['longitude'], 7),
             'job_id'      => (int)   $data['job_id'],
+            'API_keys'      => (string)   $data['API_keys'],
         ];
     }
 
@@ -246,6 +249,12 @@ class MQTTStoreService
     {
         // 1. Parse & validasi JSON payload
         $validated = $this->parseAndValidate($jsonPayload);
+
+        $device = Device::where('id', $id)->select('id', 'API_keys')->with('device_config')->first();
+
+        if ($device->API_keys !== $validated['API_keys']) {
+            return [false, "API key tidak valid"];
+        }
 
         $nowTs     = time();
         $daya      = $validated['daya'];
@@ -362,7 +371,7 @@ class MQTTStoreService
         // ----------------------------------------------------------------
         $this->statusUpdate->DeviceStatusUpdate($id);
 
-        $device_config = DeviceConfig::where('device_id', $id)->select('job_id', 'volume_limit', 'volume_progress', 'mode', 'timer_start', 'timer_end', 'lat', 'long')->first();
+        $device_config = $device->device_config;
 
         $latChanged = (float) $device_config->lat !== (float) $validated['latitude'];
         $longChanged = (float) $device_config->long !== (float) $validated['longitude'];
@@ -410,7 +419,7 @@ class MQTTStoreService
                     'Energi_delta' => round($deltaEnergi, 4),
                     'Volume_delta' => round($deltaVolume, 4),
                     'Durasi_Operasional_delta' => $deltaDurasi,
-                    '_Time' => $nowTs,
+                    '_time' => $nowTs,
                 ]
             ));
 
