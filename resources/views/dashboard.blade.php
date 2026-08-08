@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Monitoring</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
@@ -20,8 +20,20 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         #map {
-            height: 100%;
+            height: 280px;
             background: #1c1c1e;
+        }
+
+        @media (min-width: 640px) {
+            #map {
+                height: 360px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            #map {
+                height: 100%;
+            }
         }
 
         /* Location Bar */
@@ -33,21 +45,28 @@
 
             z-index: 1111;
 
-            padding: 10px 16px;
+            padding: 8px 12px;
 
             background: rgba(86, 86, 86, 0.36);
-            /* backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px); */
 
             border: 1px solid rgba(23, 23, 23);
             border-radius: 15px;
 
             color: #f5f5f7;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
             white-space: nowrap;
 
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+
+            max-width: calc(100% - 24px);
+        }
+
+        @media (min-width: 640px) {
+            .location-bar {
+                padding: 10px 16px;
+                font-size: 14px;
+            }
         }
 
         /* Marker Navigasi */
@@ -208,7 +227,7 @@
             <div class="flex items-center gap-5">
                 <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
                     alt="Profile picture" class="w-10 h-10 rounded-full object-cover border border-zinc-700">
-                <div class="hidden sm:flex flex-col">
+                <div class="flex flex-col">
                     <span class="text-xs text-zinc-100">{{ auth()->user()->name }}</span>
                     <span class="text-[10px] text-zinc-400">{{ auth()->user()->email }}</span>
                 </div>
@@ -230,7 +249,7 @@
 
 <x-mode.select :id="$id" :serial_number="$device->serial_number" />
 
-<body class="my-12 mx-16 text-white">
+<body class="lg:my-12 my-6 lg:mx-16 mx-3 text-white">
     <nav class="flex items-center justify-between bg-[#121212] text-white w-full">
 
         <div class="flex items-center gap-4">
@@ -244,14 +263,14 @@
 
             <h1 class="text-2xl tracking-wide">Dashboard</h1>
 
-            <div class="h-6 w-[1px] bg-[#373737] mx-2"></div>
+            <div class="h-6 w-[1px] bg-[#373737] mx-2 hidden lg:block"></div>
 
-            <p class="text-2xl">
+            <p class="hidden lg:block text-2xl">
                 Selamat Datang, {{ auth()->user()->name }} 👋
             </p>
         </div>
 
-        <div class="flex items-center gap-5">
+        <div class="items-center gap-5 flex">
 
             <div class="hidden sm:flex flex-col items-end">
                 <span class="text-xs text-zinc-100">{{ auth()->user()->name }}</span>
@@ -262,7 +281,7 @@
                 alt="Profile picture" class="w-10 h-10 rounded-full object-cover border border-zinc-700">
 
             <button
-                class="relative p-2 text-zinc-400 hover:text-white rounded-full hover:bg-zinc-800 transition-colors">
+                class="relative p-2 text-zinc-400 hover:text-white rounded-full hover:bg-zinc-800 transition-colors hidden lg:block">
                 <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
@@ -274,7 +293,7 @@
 
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="p-1.5 text-white hover:text-white rounded-md hover:bg-zinc-800 transition-colors">
+                <button type="submit" class="p-1.5 text-white hover:text-white rounded-md hover:bg-zinc-800 transition-colors hidden lg:block">
                     <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M5.83333 24.5C5.19167 24.5 4.64256 24.2717 4.186 23.8152C3.72944 23.3586 3.50078 22.8091 3.5 22.1667V5.83333C3.5 5.19167 3.72867 4.64256 4.186 4.186C4.64333 3.72944 5.19244 3.50078 5.83333 3.5H14V5.83333H5.83333V22.1667H14V24.5H5.83333ZM18.6667 19.8333L17.0625 18.1417L20.0375 15.1667H10.5V12.8333H20.0375L17.0625 9.85833L18.6667 8.16667L24.5 14L18.6667 19.8333Z" fill="#979797" />
                     </svg>
@@ -284,34 +303,32 @@
     </nav>
 
     <hr class="my-5 border-[#373737]">
-    <header class="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-
-        <!-- Left Section: Title and Description -->
-        <div class="flex flex-col gap-1.5">
-            <h2 class="text-2xl text-white tracking-wide">
-                Dashboard Monitoring- {{ $device->device_name }}
+    <header class="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+        <div class="flex flex-col gap-1.5 min-w-0">
+            <h2 class="text-lg sm:text-xl lg:text-2xl text-white tracking-wide break-words">
+                Dashboard Monitoring <br class="hidden sm:block lg:hidden">{{ $device->device_name }}
             </h2>
-            <p class="text-[#979797] text-sm">
+            <p class="text-[#979797] text-sm hidden lg:block">
                 Pantau performa dan efisiensi pompa air tenaga surya Anda secara real-time.
             </p>
         </div>
 
         <!-- Right Section: Status and Last Update -->
-        <div class="flex flex-col sm:items-end gap-2">
+        <div class="flex flex-col sm:items-end gap-2 shrink-0">
 
             <!-- Status Badge -->
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-xl {{ $device->online_status == 1 ? 'bg-[#00A451]/5' : 'bg-[#DC2626]/5'}}">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-xl w-fit {{ $device->online_status == 1 ? 'bg-[#00A451]/5' : 'bg-[#DC2626]/5'}}">
                 <!-- Blinking/Static Green Dot -->
-                <span class="w-2 h-2 rounded-full {{ $device->online_status == 1 ? 'bg-[#00A451]' : 'bg-[#DC2626]'}}"></span>
-                <span class="{{ $device->online_status == 1 ? 'text-[#00A451]' : 'text-[#DC2626]'}} text-sm">Pompa {{ $device->online_status == 1 ? 'Online' : 'Offline'}}</span>
+                <span class="w-2 h-2 rounded-full shrink-0 {{ $device->online_status == 1 ? 'bg-[#00A451]' : 'bg-[#DC2626]'}}"></span>
+                <span class="{{ $device->online_status == 1 ? 'text-[#00A451]' : 'text-[#DC2626]'}} text-sm whitespace-nowrap">Pompa {{ $device->online_status == 1 ? 'Online' : 'Offline'}}</span>
             </div>
 
             <!-- Last Update Text -->
-            <p class="text-[#979797] text-sm">
+            <p class="text-[#979797] text-xs sm:text-sm text-left sm:text-right">
                 Terakhir Update : {{ \Carbon\Carbon::parse($latest['_time'], 'UTC')
-                                ->timezone('Asia/Jakarta')
-                                ->locale('id')
-                                ->translatedFormat('d F Y H:i:s') }}
+                            ->timezone('Asia/Jakarta')
+                            ->locale('id')
+                            ->translatedFormat('d F Y H:i:s') }}
             </p>
 
         </div>
@@ -324,9 +341,6 @@
             <div class="flex justify-between items-center ">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center text-zinc-300">
-                        <!-- <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="26" viewBox="0 0 16 26">
-                            <image xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAaCAYAAAC+aNwHAAACp0lEQVR4AaRTXWhSYRg+R2EXk7aL/cDmILc5t2roaDC8CWosumhdddfEQsQokMX0wouY3qX9bFlBJCKxi9Gd0IVX4pVE0UUl1lSGEG7+FSiiEnNHe87xJz/PUS86vO/3/pzne77vfb/vE1H/+XUjEPfhpZv/uxEwuVwu/j0cfhZu0x/h8G48Hn9vMBjmexJ4vd6barVadWFx0bTYpufhDw8PLbtcrmgvAnp9/fpeNBotNkENKyoXi1sjI6NSxDUoJ0Il1CqVUyv3lxyqiePENTJFUZ0EdCaT2RkcHHwKYGsV+OJ8Pm+fnz93FT4hnQRUtXp6g0DUA6ZUKkng8vBEQqvVzjmdL28BSEgkEvFKpVIjklUoIQSBzWrdt9vtnwkEgvHx8Q8wNJQnBAFF01+AIIB+v3+rUChsHB8dfYV+YxV34WMsFtsE9l8TDw9jd2dmZgxItjePWltb25HJZEvSqSlVQ5emp6dXFArFK2BbBPTs7NxrNtFHRel0+jlN0+zOGRbLOqwVB4PB23CI1RG3l0ObTMaFbDbLltl6KxxBIBAwLqlUj8vl8i8c12/WVk5OCjqdbgIkTandv7f5RqlU7iHBrQ5bL2F1dXX3zNDQBC7QmEQiGWVtOpN56/F4kiwIKkomkwezcvkl+MRRcjtAkieTk5P6RlKMl/lAr9dfQdxeEkKqvgPO6xhwVO8aKWZgYGDE5/NlEXf2SJgA733B4XA8wQRRrVZjUNY2fGLriDkRLMFisZjdbvdBKpVy4sjYjreaxs1qGwQJZLKzG2azWZlI/PwELEsAIyyCBAxTfYQyXqysqPcxrevq+MfvgUajkdMUZcFVvQyAYN3It4S3A5tt++HF5eUxIMCDsY/wCORyxZ1QKPQH83hHhhxPeAQNRM+6GxjO/AUAAP//9LbfTAAAAAZJREFUAwBWc+M1LVOJFQAAAABJRU5ErkJggg==" x="0" y="0" width="16" height="26" />
-                        </svg> -->
                         <img src="{{ asset('images/electric4.png') }}" alt="" class="w-4">
                     </div>
                     <h3 class="text-lg text-white">Produksi Listrik</h3>
@@ -342,7 +356,7 @@
                 </div>
             </div>
 
-            <div class="flex items-baseline gap-1">
+            <div class="flex items-baseline gap-1 my-2 lg:my-0">
                 <span class="text-4xl text-white">{{ $latest["Daya"] }}</span>
                 <span class="text-sm text-zinc-400">Watt</span>
             </div>
@@ -381,7 +395,7 @@
             </div>
 
             <div>
-                <div class="flex items-start gap-1">
+                <div class="flex items-start gap-1 my-2 lg:my-0">
                     <span class="text-4xl text-white">{{ $latest["Suhu"] }}</span>
                     <span class="text-sm text-white mt-1">°C</span>
                 </div>
@@ -535,8 +549,8 @@
         </div>
         <div class="bg-[#171717] z-[1111] rounded-2xl p-6 lg:col-span-2 flex flex-col h-full" id="chart-card-container">
 
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-                <div class="flex items-center gap-3">
+            <div class="lg:flex block justify-between items-center gap-4 mb-8">
+                <div class="flex items-center gap-3 mb-3 lg:mb-0">
                     <div class="w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center text-zinc-300">
                         <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path fill-rule="evenodd" clip-rule="evenodd" d="M13.486 5.57839C13.5577 5.3146 13.7313 5.0901 13.9685 4.95423C14.2057 4.81835 14.4871 4.78221 14.751 4.85376L19.0355 6.02114C19.298 6.09266 19.5216 6.26503 19.6576 6.50069C19.7936 6.73634 19.8309 7.01619 19.7615 7.27926L18.6299 11.5706C18.5545 11.8286 18.3814 12.047 18.1475 12.1793C17.9135 12.3116 17.6371 12.3473 17.3772 12.2788C17.1173 12.2104 16.8944 12.0431 16.756 11.8127C16.6175 11.5823 16.5745 11.307 16.6361 11.0454L17.0995 9.28401C15.3083 10.5143 13.6457 11.922 12.1371 13.486C12.042 13.5846 11.9283 13.6633 11.8025 13.7174C11.6767 13.7716 11.5413 13.8001 11.4044 13.8014C11.2674 13.8027 11.1316 13.7767 11.0048 13.7249C10.878 13.6731 10.7627 13.5966 10.6659 13.4998L8.24998 11.0825L3.13498 16.1975C3.0398 16.296 2.92597 16.3745 2.80013 16.4285C2.67429 16.4824 2.53895 16.5108 2.40203 16.5119C2.2651 16.5131 2.12932 16.4869 2.0026 16.435C1.87589 16.3831 1.76079 16.3065 1.66401 16.2096C1.56723 16.1127 1.49071 15.9975 1.43891 15.8708C1.38712 15.744 1.36109 15.6082 1.36235 15.4713C1.3636 15.3344 1.39211 15.1991 1.44622 15.0733C1.50032 14.9475 1.57894 14.8337 1.67748 14.7386L7.52123 8.89489C7.71459 8.70177 7.9767 8.59329 8.24998 8.59329C8.52326 8.59329 8.78537 8.70177 8.97873 8.89489L11.3932 11.308C12.8794 9.8588 14.4939 8.54719 16.2167 7.38926L14.2092 6.84201C13.9457 6.76996 13.7215 6.59629 13.5859 6.35912C13.4503 6.12195 13.4144 5.84204 13.486 5.57839Z" fill="white" />
@@ -545,19 +559,19 @@
                     <h3 class="text-lg text-white font-medium">Tren Aktual</h3>
                 </div>
 
-                <div class="flex items-center gap-3">
-                    <div class="relative" id="data-dropdown-wrapper">
+                <div class="flex items-center gap-3 w-full lg:w-fit">
+                    <div class="relative w-full lg:w-fit" id="data-dropdown-wrapper">
                         <button id="data-dropdown-btn" type="button"
-                            class="flex items-center gap-2 px-5 py-1.5 rounded-lg bg-[#171717] border border-[#242424] text-sm text-white relative z-50">
+                            class="flex items-center justify-center gap-2 px-5 py-1.5 rounded-lg bg-[#171717] border border-[#242424] text-sm text-white relative z-50 lg:w-fit w-full">
                             Data
-                            <svg id="data-dropdown-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            <svg id="data-dropdown-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round"
                                 style="transition: transform .2s ease;">
                                 <path d="m6 9 6 6 6-6" />
                             </svg>
                         </button>
 
-                        <!-- Overlay: klik di sini = cancel (tutup tanpa apply) -->
                         <div id="data-dropdown-overlay" class="hidden fixed inset-0 z-40" style="background:rgba(0,0,0,0.15);"></div>
 
                         <div id="data-dropdown-menu"
@@ -592,85 +606,6 @@
                 </div>
             </div>
             <div id="chart" class="h-max"></div>
-
-            <!-- <div id="time-filter-panel"
-                class="hidden absolute top-0 -right-6 translate-x-full w-[475px] h-[665px] z-[1112] bg-[#171717] rounded-2xl p-6 transition-transform duration-300 ease-out">
-                <div class="flex justify-between items-center">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center text-zinc-300">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M12 12H17V17H12V12ZM19 3H18V1H16V3H8V1H6V3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM19 5V7H5V5H19ZM5 19V9H19V19H5Z"
-                                    fill="white" />
-                            </svg>
-                        </div>
-                        <h3 class="text-lg text-white">Pengaturan Filter Waktu</h3>
-                    </div>
-                    <button id="btn-close-time-filter-chart" class="">
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M16.6673 16.6667L3.33398 3.33334M16.6673 3.33334L3.33398 16.6667" stroke="#C2C2C2" stroke-width="2" stroke-linecap="round" />
-                        </svg>
-                    </button>
-                </div>
-                <div class="mt-6">
-                    <div class="flex items-center gap-2 mb-4">
-                        <button id="tf-preset-5" type="button" data-preset="5"
-                            class="tf-preset-chip px-3 py-1.5 rounded-lg border border-[#3f3f46] text-xs font-medium text-zinc-400 hover:text-white hover:border-zinc-500 transition-colors">
-                            5 Hari Terakhir
-                        </button>
-                        <button id="tf-preset-30" type="button" data-preset="30"
-                            class="tf-preset-chip px-3 py-1.5 rounded-lg border border-[#3f3f46] text-xs font-medium text-zinc-400 hover:text-white hover:border-zinc-500 transition-colors">
-                            30 Hari Terakhir
-                        </button>
-                        <button id="tf-preset-month" type="button" data-preset="month"
-                            class="tf-preset-chip px-3 py-1.5 rounded-lg border border-[#3f3f46] text-xs font-medium text-zinc-400 hover:text-white hover:border-zinc-500 transition-colors">
-                            Bulan Ini
-                        </button>
-                    </div>
-                    <div class="bg-[#2c2c2e] border border-[#3f3f46] rounded-2xl p-5 relative">
-                        <div class="flex items-center justify-between mb-4">
-                            <button id="tf-prev-month" type="button" class="text-zinc-400 hover:text-white transition-colors p-1">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M15 18l-6-6 6-6" />
-                                </svg>
-                            </button>
-                            <div id="tf-month-label" class="text-sm font-semibold text-white"></div>
-                            <button id="tf-next-month" type="button" class="text-zinc-400 hover:text-white transition-colors p-1">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M9 18l6-6-6-6" />
-                                </svg>
-                            </button>
-                        </div>
-                        <div class="grid grid-cols-7 text-center text-[11px] text-zinc-500 font-medium mb-2">
-                            <div>Min</div>
-                            <div>Sen</div>
-                            <div>Sel</div>
-                            <div>Rab</div>
-                            <div>Kam</div>
-                            <div>Jum</div>
-                            <div>Sab</div>
-                        </div>
-                        <div id="tf-days-grid" class="grid grid-cols-7 text-center text-sm"></div>
-                    </div>
-                    <div class="mt-5">
-                        <div class="text-base text-zinc-500 mb-2 px-1">Resolusi Data</div>
-                        <div class="flex items-center p-0.5 rounded-lg bg-[#242424] border border-[#242424]" id="tf-resolution-group">
-                            <button type="button" data-resolution="detail"
-                                class="tf-resolution-btn flex-1 px-3 py-1.5 text-xs font-medium text-white bg-[#171717] rounded-md shadow transition-colors">
-                                Detail
-                            </button>
-                            <button type="button" data-resolution="harian"
-                                class="tf-resolution-btn flex-1 px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-white rounded-md transition-colors">
-                                Harian
-                            </button>
-                        </div>
-                    </div>
-                    <button id="tf-apply-btn" type="button"
-                        class="w-full mt-4 py-2.5 rounded-xl border border-[#5a5a5a] text-sm text-zinc-200 hover:text-white hover:border-zinc-400 transition-colors">
-                        Terapkan
-                    </button>
-                </div>
-            </div> -->
         </div>
 
 
@@ -1657,7 +1592,7 @@
             var PUMP_CONFIG = {
                 FIELD: 'Debit',
                 RANGE: '1H', // selalu 1 hari terakhir, statis
-                FULL_THRESHOLD: 20, // Debit >= ini = Operasi Penuh
+                FULL_THRESHOLD: 100, // Debit >= ini = Operasi Penuh
                 GAP_MATI_MS: 20 * 60 * 1000, // 10 menit tanpa data = Mati
                 REFRESH_INTERVAL_MS: 30000
             };
@@ -1927,8 +1862,8 @@
         })();
     </script>
 
-    <div class="grid grid-cols-5 grid-rows-1 gap-6 mt-6">
-        <div class="col-span-2 bg-[#171717] rounded-2xl p-3">
+    <div class="grid grid-cols-1 lg:grid-cols-5 lg:grid-rows-1 gap-6 mt-6">
+        <div class="lg:col-span-2 bg-[#171717] rounded-2xl p-3">
             <div class="rounded-lg bg-[#121212] p-7">
                 <div class="flex items-center justify-between">
                     <div>
@@ -1984,8 +1919,8 @@
                     </div>
                 </div>
             </div>
-            <div class="flex items-center text-white mt-5 mx-4 justify-between">
-                <div class="flex items-center gap-14">
+            <div class="flex items-center text-white mt-5 lg:mx-4 justify-between">
+                <div class="flex items-center lg:gap-14 gap-4">
                     <div>
                         <h1>Hujan</h1>
                         <div class="flex items-center gap-2 text-[#979797] mb-5">
@@ -2036,13 +1971,13 @@
                 </a>
             </div>
         </div>
-        <div class="col-span-3 col-start-3 bg-[#171717] rounded-2xl p-3 relative">
+        <div class="lg:col-span-3 lg:col-start-3 bg-[#171717] rounded-2xl p-3 relative">
 
             <!-- Location Bar -->
             <div class="location-bar p-1">
-                <div class="flex items-center gap-20 bg-[#444444]/44 rounded-lg py-1 px-4">
-                    <div class="flex items-center gap-3">
-                        <svg width="12" height="16" viewBox="0 0 12 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <div class="flex items-center justify-between gap-3 sm:gap-20 bg-[#444444]/44 rounded-lg py-1 px-4">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <svg width="12" height="16" viewBox="0 0 12 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0">
                             <g clip-path="url(#clip0_301_829)">
                                 <path
                                     d="M5.38333 15.68C0.842667 9.09467 0 8.41933 0 6C0 2.686 2.686 0 6 0C9.314 0 12 2.686 12 6C12 8.41933 11.1573 9.09333 6.61667 15.6773C6.54771 15.7766 6.45579 15.8578 6.34872 15.914C6.24165 15.9701 6.1226 15.9996 6.0017 15.9999C5.88079 16.0001 5.76162 15.9712 5.65431 15.9155C5.54699 15.8598 5.45472 15.779 5.38533 15.68L5.384 15.6773L5.38333 15.68ZM6 8.5C6.66304 8.5 7.29893 8.23661 7.76777 7.76777C8.23661 7.29893 8.5 6.66304 8.5 6C8.5 5.33696 8.23661 4.70107 7.76777 4.23223C7.29893 3.76339 6.66304 3.5 6 3.5C5.33696 3.5 4.70107 3.76339 4.23223 4.23223C3.76339 4.70107 3.5 5.33696 3.5 6C3.5 6.66304 3.76339 7.29893 4.23223 7.76777C4.70107 8.23661 5.33696 8.5 6 8.5Z"
@@ -2054,9 +1989,9 @@
                                 </clipPath>
                             </defs>
                         </svg>
-                        <h1>{{ $device->device_config->location }}</h1>
+                        <h1 class="truncate text-sm sm:text-base">{{ $device->device_config->location }}</h1>
                     </div>
-                    <a href="" class="p-1 rounded-lg bg-white">
+                    <a href="" class="p-1 rounded-lg bg-white shrink-0">
                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path
                                 d="M10 10L14 14M10.6667 14H14V10.6667M10 6L14 2M10.6667 2H14V5.33333M5.33333 14H2V10.6667M2 14L6 10M5.33333 2H2V5.33333M2 2L6 6"
@@ -2066,7 +2001,7 @@
                 </div>
             </div>
 
-            <div id="map" class="rounded-lg"></div>
+            <div id="map" class="rounded-lg h-[280px] sm:h-[360px] lg:h-full lg:min-h-[420px]"></div>
 
             <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
             <script>
@@ -2131,8 +2066,8 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-5 grid-rows-1 gap-6 mt-6">
-        <div class="col-span-2 p-6 bg-[#171717] rounded-2xl">
+    <div class="grid grid-cols-1 lg:grid-cols-5 grid-rows-1 gap-6 mt-6">
+        <div class="lg:col-span-2 col-span-1 p-6 bg-[#171717] rounded-2xl">
             <div class="flex items-center gap-5">
                 <div class="w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center text-zinc-300">
                     <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -2192,8 +2127,8 @@
             </div>
             <hr class="border-[#373737] mt-3">
         </div>
-        <div class="col-span-3 col-start-3 p-6 bg-[#171717] rounded-2xl flex">
-            <div class="w-1/2 flex flex-col justify-between">
+        <div class="lg:col-span-3 lg:col-start-3 col-span-1 p-6 bg-[#171717] rounded-2xl block lg:flex ">
+            <div class="lg:w-1/2 mb-4 lg:mb-0 flex flex-col justify-between">
                 <!-- Header -->
                 <div class="flex items-center gap-5">
                     <div class="w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center text-zinc-300">
@@ -2271,8 +2206,10 @@
                             return `
                     <div
                         class="
-                            w-8
-                            h-8
+                            w-[26px]
+                            lg:h-8
+                            h-[26px]
+                            lg:w-8
                             rounded-full
                             transition-all
                             duration-300
@@ -2338,7 +2275,7 @@
                 renderHeatmap(deviceId);
             </script>
 
-            <div class="w-1/2">
+            <div class="lg:w-1/2">
                 <div class="flex items-center gap-2">
                     <img src="{{ asset('images/chain.svg') }}" alt="" class="w-5">
                     <h3 class="text-lg text-white">Log Aktivitas Pompa</h3>
@@ -2363,7 +2300,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="flex items-center justify-between lg:hidden mt-3">
+                <div class="flex items-center justify-between lg:hidden mt-3 text-[#979797]">
                     <h1>{{ $log['Volume_delta'] }} L</h1>
                     <h1>•</h1>
                     <h1>{{ round($log['Durasi_Operasional_delta']/3600) }} jam</h1>
@@ -2377,23 +2314,27 @@
     </div>
 
     <footer class="mt-12">
-        <div class="flex place-content-between items-center text-[#C4C4C4]">
-            <div class="flex items-center gap-4 text-2xl">
-                <img src="{{ asset('images/ecolume-logo.svg') }}" alt="" class="">
+        <div class="flex flex-col md:flex-row md:place-content-between items-center md:items-center gap-6 md:gap-4 text-[#C4C4C4] text-center md:text-left">
+            <div class="flex items-center gap-4 text-xl sm:text-2xl">
+                <img src="{{ asset('images/ecolume-logo.svg') }}" alt="" class="w-7 h-7 sm:w-auto sm:h-auto">
                 <h1>Ecolume</h1>
             </div>
-            <div class="flex items-center gap-8">
+
+            <div class="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 sm:gap-x-8 text-sm sm:text-base">
                 <a href="{{ route('beranda') }}" class="hover:underline">Beranda</a>
                 <a href="{{ route('dashboard', ['device_name' => $devices[0]->device_name, 'device_id' => $devices[0]->id]) }}" class="hover:underline">Dashboard</a>
                 <a href="{{ route('ramalan-cuaca', ['device_name' => $devices[0]->device_name, 'device_id' => $devices[0]->id]) }}" class="hover:underline">Ramalan Cuaca</a>
                 <a href="" class="hover:underline">Laporan Analitik</a>
             </div>
-            <h1 class="text-xl">@Ecolume.id</h1>
+
+            <h1 class="hidden md:block text-xl">@Ecolume.id</h1>
         </div>
+
         <hr class="border-[#373737] my-6">
-        <div class="flex justify-between items-center text-[#979797]">
+
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 text-[#979797] text-center text-sm sm:text-base">
             <h1>All Rights Reserved © 2026</h1>
-            <div class="flex items-center gap-7">
+            <div class="flex items-center gap-5 sm:gap-7">
                 <a href="" class="hover:underline">Kebijakan Privasi</a>
                 <a href="" class="hover:underline">Syarat dan Ketentuan</a>
             </div>

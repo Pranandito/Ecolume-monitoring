@@ -103,7 +103,7 @@
     </style>
 </head>
 
-<aside id="sidebar" class="fixed left-0 top-0 bottom-0 h-lvh w-[400px] bg-[#171717]  z-[1113] p-11 flex flex-col justify-between  -translate-x-full transition-transform duration-300">
+<aside id="sidebar" class="fixed left-0 top-0 bottom-0 h-lvh w-[400px] bg-[#171717]  z-[1114] p-11 flex flex-col justify-between  -translate-x-full transition-transform duration-300">
     <div>
         <div class=" flex items-center justify-between">
             <div class="flex items-center gap-4 text-2xl">
@@ -188,7 +188,7 @@
             <div class="flex items-center gap-5">
                 <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
                     alt="Profile picture" class="w-10 h-10 rounded-full object-cover border border-zinc-700">
-                <div class="hidden sm:flex flex-col">
+                <div class="flex flex-col">
                     <span class="text-xs text-zinc-100">{{ auth()->user()->name }}</span>
                     <span class="text-[10px] text-zinc-400">{{ auth()->user()->email }}</span>
                 </div>
@@ -207,7 +207,7 @@
 
 <section id="overlay" class="hidden fixed top-0 bottom-0 left-0 right-0 bg-black/30 z-[1111]"></section>
 
-<div id="addDevice-Card" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#171717] rounded-2xl shadow-3xl p-6 w-full max-w-md z-[1112] text-zinc-400">
+<div id="addDevice-Card" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#171717] rounded-2xl shadow-3xl p-6 w-full max-w-[350px] lg:max-w-md z-[1112] text-zinc-400">
     <div class="flex justify-between items-center">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center text-zinc-300">
@@ -248,8 +248,9 @@
     </form>
 </div>
 
-<body class="my-12 mx-16 text-white">
+<body class="lg:my-12 my-6 lg:mx-16 mx-3 text-white">
     <nav class="flex items-center justify-between bg-[#121212] text-white w-full">
+
         <div class="flex items-center gap-4">
             <button id="btn-open-sidebar" class="p-1.5 text-white hover:text-white rounded-md hover:bg-zinc-800 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
@@ -258,21 +259,28 @@
                     <line x1="9" y1="3" x2="9" y2="21"></line>
                 </svg>
             </button>
+
             <h1 class="text-2xl tracking-wide">Beranda</h1>
-            <div class="h-6 w-[1px] bg-[#373737] mx-2"></div>
-            <p class="text-2xl">
+
+            <div class="h-6 w-[1px] bg-[#373737] mx-2 hidden lg:block"></div>
+
+            <p class="hidden lg:block text-2xl">
                 Selamat Datang, {{ auth()->user()->name }} 👋
             </p>
         </div>
-        <div class="flex items-center gap-5">
+
+        <div class="items-center gap-5 flex">
+
             <div class="hidden sm:flex flex-col items-end">
                 <span class="text-xs text-zinc-100">{{ auth()->user()->name }}</span>
                 <span class="text-[10px] text-zinc-400">{{ auth()->user()->email }}</span>
             </div>
+
             <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
                 alt="Profile picture" class="w-10 h-10 rounded-full object-cover border border-zinc-700">
+
             <button
-                class="relative p-2 text-zinc-400 hover:text-white rounded-full hover:bg-zinc-800 transition-colors">
+                class="relative p-2 text-zinc-400 hover:text-white rounded-full hover:bg-zinc-800 transition-colors hidden lg:block">
                 <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
@@ -281,9 +289,10 @@
                 <span
                     class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 border-2 border-[#18181b] rounded-full"></span>
             </button>
+
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="p-1.5 text-white hover:text-white rounded-md hover:bg-zinc-800 transition-colors">
+                <button type="submit" class="p-1.5 text-white hover:text-white rounded-md hover:bg-zinc-800 transition-colors hidden lg:block">
                     <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M5.83333 24.5C5.19167 24.5 4.64256 24.2717 4.186 23.8152C3.72944 23.3586 3.50078 22.8091 3.5 22.1667V5.83333C3.5 5.19167 3.72867 4.64256 4.186 4.186C4.64333 3.72944 5.19244 3.50078 5.83333 3.5H14V5.83333H5.83333V22.1667H14V24.5H5.83333ZM18.6667 19.8333L17.0625 18.1417L20.0375 15.1667H10.5V12.8333H20.0375L17.0625 9.85833L18.6667 8.16667L24.5 14L18.6667 19.8333Z" fill="#979797" />
                     </svg>
@@ -294,7 +303,7 @@
 
     <hr class="my-5 border-[#373737]">
 
-    <div class="grid grid-cols-3 grid-rows-1 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 grid-rows-1 gap-6">
         <div class="bg-[#171717] rounded-2xl p-6 text-[#979797]">
             <p>• Profil akun</p>
             <div class="flex items-center justify-between">
@@ -313,43 +322,88 @@
                     <p>{{ auth()->user()->email }}</p>
                 </div>
                 <div class="rounded-full bg-[#262626] border-[#323232] border p-2 my-3">
-                    <!-- Border -->
                     <div class="rounded-full overflow-hidden">
-                        <!-- Default Avatar -->
                         <img src="{{ asset('images/pp.png') }}" alt="Profile Picture" class="object-cover">
                     </div>
                 </div>
             </div>
+
             <div class="flex items-center gap-2 mt-4">
                 <img src="{{ asset('images/chain.svg') }}" alt="" class="w-5">
-                </svg>
                 <div>
                     <h3 class="text-lg text-white">Log Aktivitas Pompa</h3>
                 </div>
             </div>
             <p class="text-[#979797] text-sm">Laporan 8 aktivitas terakhir pompa Anda</p>
-            @foreach($deviceLogs as $log)
-            <hr class="border-[#373737] my-3">
-            <a href="{{ route('dashboard', ['device_id' => $log['Device_Id'], 'device_name' => $logData[$log['Device_Id']]]) }}">
-                <div class="flex items-center gap-5 group">
-                    <h1 class="w-16 h-[52px] flex items-center justify-center text-white font-semibold rounded-full bg-[#262626]">
-                        {{ \Carbon\Carbon::parse($log['_time'])->locale('id')->translatedFormat('j/n') }}
-                    </h1>
-                    <div class="w-full">
-                        <h1 class="text-xl lg:text-base text-white group-hover:underline">{{ $logData[$log['Device_Id']] }}</h1>
-                        <div class=" items-center justify-between hidden lg:flex text-[#979797]">
-                            <h1>{{ $log['Volume_delta'] }} L</h1>
-                            <h1>•</h1>
-                            <h1>{{ round($log['Durasi_Operasional_delta']/60) }} menit</h1>
-                            <h1>•</h1>
-                            <h1>{{ round($log['Energi_delta']/1000, 2) }} kWh</h1>
+
+            <!-- Container log: id dipakai JS untuk toggle -->
+            <div id="pumpLogList" class="overflow-hidden max-h-[220px] transition-[max-height] duration-500 ease-in-out lg:!max-h-none lg:overflow-visible">
+                @foreach($deviceLogs as $log)
+                <hr class="border-[#373737] my-3">
+                <a href="{{ route('dashboard', ['device_id' => $log['Device_Id'], 'device_name' => $logData[$log['Device_Id']]]) }}">
+                    <div class="flex items-center gap-5 group">
+                        <h1 class="w-16 h-[52px] flex items-center justify-center text-white font-semibold rounded-full bg-[#262626]">
+                            {{ \Carbon\Carbon::parse($log['_time'])->locale('id')->translatedFormat('j/n') }}
+                        </h1>
+                        <div class="w-full">
+                            <h1 class="text-xl lg:text-base text-white group-hover:underline">{{ $logData[$log['Device_Id']] }}</h1>
+                            <div class="items-center justify-between hidden lg:flex text-[#979797]">
+                                <h1>{{ $log['Volume_delta'] }} L</h1>
+                                <h1>•</h1>
+                                <h1>{{ round($log['Durasi_Operasional_delta']/60) }} menit</h1>
+                                <h1>•</h1>
+                                <h1>{{ round($log['Energi_delta']/1000, 2) }} kWh</h1>
+                            </div>
+                            <h1 class="block lg:hidden">{{ \Carbon\Carbon::parse($log['_time'])->locale('id')->translatedFormat('j F Y') }}</h1>
                         </div>
                     </div>
-                </div>
-            </a>
-            @endforeach
+                    <div class="flex items-center justify-between lg:hidden mt-3 text-[#979797]">
+                        <h1>{{ $log['Volume_delta'] }} L</h1>
+                        <h1>•</h1>
+                        <h1>{{ round($log['Durasi_Operasional_delta']/3600) }} jam</h1>
+                        <h1>•</h1>
+                        <h1>{{ round($log['Energi_delta']/1000) }} kWh</h1>
+                    </div>
+                </a>
+                @endforeach
+            </div>
+
+            <!-- Tombol expand/collapse: hanya tampil di mobile -->
+            <div class="flex justify-center mt-4 lg:hidden">
+                <button
+                    type="button"
+                    id="pumpLogToggleBtn"
+                    onclick="togglePumpLog()"
+                    class="w-9 h-9 flex items-center justify-center rounded-full bg-[#262626] border border-[#323232] hover:bg-[#2f2f2f] transition-colors">
+                    <svg
+                        id="pumpLogToggleIcon"
+                        width="14" height="14" viewBox="0 0 24 24" fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="transition-transform duration-300">
+                        <path d="M6 9L12 15L18 9" stroke="#979797" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </button>
+            </div>
         </div>
-        <div class="col-span-2">
+
+        <script>
+            function togglePumpLog() {
+                const list = document.getElementById('pumpLogList');
+                const icon = document.getElementById('pumpLogToggleIcon');
+                const isExpanded = list.classList.contains('max-h-[2000px]');
+
+                if (isExpanded) {
+                    list.classList.remove('max-h-[2000px]');
+                    list.classList.add('max-h-[220px]');
+                    icon.classList.remove('rotate-180');
+                } else {
+                    list.classList.remove('max-h-[220px]');
+                    list.classList.add('max-h-[2000px]');
+                    icon.classList.add('rotate-180');
+                }
+            }
+        </script>
+        <div class="lg:col-span-2">
             <div class="bg-[#171717] rounded-2xl p-6">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
@@ -374,7 +428,7 @@
                                 </svg>
                             </div>
                         </button>
-                        <div class="py-1 px-3 bg-white rounded-full text-black">
+                        <div class="py-1 px-3 bg-white rounded-full text-black hidden lg:block">
                             <h1 class="text-sm">Lebih Banyak ⟶</h1>
                         </div>
                     </div>
@@ -555,23 +609,27 @@
     </div>
 
     <footer class="mt-12">
-        <div class="flex place-content-between items-center text-[#C4C4C4]">
-            <div class="flex items-center gap-4 text-2xl">
-                <img src="{{ asset('images/ecolume-logo.svg') }}" alt="" class="">
+        <div class="flex flex-col md:flex-row md:place-content-between items-center md:items-center gap-6 md:gap-4 text-[#C4C4C4] text-center md:text-left">
+            <div class="flex items-center gap-4 text-xl sm:text-2xl">
+                <img src="{{ asset('images/ecolume-logo.svg') }}" alt="" class="w-7 h-7 sm:w-auto sm:h-auto">
                 <h1>Ecolume</h1>
             </div>
-            <div class="flex items-center gap-8">
+
+            <div class="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 sm:gap-x-8 text-sm sm:text-base">
                 <a href="{{ route('beranda') }}" class="hover:underline">Beranda</a>
                 <a href="{{ route('dashboard', ['device_name' => $devices[0]->device_name, 'device_id' => $devices[0]->id]) }}" class="hover:underline">Dashboard</a>
                 <a href="{{ route('ramalan-cuaca', ['device_name' => $devices[0]->device_name, 'device_id' => $devices[0]->id]) }}" class="hover:underline">Ramalan Cuaca</a>
                 <a href="" class="hover:underline">Laporan Analitik</a>
             </div>
-            <h1 class="text-xl">@Ecolume.id</h1>
+
+            <h1 class="hidden md:block text-xl">@Ecolume.id</h1>
         </div>
+
         <hr class="border-[#373737] my-6">
-        <div class="flex justify-between items-center text-[#979797]">
+
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 text-[#979797] text-center text-sm sm:text-base">
             <h1>All Rights Reserved © 2026</h1>
-            <div class="flex items-center gap-7">
+            <div class="flex items-center gap-5 sm:gap-7">
                 <a href="" class="hover:underline">Kebijakan Privasi</a>
                 <a href="" class="hover:underline">Syarat dan Ketentuan</a>
             </div>

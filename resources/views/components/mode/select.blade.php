@@ -101,7 +101,7 @@
         }
     </style>
 
-    <div id="mode-select-card" class="hidden w-full max-w-md bg-[#171717] rounded-2xl p-6 sm:p-7 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[1113]">
+    <div id="mode-select-card" class="hidden w-full max-w-[350px] lg:max-w-md bg-[#171717] rounded-2xl p-6 sm:p-7 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[1113]">
         <div class="flex justify-between items-center">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center text-zinc-300">
@@ -112,7 +112,7 @@
                             d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9c.26.604.852 1 1.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z" />
                     </svg>
                 </div>
-                <h3 class="text-lg text-white">Pengaturan Mode Pompa Air</h3>
+                <h3 class="text-lg text-white">Pengaturan Mode <br class="block lg:hidden">Pompa Air</h3>
             </div>
             <button id="btn-close-mode-select" class="">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
