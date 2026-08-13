@@ -14,11 +14,14 @@
                     </path>
                 </svg>
             </div>
-            <h3 class="text-lg text-white">Mode: Off</h3>
+            <h3 class="text-lg text-white" id="pumpModeLabel-{{ $device_config->device_id }}">Mode: Off</h3>
         </div>
         <div class="flex items-center gap-3">
             <button
-                class="bg-white text-black hover:bg-zinc-200 transition-colors px-3 py-1.5 rounded-full text-xs font-semibold">
+                class="btn-quick-on bg-white text-black hover:bg-zinc-200 transition-colors px-3 py-1.5 rounded-full text-xs font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                data-device-id="{{ $device_config->device_id }}"
+                data-serial-number="{{ $device_config->serial_number }}"
+                data-label-target="pumpModeLabel-{{ $device_config->device_id }}">
                 Nyalakan
             </button>
             <button class="btn-open-mode-select" data-device-id="{{ $device_config->device_id }}" id="btn-open-mode-select" class="text-zinc-400 hover:text-white transition-colors">
@@ -41,7 +44,6 @@
     <div class="my-3">
         <div class="mt-3 flex items-baseline gap-1.5 relative z-10">
             <span class="text-xl text-white">Status: {{ $tegangan > 150 ? "Siap" : "Standby" }}</span>
-            <!-- <span class="text-lg text-zinc-400"></span> -->
         </div>
         <p class="text-zinc-500 text-xs">Tegangan panel surya {{ $tegangan > 150 ? "" : "kurang" }} optimal untuk beroperasi</p>
     </div>
@@ -50,3 +52,49 @@
         <span class="text-sm text-white">{{ $device_config->job_created->locale('id')->translatedFormat('d M G:i') }}</span>
     </div>
 </div>
+
+<script>
+    // Delegasi event supaya tetap jalan meski kartu ini di-render berkali-kali (loop device)
+    document.addEventListener('click', async (e) => {
+        const btn = e.target.closest('.btn-quick-on');
+        if (!btn) return;
+
+        const deviceId = btn.dataset.deviceId;
+        const serialNumber = btn.dataset.serialNumber;
+        const labelEl = document.getElementById(btn.dataset.labelTarget);
+        const originalText = btn.textContent;
+
+        btn.disabled = true;
+        btn.textContent = '...';
+
+        try {
+            const res = await fetch(`/device/mode/${deviceId}/${serialNumber}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+                },
+                body: JSON.stringify({
+                    mode: 'On'
+                }),
+            });
+            const json = await res.json();
+            if (!res.ok) throw new Error(json.message || 'Gagal menyalakan pompa');
+
+            if (labelEl) labelEl.textContent = 'Mode: On';
+
+            document.dispatchEvent(new CustomEvent('pump-mode-updated', {
+                detail: {
+                    device_id: deviceId,
+                    html: json.html
+                }
+            }));
+        } catch (err) {
+            alert(err.message);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = originalText;
+        }
+    });
+</script>

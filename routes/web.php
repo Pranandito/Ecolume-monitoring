@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BerandaController;
+use App\Http\Controllers\CarbonController;
 use App\Http\Controllers\CuacaController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeviceController;
@@ -24,6 +25,8 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+Route::patch('/carbon-factor/update/{id}', [CarbonController::class, 'update'])->name('carbonFactor.update');
 
 Route::post('/device/create', [DeviceController::class, 'create'])->name('device.create');
 Route::patch('/device/update/{id}', [DeviceController::class, 'update'])->name('device.update');

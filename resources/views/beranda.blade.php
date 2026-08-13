@@ -205,7 +205,7 @@
     </div>
 </aside>
 
-<section id="overlay" class="hidden fixed top-0 bottom-0 left-0 right-0 bg-black/30 z-[1111]"></section>
+<section id="overlay" class="hidden fixed top-0 bottom-0 left-0 right-0 bg-black/50 z-[1111]"></section>
 
 <div id="addDevice-Card" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#171717] rounded-2xl shadow-3xl p-6 w-full max-w-[350px] lg:max-w-md z-[1112] text-zinc-400">
     <div class="flex justify-between items-center">
@@ -484,7 +484,7 @@
                             </div>
                         </a>
                         @endforeach
-                        <button
+                        <button id="btn-open-addDevice-card"
                             class="w-[400px] h-[273px] shrink-0 rounded-2xl bg-[#232323] flex flex-col items-center justify-center hover:bg-[#2a2a2a] transform transition-all duration-200 ease-out hover:scale-[1.02]">
                             <div class="w-14 h-14 rounded-full bg-zinc-700 flex items-center justify-center">
                                 <svg width="30" height="30" viewBox="0 0 30 30" fill="none"
@@ -684,6 +684,7 @@
     const btnOpen = document.getElementById('btn-open-sidebar');
     const btnClose = document.getElementById('btn-close-sidebar');
     const btnOpen_addDevice = document.getElementById('btn-open-addDevice');
+    const btnOpen_addDevice_card = document.getElementById('btn-open-addDevice-card');
     const btnClose_addDevice = document.getElementById('btn-close-addDevice');
     const addDevice_Card = document.getElementById('addDevice-Card');
 
@@ -709,6 +710,7 @@
     btnClose.addEventListener('click', closeCard);
 
     btnOpen_addDevice.addEventListener('click', openAddDevice);
+    btnOpen_addDevice_card.addEventListener('click', openAddDevice);
     btnClose_addDevice.addEventListener('click', closeCard);
 
     overlay.addEventListener('click', closeCard);

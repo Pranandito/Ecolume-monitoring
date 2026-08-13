@@ -245,9 +245,59 @@
 </aside>
 
 <section id="overlay" class="hidden fixed top-0 bottom-0 left-0 right-0 bg-black/75 z-[1113]"></section>
-<section id="overlay-timepicker" class="hidden fixed top-0 bottom-0 left-0 right-0 bg-black/75 z-[1110]"></section>
+<section id="overlay-timepicker" class="hidden fixed top-0 bottom-0 left-0 right-0 bg-black/75 z-[1112] lg:z-[1110]"></section>
 
 <x-mode.select :id="$id" :serial_number="$device->serial_number" />
+
+<div id="carbon-form" class="hidden w-full max-w-[350px] lg:max-w-md bg-[#171717] rounded-2xl p-6 sm:p-7 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[1113]">
+    <div class="flex justify-between items-center pb-4">
+        <div class="flex items-center gap-3">
+            <svg width="25" height="25" viewBox="0 0 27 27" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12.1782 24.75C11.6719 24.75 11.2362 24.5812 10.8709 24.2437C10.5057 23.9062 10.2852 23.4938 10.2094 23.0063L9.95629 21.15C9.71254 21.0562 9.48304 20.9438 9.26779 20.8125C9.05254 20.6812 8.84141 20.5406 8.63441 20.3906L6.89066 21.1219C6.42191 21.3281 5.95316 21.3469 5.48441 21.1781C5.01566 21.0094 4.65004 20.7094 4.38754 20.2781L3.06566 17.9719C2.80316 17.5406 2.72816 17.0813 2.84066 16.5938C2.95316 16.1062 3.20629 15.7031 3.60004 15.3844L5.09066 14.2594C5.07191 14.1281 5.06254 14.0014 5.06254 13.8791V13.1198C5.06254 12.9983 5.07191 12.8719 5.09066 12.7406L3.60004 11.6156C3.20629 11.2969 2.95316 10.8938 2.84066 10.4062C2.72816 9.91875 2.80316 9.45937 3.06566 9.02812L4.38754 6.72187C4.65004 6.29063 5.01566 5.99063 5.48441 5.82188C5.95316 5.65313 6.42191 5.67188 6.89066 5.87812L8.63441 6.60938C8.84066 6.45937 9.05629 6.31875 9.28129 6.1875C9.50629 6.05625 9.73129 5.94375 9.95629 5.85L10.2094 3.99375C10.2844 3.50625 10.5049 3.09375 10.8709 2.75625C11.2369 2.41875 11.6727 2.25 12.1782 2.25H14.8219C15.3282 2.25 15.7643 2.41875 16.1303 2.75625C16.4963 3.09375 16.7164 3.50625 16.7907 3.99375L17.0438 5.85C17.2875 5.94375 17.5174 6.05625 17.7334 6.1875C17.9494 6.31875 18.1602 6.45937 18.3657 6.60938L20.1094 5.87812C20.5782 5.67188 21.0469 5.65313 21.5157 5.82188C21.9844 5.99063 22.35 6.29063 22.6125 6.72187L23.9344 9.02812C24.1969 9.45937 24.2719 9.91875 24.1594 10.4062C24.0469 10.8938 23.7938 11.2969 23.4 11.6156L21.9094 12.7406C21.9282 12.8719 21.9375 12.9986 21.9375 13.1209V13.8791C21.9375 14.0014 21.9188 14.1281 21.8813 14.2594L23.3719 15.3844C23.7657 15.7031 24.0188 16.1062 24.1313 16.5938C24.2438 17.0813 24.1688 17.5406 23.9063 17.9719L22.5563 20.2781C22.2938 20.7094 21.9282 21.0094 21.4594 21.1781C20.9907 21.3469 20.5219 21.3281 20.0532 21.1219L18.3657 20.3906C18.1594 20.5406 17.9438 20.6812 17.7188 20.8125C17.4938 20.9438 17.2688 21.0562 17.0438 21.15L16.7907 23.0063C16.7157 23.4938 16.4955 23.9062 16.1303 24.2437C15.765 24.5812 15.3289 24.75 14.8219 24.75H12.1782ZM13.5563 17.4375C14.6438 17.4375 15.5719 17.0531 16.3407 16.2844C17.1094 15.5156 17.4938 14.5875 17.4938 13.5C17.4938 12.4125 17.1094 11.4844 16.3407 10.7156C15.5719 9.94687 14.6438 9.5625 13.5563 9.5625C12.45 9.5625 11.517 9.94687 10.7573 10.7156C9.99754 11.4844 9.61804 12.4125 9.61879 13.5C9.61954 14.5875 9.99941 15.5156 10.7584 16.2844C11.5174 17.0531 12.45 17.4375 13.5563 17.4375Z"
+                    fill="white" />
+            </svg>
+
+            <h3 class="text-lg text-white">Faktor Emisi Karbon</h3>
+        </div>
+        <button id="btn-close-carbon-form" class="">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M16.6673 16.6667L3.33398 3.33334M16.6673 3.33334L3.33398 16.6667" stroke="#C2C2C2" stroke-width="2" stroke-linecap="round" />
+            </svg>
+        </button>
+    </div>
+
+
+    <form action="{{ route('carbonFactor.update', ['id' => $id]) }}" method="POST">
+        @csrf
+        @method('PATCH')
+        <div class="flex justify-center my-5">
+            <button type="button" id="koef-minus" class="text-4xl leading-none text-white/70 transition hover:text-white" aria-label="Kurangi">&minus;</button>
+            <input
+                type="text"
+                inputmode="decimal"
+                id="koef-value"
+                name="carbon_factor"
+                value="0.852"
+                class="w-36 text-center border-0 bg-transparent p-0 text-4xl text-white focus:outline-none focus:ring-0">
+            <button type="button" id="koef-plus" class="text-4xl leading-none text-white/70 transition hover:text-white" aria-label="Tambah">&#43;</button>
+        </div>
+        <h1 class="text-base text-center text-white/60 mb-4">Kg Co2/kWh</h1>
+        <h1 class="text-sm text-center text-white/60">Merepresentasikan pengurangan emisi karbon <br> per kWh listrik yang dihasilkan</h1>
+
+        <div class="flex items-center gap-3 mt-5">
+            <button id="btn-cancel-carbon-factor"
+                class="flex-1 rounded-full border border-white/15 text-neutral-300 py-1 hover:bg-white/5 transition">Batalkan</button>
+            <button id="btn-apply-carbon-factor" type="submit"
+                class="flex-1 rounded-full bg-white text-neutral-900 py-1 flex items-center justify-center gap-1.5 hover:bg-neutral-200 transition">
+                Terapkan
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 18l6-6-6-6" />
+                </svg>
+            </button>
+        </div>
+    </form>
+</div>
 
 <body class="lg:my-12 my-6 lg:mx-16 mx-3 text-white">
     <nav class="flex items-center justify-between bg-[#121212] text-white w-full">
@@ -485,7 +535,7 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6 relative">
         <div id="time-filter-panel"
-            class="hidden absolute right-0 w-[475px] max-h-[665px] z-[1113] bg-[#171717] rounded-2xl p-6">
+            class="hidden absolute right-0 lg:w-[475px] w-[350px] max-h-[665px] z-[1113] bg-[#171717] rounded-2xl p-6">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center text-zinc-300">
@@ -1391,9 +1441,15 @@
                 tfDraftResolution = applied.resolution || 'detail';
                 tfSyncResolutionButtons();
 
-                // reposisi panel sesuai context — tanpa pindah elemen antar container
-                tfPanel.classList.remove.apply(tfPanel.classList, TF_ALL_POSITION_CLASSES);
-                tfPanel.classList.add.apply(tfPanel.classList, TF_POSITION_CLASSES[tfContext]);
+                if (window.innerWidth < 1024) {
+                    tfPanel.classList.remove('absolute', 'right-0');
+                    tfPanel.classList.add('fixed', 'top-1/2', 'left-1/2', '-translate-x-1/2', '-translate-y-1/2');
+                    // tfOverlay.classList.replace('z-[1110]', 'z-[1112]');
+                } else {
+                    // reposisi panel sesuai context — tanpa pindah elemen antar container
+                    tfPanel.classList.remove.apply(tfPanel.classList, TF_ALL_POSITION_CLASSES);
+                    tfPanel.classList.add.apply(tfPanel.classList, TF_POSITION_CLASSES[tfContext]);
+                }
 
                 // card kinerja tidak punya opsi resolusi data
                 tfResolutionWrapper.classList.toggle('hidden', tfContext === 'kinerja');
@@ -2001,7 +2057,7 @@
                 </div>
             </div>
 
-            <div id="map" class="rounded-lg h-[280px] sm:h-[360px] lg:h-full lg:min-h-[420px]"></div>
+            <div id="map" class="rounded-lg h-[280px] lg:h-full lg:min-h-[360px]"></div>
 
             <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
             <script>
@@ -2068,18 +2124,34 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-5 grid-rows-1 gap-6 mt-6">
         <div class="lg:col-span-2 col-span-1 p-6 bg-[#171717] rounded-2xl">
-            <div class="flex items-center gap-5">
-                <div class="w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center text-zinc-300">
-                    <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                            d="M11.9167 22.75V15.6L6.87917 20.6646L5.33542 19.1208L10.4 14.0833H3.25V11.9167H10.4L5.33542 6.87917L6.87917 5.33542L11.9167 10.4V3.25H14.0833V10.4L19.1208 5.33542L20.6646 6.87917L15.6 11.9167H22.75V14.0833H15.6L20.6646 19.1208L19.1208 20.6646L14.0833 15.6V22.75H11.9167Z"
-                            fill="white" />
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-5">
+                    <div class="w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center text-zinc-300">
+                        <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M11.9167 22.75V15.6L6.87917 20.6646L5.33542 19.1208L10.4 14.0833H3.25V11.9167H10.4L5.33542 6.87917L6.87917 5.33542L11.9167 10.4V3.25H14.0833V10.4L19.1208 5.33542L20.6646 6.87917L15.6 11.9167H22.75V14.0833H15.6L20.6646 19.1208L19.1208 20.6646L14.0833 15.6V22.75H11.9167Z"
+                                fill="white" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg text-white">Statistik Total Penggunaan</h3>
+                        <p class="text-[#979797] text-sm">{{ \Carbon\Carbon::parse($device->created_at)->locale('id')->translatedFormat('F Y') }} - {{ \Carbon\Carbon::parse($latest['_time'])->locale('id')->translatedFormat('F Y') }}</p>
+                    </div>
+                </div>
+                <button id="btn-open-carbon-form" type="button" class="p-3 rounded-full hover:bg-[#121212]">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="4" y1="21" x2="4" y2="14"></line>
+                        <line x1="4" y1="10" x2="4" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12" y2="3"></line>
+                        <line x1="20" y1="21" x2="20" y2="16"></line>
+                        <line x1="20" y1="12" x2="20" y2="3"></line>
+                        <line x1="1" y1="14" x2="7" y2="14"></line>
+                        <line x1="9" y1="8" x2="15" y2="8"></line>
+                        <line x1="17" y1="16" x2="23" y2="16"></line>
                     </svg>
-                </div>
-                <div>
-                    <h3 class="text-lg text-white">Statistik Total Penggunaan</h3>
-                    <p class="text-[#979797] text-sm">{{ \Carbon\Carbon::parse($device->created_at)->locale('id')->translatedFormat('F Y') }} - {{ \Carbon\Carbon::parse($latest['_time'])->locale('id')->translatedFormat('F Y') }}</p>
-                </div>
+                </button>
             </div>
             <div class="flex items-baseline mx-auto w-fit my-12 gap-2">
                 <h1 class="text-4xl">{{ round($latest['Volume']/1000,1) }}</h1>
@@ -2123,7 +2195,7 @@
                     </svg>
                     <h1>Reduksi emisi</h1>
                 </div>
-                <h1>{{ round($latest['Energi'] * 0.00085,2) }} kg CO²</h1>
+                <h1>{{ round($latest['Energi'] * auth()->user()->carbon_factor / 1000, 1) }} kg CO²</h1>
             </div>
             <hr class="border-[#373737] mt-3">
         </div>
@@ -2471,6 +2543,20 @@
     const modeSelect = document.getElementById('mode-select-card');
     const btnCloseModeSelect = document.getElementById('btn-close-mode-select');
 
+    const carbonFormCloseBtn = document.getElementById('btn-close-carbon-form');
+    const carbonFormOpenBtn = document.getElementById('btn-open-carbon-form');
+    const carbonForm = document.getElementById('carbon-form');
+
+    carbonFormCloseBtn.addEventListener('click', function() {
+        carbonForm.classList.add('hidden');
+        overlay.classList.add('hidden');
+    });
+
+    carbonFormOpenBtn.addEventListener('click', function() {
+        carbonForm.classList.remove('hidden');
+        overlay.classList.remove('hidden');
+    });
+
     function openSidebar() {
         sidebar.classList.remove('-translate-x-full');
         sidebar.classList.add('translate-x-0');
@@ -2499,6 +2585,8 @@
 
         sidebar.classList.add('-translate-x-full');
         sidebar.classList.remove('translate-x-0');
+
+        carbonForm.classList.add('hidden');
     }
 
     btnOpenSideBar.addEventListener('click', openSidebar);
@@ -2512,6 +2600,59 @@
     btnCloseModeSelect.addEventListener('click', closeModeSelect);
 
     overlay.addEventListener('click', overlayClick);
+</script>
+<script>
+    (function() {
+        const step = 0.01;
+        const min = 0;
+        const max = 10;
+
+        const inputEl = document.getElementById('koef-value');
+        const minusBtn = document.getElementById('koef-minus');
+        const plusBtn = document.getElementById('koef-plus');
+
+        let value = parseFloat(inputEl.value) || 0;
+
+        function clamp(v) {
+            return Math.min(max, Math.max(min, v));
+        }
+
+        function render() {
+            inputEl.value = value.toFixed(2);
+        }
+
+        minusBtn.addEventListener('click', function() {
+            value = clamp(value - step);
+            render();
+        });
+
+        plusBtn.addEventListener('click', function() {
+            value = clamp(value + step);
+            render();
+        });
+
+        // Izinkan user mengetik bebas (termasuk koma sebagai desimal)
+        inputEl.addEventListener('input', function() {
+            inputEl.value = inputEl.value.replace(/,/g, '.').replace(/[^0-9.]/g, '');
+        });
+
+        // Rapikan dan validasi nilai saat user selesai mengetik
+        inputEl.addEventListener('blur', function() {
+            const parsed = parseFloat(inputEl.value);
+            value = clamp(isNaN(parsed) ? 0 : parsed);
+            render();
+        });
+
+        // Enter juga memicu validasi tanpa submit form
+        inputEl.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                inputEl.blur();
+            }
+        });
+
+        render();
+    })();
 </script>
 
 </html>
