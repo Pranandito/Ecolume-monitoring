@@ -12,7 +12,8 @@ class Device extends Model
         'serial_number',
         'firmware_version',
         'API_keys',
-        'online_status'
+        'online_status',
+        'claim_at'
     ];
 
     public function device_config()

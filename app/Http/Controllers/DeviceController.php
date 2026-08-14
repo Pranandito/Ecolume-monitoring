@@ -4,10 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Device;
 use App\Models\DeviceConfig;
+use Carbon\Carbon;
+use GrahamCampbell\ResultType\Success;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
+use function PHPUnit\Framework\isNull;
 
 class DeviceController extends Controller
 {
@@ -63,6 +67,59 @@ class DeviceController extends Controller
             'message' => 'Device berhasil diupdate',
             'data'    => $device->fresh()
         ], 200);
+    }
+
+    public function deviceClaim(Request $request)
+    {
+        $validated = $request->validate([
+            'owner_id'      => ['required', 'exists:users,id'],
+            'serial_number' => ['required', 'string', 'max:15'],
+        ]);
+
+        $device = Device::where('serial_number', $validated['serial_number'])
+            ->first();
+
+        if (!$device) {
+            return back()->with([
+                'status' => 'error',
+                'title' => 'Terjadi Kesalahan',
+                'desc' => 'Gagal menambahkan perangkat. Pastikan serial number yang Anda masukkan sudah benar'
+            ]);
+        }
+
+        if (!is_null($device->owner_id)) {
+            if ($device->owner_id == Auth::id()) {
+                return back()->with([
+                    'status' => 'error',
+                    'title' => 'Terjadi Kesalahan',
+                    'desc' => 'Gagal menambahkan perangkat. Perangkat sudah terhubung ke sistem Anda'
+                ]);
+            }
+
+            return back()->with([
+                'status' => 'error',
+                'title' => 'Terjadi Kesalahan',
+                'desc' => 'Gagal menambahkan perangkat. Perangkat telah terhubung dengan akun lain'
+            ]);
+        }
+
+        $deviceCount = Device::where('owner_id', Auth::id())->count();
+        if ($deviceCount == 0) {
+            $deviceCount = "";
+        }
+        $deviceName = 'Portable-PTS-' . $deviceCount + 1;
+
+        $device->update([
+            'owner_id' => $validated['owner_id'],
+            'device_name' => $deviceName,
+            'claim_at' => Carbon::now()
+        ]);
+
+        return back()->with([
+            'status' => 'success',
+            'title' => 'Berhasil Ditambahkan!🎉',
+            'desc' => 'Perangkat ' . $deviceName . ' telah berhasil ditambahkan ke dalam sistem Anda',
+        ]);
     }
 
     public function tes()

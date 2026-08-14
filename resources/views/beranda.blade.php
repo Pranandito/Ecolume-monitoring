@@ -229,24 +229,65 @@
     <h1 class="text-white mt-5">Masukkan Device ID</h1>
     <p class="text-sm mb-5">Masukkan device id yang ada pada gerobak</p>
 
-    <form action="" method="POST">
+    <form action="{{ route('device.claim') }}" method="POST">
         @csrf
+        @method('PATCH')
 
         <div class="mb-5">
             <input
                 type="text"
-                name="device_id"
+                name="serial_number"
                 placeholder="Contoh: PTSP-2026-XXXX"
                 class="w-full rounded-xl border border-zinc-700 bg-[#262626] px-4 py-3 text-white placeholder:text-zinc-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition"
                 required>
+
+            <input
+                type="hidden"
+                name="owner_id"
+                value="{{ auth()->user()->id }}">
         </div>
 
-        <a href=""
+        <button type="submit"
             class="block text-center w-full text-sm rounded-full border border-zinc-700 py-1 text-[#979797] hover:bg-zinc-800 transition">
             Tambahkan
-        </a>
+        </button>
     </form>
 </div>
+
+@if(session('status'))
+<div id="claim-popup" class="text-center fixed bottom-0 lg:bottom-1/2 left-1/2 -translate-x-1/2 lg:translate-y-1/2 bg-[#171717] lg:rounded-b-2xl rounded-t-2xl shadow-3xl p-10 w-full lg:max-w-md z-[1112] text-zinc-400">
+    <div class="w-9 h-1 bg-zinc-500 rounded-full mx-auto -mt-8 mb-8 lg:hidden"></div>
+    @if(session('status') == 'success')
+    <img src="{{ asset('images/success.svg') }}" alt="" class="mx-auto">
+    @else
+    <img src="{{ asset('images/error.svg') }}" alt="" class="mx-auto">
+    @endif
+
+    <h1 class="text-2xl text-white mt-5">{{ session('title') }}</h1>
+    <p class="text-sm w-68 mx-auto mt-2">{{ session('desc') }}</p>
+    <button type="button" id="close-claim-status-popup"
+        class="mt-6 w-full text-sm rounded-full border border-zinc-700 py-1 text-[#979797] hover:bg-zinc-800 transition">
+        Tutup
+    </button>
+</div>
+<section id="overlay-claim-popup" class="fixed top-0 bottom-0 left-0 right-0 bg-black/50 z-[1111]"></section>
+
+<script>
+    const claimPopup = document.getElementById('claim-popup');
+    const overlayPopup = document.getElementById('overlay-claim-popup');
+    const claimPopupCloseBtn = document.getElementById('close-claim-status-popup');
+
+    claimPopupCloseBtn.addEventListener('click', function() {
+        claimPopup.classList.add('hidden');
+        overlayPopup.classList.add('hidden');
+    });
+
+    overlayPopup.addEventListener('click', function() {
+        claimPopup.classList.add('hidden');
+        overlayPopup.classList.add('hidden');
+    });
+</script>
+@endif
 
 <body class="lg:my-12 my-6 lg:mx-16 mx-3 text-white">
     <nav class="flex items-center justify-between bg-[#121212] text-white w-full">
@@ -419,7 +460,8 @@
                     </div>
                     <div class="flex items-center gap-2">
                         <button id="btn-open-addDevice">
-                            <div class="p-1 bg-white rounded-full">
+                            <div class="py-1 px-1 bg-white rounded-full flex items-center gap-2 text-[#141414]">
+                                <!-- <h1>Tambahkan Perangkat</h1> -->
                                 <svg width="19" height="19" viewBox="0 0 19 19" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
@@ -428,9 +470,6 @@
                                 </svg>
                             </div>
                         </button>
-                        <div class="py-1 px-3 bg-white rounded-full text-black hidden lg:block">
-                            <h1 class="text-sm">Lebih Banyak ⟶</h1>
-                        </div>
                     </div>
                 </div>
 

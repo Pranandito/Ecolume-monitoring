@@ -30,7 +30,7 @@ Route::patch('/carbon-factor/update/{id}', [CarbonController::class, 'update'])-
 
 Route::post('/device/create', [DeviceController::class, 'create'])->name('device.create');
 Route::patch('/device/update/{id}', [DeviceController::class, 'update'])->name('device.update');
-
+Route::patch('/device/claim', [DeviceController::class, 'deviceClaim'])->name('device.claim');
 
 Route::get('/device/tes', [BerandaController::class, 'test']);
 Route::get('/device/test/{device_id}', [DashboardController::class, 'getHeatMapData']);
