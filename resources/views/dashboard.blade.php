@@ -277,7 +277,7 @@
                 inputmode="decimal"
                 id="koef-value"
                 name="carbon_factor"
-                value="0.852"
+                value="{{ auth()->user()->carbon_factor }}"
                 class="w-36 text-center border-0 bg-transparent p-0 text-4xl text-white focus:outline-none focus:ring-0">
             <button type="button" id="koef-plus" class="text-4xl leading-none text-white/70 transition hover:text-white" aria-label="Tambah">&#43;</button>
         </div>
@@ -583,7 +583,6 @@
                     <div id="tf-days-grid" class="grid grid-cols-7 text-center text-sm"></div>
                 </div>
 
-                <!-- Blok resolusi: disembunyikan otomatis saat context = 'kinerja' -->
                 <div id="tf-resolution-wrapper" class="mt-5">
                     <div class="text-base text-zinc-500 mb-2 px-1">Resolusi Data</div>
                     <div class="flex items-center p-0.5 rounded-lg bg-[#242424] border border-[#242424]" id="tf-resolution-group">
@@ -597,7 +596,7 @@
                 </button>
             </div>
         </div>
-        <div class="bg-[#171717] z-[1111] rounded-2xl p-6 lg:col-span-2 flex flex-col h-full" id="chart-card-container">
+        <!-- <div class="bg-[#171717] z-[1111] rounded-2xl p-6 lg:col-span-2 flex flex-col h-full" id="chart-card-container">
 
             <div class="lg:flex block justify-between items-center gap-4 mb-8">
                 <div class="flex items-center gap-3 mb-3 lg:mb-0">
@@ -1551,8 +1550,9 @@
             // <<< /TAMBAHAN
 
             tfRenderCalendar();
-        </script>
+        </script> -->
 
+        <x-dashboard.chart-card :device="$device" />
 
         <div class="bg-[#171717] rounded-2xl p-6 flex flex-col z-[1111] relative" id="kinerja-card-container">
 
@@ -1612,213 +1612,9 @@
                     <div class="text-sm text-gray-400 mt-1">Operasional</div>
                 </div>
             </div>
-            <div class="mb-5">
-                <div class="h-3 w-full flex rounded overflow-hidden mb-2.5" id="pump-usage-bar">
-                </div>
-                <div class="flex justify-between text-[11px] text-gray-500 font-medium px-0.5">
-                    <span>06:00</span>
-                    <span>12:00</span>
-                    <span>18:00</span>
-                </div>
-            </div>
-            <div class="flex justify-center gap-5 text-[11px] text-gray-400">
-                <div class="flex items-center gap-2">
-                    <div class="w-2.5 h-2.5 rounded-full bg-[#6a5acd]"></div>
-                    <span>Debit Tinggi</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <div class="w-2.5 h-2.5 rounded-full bg-[#4ea8de]"></div>
-                    <span>Debit Rendah</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <div class="w-2.5 h-2.5 rounded-full bg-[#3f3f46]"></div>
-                    <span>Mati</span>
-                </div>
-            </div>
-            <div id="pump-usage-tooltip" class="hidden" style="position:fixed;z-index:50;background:#2c2c2e;border:1px solid #3f3f46;border-radius:10px;padding:8px 12px;font-size:11px;box-shadow:0 10px 40px rgba(0,0,0,0.4);pointer-events:none;"></div>
+            <x-dashboard.pump-usage :device="$device" />
         </div>
     </div>
-
-    <script>
-        // =========================================================
-        // 9. CHART PENGGUNAAN POMPA — independen dari line chart
-        // =========================================================
-        document.addEventListener('DOMContentLoaded', function() {
-
-            var PUMP_CONFIG = {
-                FIELD: 'Debit',
-                RANGE: '1H', // selalu 1 hari terakhir, statis
-                FULL_THRESHOLD: 100, // Debit >= ini = Operasi Penuh
-                GAP_MATI_MS: 20 * 60 * 1000, // 10 menit tanpa data = Mati
-                REFRESH_INTERVAL_MS: 30000
-            };
-
-            var STATUS_COLOR = {
-                penuh: '#6a5acd',
-                sedang: '#4ea8de',
-                mati: '#3f3f46'
-            };
-            var STATUS_LABEL = {
-                penuh: 'Operasi Penuh',
-                sedang: 'Operasi Sedang',
-                mati: 'Mati'
-            };
-
-            var barEl = document.getElementById('pump-usage-bar');
-            var tooltipEl = document.getElementById('pump-usage-tooltip');
-
-            // guard: kalau elemen belum ada di halaman ini, hentikan tanpa error
-            if (!barEl || !tooltipEl) {
-                console.warn('Chart penggunaan pompa: elemen #pump-usage-bar / #pump-usage-tooltip tidak ditemukan di DOM.');
-                return;
-            }
-
-            function pad(v) {
-                return v < 10 ? '0' + v : '' + v;
-            }
-
-            function fmtTime(d) {
-                return pad(d.getHours()) + ':' + pad(d.getMinutes());
-            }
-
-            function classifyValue(y) {
-                return y >= PUMP_CONFIG.FULL_THRESHOLD ? 'penuh' : 'sedang';
-            }
-
-            function buildSegments(points, windowStart, windowEnd) {
-                var raw = [];
-
-                if (points.length === 0) {
-                    return [{
-                        start: windowStart,
-                        end: windowEnd,
-                        status: 'mati'
-                    }];
-                }
-
-                if (points[0].x > windowStart) {
-                    raw.push({
-                        start: windowStart,
-                        end: points[0].x,
-                        status: 'mati'
-                    });
-                }
-
-                for (var i = 0; i < points.length; i++) {
-                    var cur = points[i];
-                    var next = points[i + 1];
-                    var segEnd = next ? next.x : windowEnd;
-                    var gap = segEnd - cur.x;
-
-                    if (gap > PUMP_CONFIG.GAP_MATI_MS) {
-                        raw.push({
-                            start: cur.x,
-                            end: cur.x + PUMP_CONFIG.GAP_MATI_MS,
-                            status: classifyValue(cur.y)
-                        });
-                        raw.push({
-                            start: cur.x + PUMP_CONFIG.GAP_MATI_MS,
-                            end: segEnd,
-                            status: 'mati'
-                        });
-                    } else {
-                        raw.push({
-                            start: cur.x,
-                            end: segEnd,
-                            status: classifyValue(cur.y)
-                        });
-                    }
-                }
-
-                var merged = [];
-                raw.forEach(function(seg) {
-                    if (seg.end <= seg.start) return;
-                    var last = merged[merged.length - 1];
-                    if (last && last.status === seg.status) {
-                        last.end = seg.end;
-                    } else {
-                        merged.push({
-                            start: seg.start,
-                            end: seg.end,
-                            status: seg.status
-                        });
-                    }
-                });
-                return merged;
-            }
-
-            function renderSegments(segments, windowStart, windowEnd) {
-                var totalMs = windowEnd - windowStart;
-                barEl.innerHTML = '';
-                segments.forEach(function(seg) {
-                    var pct = ((seg.end - seg.start) / totalMs) * 100;
-                    if (pct <= 0) return;
-
-                    var div = document.createElement('div');
-                    div.className = 'h-full';
-                    div.style.width = pct + '%';
-                    div.style.backgroundColor = STATUS_COLOR[seg.status];
-                    div.style.cursor = 'pointer';
-                    div.addEventListener('mousemove', function(e) {
-                        showTooltip(e, seg);
-                    });
-                    div.addEventListener('mouseleave', hideTooltip);
-
-                    barEl.appendChild(div);
-                });
-            }
-
-            function showTooltip(e, seg) {
-                tooltipEl.innerHTML =
-                    '<div style="font-weight:600;color:#e4e4e7;margin-bottom:2px;">' + STATUS_LABEL[seg.status] + '</div>' +
-                    '<div style="color:#a1a1aa;">' + fmtTime(new Date(seg.start)) + ' – ' + fmtTime(new Date(seg.end)) + '</div>';
-                tooltipEl.style.left = (e.clientX + 12) + 'px';
-                tooltipEl.style.top = (e.clientY - 36) + 'px';
-                tooltipEl.classList.remove('hidden');
-            }
-
-            function hideTooltip() {
-                tooltipEl.classList.add('hidden');
-            }
-
-            async function loadPumpUsageData() {
-                try {
-                    var url = CONFIG.API_ENDPOINT + '?fields=' + PUMP_CONFIG.FIELD + '&range=' + PUMP_CONFIG.RANGE;
-                    var response = await fetch(url);
-                    if (!response.ok) throw new Error('HTTP error! status: ' + response.status);
-                    var fetchedData = await response.json();
-
-                    var series = fetchedData.find(function(s) {
-                        return s.name === PUMP_CONFIG.FIELD;
-                    });
-                    var allPoints = series ? series.data.slice().sort(function(a, b) {
-                        return a.x - b.x;
-                    }) : [];
-
-                    var refDate = allPoints.length ? new Date(allPoints[allPoints.length - 1].x) : new Date();
-                    var dayStart = new Date(refDate.getFullYear(), refDate.getMonth(), refDate.getDate()).getTime();
-
-                    // window hanya 06:00 - 18:00
-                    var windowStart = dayStart + 6 * 60 * 60 * 1000;
-                    var windowEnd = dayStart + 18 * 60 * 60 * 1000;
-
-                    // buang titik di luar jam 06:00-18:00
-                    var points = allPoints.filter(function(p) {
-                        return p.x >= windowStart && p.x <= windowEnd;
-                    });
-
-                    renderSegments(buildSegments(points, windowStart, windowEnd), windowStart, windowEnd);
-                } catch (error) {
-                    console.error('Gagal mengambil data penggunaan pompa:', error);
-                }
-            }
-
-            loadPumpUsageData();
-            setInterval(loadPumpUsageData, PUMP_CONFIG.REFRESH_INTERVAL_MS);
-
-        });
-    </script>
-
     <script>
         (function() {
             const canvasEl = document.getElementById('gauge');
@@ -2654,5 +2450,7 @@
         render();
     })();
 </script>
+
+@stack('scripts')
 
 </html>
