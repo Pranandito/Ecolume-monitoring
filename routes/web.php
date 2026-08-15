@@ -6,6 +6,7 @@ use App\Http\Controllers\CuacaController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\DeviceModeController;
+use App\Http\Controllers\EspController;
 use App\Http\Controllers\MQTTController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -32,7 +33,8 @@ Route::post('/device/create', [DeviceController::class, 'create'])->name('device
 Route::patch('/device/update/{id}', [DeviceController::class, 'update'])->name('device.update');
 Route::patch('/device/claim', [DeviceController::class, 'deviceClaim'])->name('device.claim');
 
-Route::get('/device/tes', [BerandaController::class, 'test']);
+Route::get('/device/tes', [EspController::class, 'tes2']);
+
 Route::get('/device/test/{device_id}', [DashboardController::class, 'getHeatMapData']);
 Route::get('/device/line-chart/{device_id}', [DashboardController::class, 'getChartData'])->name('dashboard.line-chart');
 Route::get('/device/{device_id}/kinerja-baseline', [DashboardController::class, 'kinerjaBaseline'])->name('kinerja.baseline');

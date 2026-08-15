@@ -1,90 +1,33 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Console\Commands;
 
 use App\Models\Device;
 use Carbon\Carbon;
-use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use RikoDEV\InfluxDB\Facades\InfluxDB;
 
-class EspController extends Controller
+class CheckDeviceOnlineStatus extends Command
 {
-    public function getTunellingPort(Request $request, $id)
-    {
-        $apiKey = $request->header('API-key');
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'device:status-check';
 
-        if (!$apiKey) {
-            return response()->json([
-                'success' => false,
-                'message' => 'API key tidak ditemukan',
-            ], 401);
-        }
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Check dan update status online device setiap 5 menit';
 
-        $device = Device::where('id', $id)
-            ->select('id', 'API_keys')
-            ->first();
-
-        if (!$device) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Device tidak ditemukan',
-            ], 404);
-        }
-
-        if ($device->API_keys !== $apiKey) {
-            return response()->json([
-                'success' => false,
-                'message' => 'API key tidak cocok',
-            ], 401);
-        }
-
-        try {
-            $response = Http::timeout(3)
-                ->get('http://127.0.0.1:4040/api/tunnels');
-        } catch (ConnectionException $e) {
-            report($e);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Ngrok tidak dapat dihubungi',
-            ], 503);
-        }
-
-        if ($response->failed()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal mengakses API ngrok',
-            ], 503);
-        }
-
-        $tunnels = $response->json('tunnels', []);
-
-        foreach ($tunnels as $tunnel) {
-            if (($tunnel['proto'] ?? null) === 'tcp') {
-
-                $publicUrl = $tunnel['public_url'] ?? null;
-                if (!$publicUrl) {
-                    continue;
-                }
-                $url = parse_url($publicUrl);
-
-                return response()->json([
-                    'success' => true,
-                    'port' => $url['port'] ?? null,
-                ]);
-            }
-        }
-
-        return response()->json([
-            'success' => false,
-            'message' => 'Tunnel TCP ngrok tidak ditemukan',
-        ], 404);
-    }
-
-    public function tes2()
+    /**
+     * Execute the console command.
+     */
+    public function handle()
     {
         $devices = Device::whereNotNull('owner_id')
             ->select('id', 'owner_id', 'online_status')
