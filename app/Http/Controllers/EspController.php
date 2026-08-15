@@ -11,7 +11,7 @@ class EspController extends Controller
 {
     public function getTunellingPort(Request $request, $id)
     {
-        $apiKey = $request->header('API_key');
+        $apiKey = $request->header('API-key');
 
         if (!$apiKey) {
             return response()->json([

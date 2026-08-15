@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Monitoring</title>
-    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
@@ -314,7 +314,9 @@
             <div class="flex justify-between">
                 <div class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-zinc-500">Arus</span>
-                    <span class="text-sm font-medium text-white">{{ round($latest["Daya"]/$latest["Tegangan"], 2)}} Amp</span>
+                    <span class="text-sm font-medium text-white">{{ ($latest["Tegangan"] ?? 0) != 0
+                            ? round(($latest["Daya"] ?? 0) / $latest["Tegangan"], 2) : 0 }} Amp
+                    </span>
                 </div>
                 <div class="flex flex-col gap-1 text-right">
                     <span class="text-xs text-zinc-500">Tegangan</span>
