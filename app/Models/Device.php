@@ -20,4 +20,19 @@ class Device extends Model
     {
         return $this->hasOne(DeviceConfig::class);
     }
+
+    public function today_weather()
+    {
+        return $this->hasOne(TodayWeather::class);
+    }
+
+    public function daily_weather_forecast()
+    {
+        return $this->hasMany(DailyWeatherForecast::class);
+    }
+
+    public function hourly_weather_forecast()
+    {
+        return $this->hasMany(HourlyWeatherForecast::class);
+    }
 }

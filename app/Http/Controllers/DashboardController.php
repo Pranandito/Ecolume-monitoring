@@ -276,7 +276,15 @@ class DashboardController extends Controller
 
     public function index($device_name, $device_id)
     {
-        $device = Device::where("id", $device_id)->select('id', 'owner_id', 'device_name', 'online_status', 'serial_number', 'created_at')->with('device_config')->first();
+        $device = Device::where("id", $device_id)
+            ->select('id', 'owner_id', 'device_name', 'online_status', 'serial_number', 'created_at')
+            ->with('device_config', 'today_weather')->first();
+        $sunDuration =  Carbon::parse($device->today_weather->sunrise)
+            ->diffInMinute($device->today_weather->sunset);
+
+        $device->today_weather->sun_duration_h = floor($sunDuration / 60);
+        $device->today_weather->sun_duration_m = $sunDuration % 60;
+
         $logs   = $this->getDailyLogs($device_id);
 
         $latestFull = $this->getLatestData($device_id);

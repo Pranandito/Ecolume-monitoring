@@ -34,8 +34,8 @@ class CheckDeviceOnlineStatus extends Command
             ->get();
 
         if ($devices->isEmpty()) {
-            // $this->info('Tidak ada device untuk dicek.');
-            // return self::SUCCESS;
+            $this->info('Tidak ada device untuk dicek.');
+            return self::SUCCESS;
         }
 
         // Query sekali untuk semua device, bukan N query terpisah
@@ -66,8 +66,8 @@ class CheckDeviceOnlineStatus extends Command
             Log::error('Gagal query InfluxDB untuk cek status device', [
                 'error' => $e->getMessage(),
             ]);
-            // $this->error('Query InfluxDB gagal: ' . $e->getMessage());
-            // return self::FAILURE;
+            $this->error('Query InfluxDB gagal: ' . $e->getMessage());
+            return self::FAILURE;
         }
 
         // return $lastSeenMap;
@@ -103,9 +103,9 @@ class CheckDeviceOnlineStatus extends Command
             Device::where('id', $u['id'])->update(['online_status' => $u['status']]);
         }
 
-        // $this->info(count($updates) . ' device berubah status dari ' . $devices->count() . ' total.');
+        $this->info(count($updates) . ' device berubah status dari ' . $devices->count() . ' total.');
 
-        // return self::SUCCESS;
-        return $updates;
+        return self::SUCCESS;
+        // return $updates;
     }
 }
