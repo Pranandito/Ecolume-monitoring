@@ -369,7 +369,7 @@ class MQTTStoreService
         // ----------------------------------------------------------------
         // 7. Simpan Data InfluxDB & MySql
         // ----------------------------------------------------------------
-        $this->statusUpdate->DeviceStatusUpdate($id);
+        $this->statusUpdate->DeviceStatusUpdate($id, $daya, $debit,  $validated['tegangan']);
 
         $device_config = $device->device_config;
 

@@ -13,8 +13,15 @@ class Device extends Model
         'firmware_version',
         'API_keys',
         'online_status',
+        'operational_status',
+        'last_seen',
         'claim_at'
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'owner_id', 'id');
+    }
 
     public function device_config()
     {

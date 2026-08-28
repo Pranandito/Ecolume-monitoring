@@ -4,17 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Models\Device;
 use App\Models\DeviceConfig;
+use App\Services\Logger;
 use Carbon\Carbon;
-use GrahamCampbell\ResultType\Success;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
-use function PHPUnit\Framework\isNull;
-
 class DeviceController extends Controller
 {
+    public function __construct(
+        private Logger $log
+    ) {}
+
     public function create(Request $request)
     {
         $request->validate([
@@ -43,11 +45,14 @@ class DeviceController extends Controller
             'device_id' => $device->id
         ]);
 
-        return response()->json([
-            'message' => 'Device berhasil dibuat',
-            'data' => $device,
-            'device_config' => $device_config
-        ], 201);
+        $data = [
+            "admin_name" => Auth::user()->name,
+            "device_id" => $device->id
+        ];
+
+        $this->log->create(Auth::id(), "createDevice", "Device", $device->id, $data);
+
+        return redirect()->route('admin.dashboard');
     }
 
     public function update(Request $request, $id)

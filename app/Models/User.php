@@ -22,7 +22,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'carbon_factor'
+        'carbon_factor',
+        'role',
+        'role_updated_at'
     ];
 
     /**
@@ -45,6 +47,22 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'role_updated_at' => 'datetime',
         ];
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function device()
+    {
+        return $this->hasMany(Device::class, 'owner_id', 'id');
+    }
+
+    public function activity_logs()
+    {
+        return $this->hasMany(ActivityLog::class, 'account_id', 'id');
     }
 }

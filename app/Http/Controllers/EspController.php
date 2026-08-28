@@ -86,4 +86,15 @@ class EspController extends Controller
             'message' => 'Tunnel TCP ngrok tidak ditemukan',
         ], 404);
     }
+
+    public function tes2()
+    {
+        $update = Device::where('id', 1)->update([
+            "online_status" => 1,
+            "last_seen" => Carbon::now(),
+            "oprational_status" => "On"
+        ]);
+
+        return $update;
+    }
 }

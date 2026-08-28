@@ -30,7 +30,7 @@ class JobConfirm
             $this->mqttPublish->publishMode($device_id, $serial_number, $deviceConfig, 1);
         }
 
-        $this->statusUpdate->DeviceStatusUpdate($device_id);
+        $this->statusUpdate->DeviceOnlineStatusUpdate($device_id);
 
         return $updated;
     }

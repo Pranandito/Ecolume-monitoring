@@ -18,6 +18,11 @@ return Application::configure(basePath: dirname(__DIR__))
             '/api/*'
         ]);
     })
+    ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->alias([
+            'admin' => \App\Http\Middleware\adminRoleCheck::class,
+        ]);
+    })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();
