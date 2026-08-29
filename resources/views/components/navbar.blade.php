@@ -21,7 +21,7 @@
     <div class="items-center gap-5 flex">
 
         <div class="hidden sm:flex flex-col items-end">
-            <span class="text-xs text-zinc-100">{{ auth()->user()->name }}</span>
+            <span class="text-xs text-zinc-100">{{ auth()->user()->role === 'admin' ? 'Admin - ' : '' }}{{ auth()->user()->name }}</span>
             <span class="text-[10px] text-zinc-400">{{ auth()->user()->email }}</span>
         </div>
 

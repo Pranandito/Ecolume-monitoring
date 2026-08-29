@@ -49,7 +49,9 @@
     </div>
     <div class="flex flex-col gap-1">
         <span class="text-xs text-zinc-500">Dihentikan Pada</span>
-        <span class="text-sm text-white">{{ $device_config->job_created->locale('id')->translatedFormat('d M G:i') }}</span>
+        <span class="text-sm text-white">
+            {{ $device_config->job_created?->locale('id')->translatedFormat('d M G:i') ?? '-' }}
+        </span>
     </div>
 </div>
 

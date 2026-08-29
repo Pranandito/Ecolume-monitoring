@@ -55,23 +55,70 @@ class DeviceController extends Controller
         return redirect()->route('admin.dashboard');
     }
 
-    public function update(Request $request, $id)
+    public function delete(Request $request)
     {
-        $device = Device::findOrFail($id);
-
-        $validatedData = $request->validate([
-            'owner_id'         => ['nullable', 'exists:users,id'],
-            'device_name'      => ['sometimes', 'required', 'string', 'max:25'],
-            'online_status'    => ['sometimes', 'required', 'boolean'],
-            'firmware_version' => ['sometimes', 'required', 'string', 'max:10'],
+        $validated = $request->validate([
+            'device_id' => 'required|integer'
         ]);
 
-        $device->update($validatedData);
+        $deviceExist = Device::where('id', $validated['device_id'])->first();
 
-        return response()->json([
-            'message' => 'Device berhasil diupdate',
-            'data'    => $device->fresh()
-        ], 200);
+        if (!$deviceExist) {
+            return "device tidak ada di sistem";
+        }
+
+        if (Auth::user()->role !== 'admin') {
+            return 'tidak punya akses admin';
+        }
+
+        $data_record = $deviceExist->toArray();
+        $delete = $deviceExist->delete();
+
+        $data = [
+            "admin_name" => Auth::user()->name,
+            "device_id" => $deviceExist->id
+        ];
+
+        $this->log->create(Auth::id(), 'deleteDevice', 'device', $deviceExist->id, $data, $data_record);
+
+        return redirect()->back();
+    }
+
+    public function deviceRename(Request $request)
+    {
+        $validated = $request->validate([
+            'device_id'      => ['required', 'exists:devices,id'],
+            'new_devicename'      => ['required', 'string', 'max:15'],
+        ]);
+
+        $device = Device::where('id', $validated['device_id'])
+            ->first();
+
+        if (!$device) {
+            return back()->with([
+                'status' => 'error',
+                'title' => 'Terjadi Kesalahan',
+                'desc' => 'Gagal mengubah nama perangkat. Perangkat tidak ditemukan'
+            ]);
+        }
+
+        if (!is_null($device->owner_id) && $device->owner_id !== Auth::id()) {
+            return back()->with([
+                'status' => 'error',
+                'title' => 'Terjadi Kesalahan',
+                'desc' => 'Gagal mengubah nama perangkat. Perangkat telah terhubung dengan akun lain'
+            ]);
+        }
+
+        $device->update([
+            'device_name' => $validated['new_devicename'],
+        ]);
+
+        return back()->with([
+            'status' => 'success',
+            'title' => 'Berhasil Diganti!🎉',
+            'desc' => 'Perubahan nama menjadi ' . $device->name . ' telah berhasil',
+        ]);
     }
 
     public function deviceClaim(Request $request)
@@ -120,10 +167,62 @@ class DeviceController extends Controller
             'claim_at' => Carbon::now()
         ]);
 
+        $data = [
+            "username" => Auth::user()->name,
+            "device_serial_number" => $device->serial_number
+        ];
+
+        $this->log->create(Auth::id(), 'claimDevice', 'device', $device->id, $data);
+
         return back()->with([
             'status' => 'success',
             'title' => 'Berhasil Ditambahkan!🎉',
             'desc' => 'Perangkat ' . $deviceName . ' telah berhasil ditambahkan ke dalam sistem Anda',
+        ]);
+    }
+
+    public function deviceRemove(Request $request)
+    {
+        $validated = $request->validate([
+            'device_id'      => ['required', 'exists:devices,id'],
+        ]);
+
+        $device = Device::where('id', $validated['device_id'])
+            ->first();
+
+        if (!$device) {
+            return back()->with([
+                'status' => 'error',
+                'title' => 'Terjadi Kesalahan',
+                'desc' => 'Gagal menghapus perangkat. Perangkat tidak ditemukan'
+            ]);
+        }
+
+        if (!is_null($device->owner_id) && $device->owner_id !== Auth::id()) {
+            return back()->with([
+                'status' => 'error',
+                'title' => 'Terjadi Kesalahan',
+                'desc' => 'Gagal menghapus perangkat. Perangkat telah terhubung dengan akun lain'
+            ]);
+        }
+
+        $device->update([
+            'owner_id' => null,
+            'device_name' => 'Portable-PTS',
+            'claim_at' => null
+        ]);
+
+        $data = [
+            "username" => Auth::user()->name,
+            "device_serial_number" => $device->serial_number
+        ];
+
+        $this->log->create(Auth::id(), 'removeDevice', 'device', $device->id, $data);
+
+        return back()->with([
+            'status' => 'success',
+            'title' => 'Berhasil Dihapus!🎉',
+            'desc' => 'Perangkat ' . $device->name . ' telah berhasil dihapus ke dalam sistem Anda',
         ]);
     }
 

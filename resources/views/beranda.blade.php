@@ -107,6 +107,100 @@
 
 <section id="overlay" class="hidden fixed top-0 bottom-0 left-0 right-0 bg-black/50 z-[1111]"></section>
 
+<div id="userRename-Card" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#171717] rounded-2xl shadow-3xl p-6 w-full max-w-[350px] lg:max-w-md z-[1112] text-zinc-400">
+    <div class="flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center text-zinc-300">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M4.93045 4.92901C5.11796 4.74137 5.37233 4.6359 5.6376 4.6358C5.90287 4.63571 6.15731 4.741 6.34495 4.92851C6.53259 5.11601 6.63806 5.37038 6.63816 5.63565C6.63825 5.90092 6.53296 6.15537 6.34545 6.34301C4.84538 7.84327 4.00266 9.87795 4.00266 11.9995C4.00266 14.1211 4.84538 16.1557 6.34545 17.656C6.53309 17.8435 6.63856 18.0979 6.63866 18.3632C6.63875 18.6284 6.53346 18.8829 6.34595 19.0705C6.15844 19.2581 5.90408 19.3636 5.63881 19.3637C5.37354 19.3638 5.11909 19.2585 4.93145 19.071C1.02545 15.166 1.02545 8.83401 4.93145 4.92901M17.6595 4.92901C17.847 4.74153 18.1013 4.63622 18.3665 4.63622C18.6316 4.63622 18.8859 4.74153 19.0735 4.92901C22.9795 8.83401 22.9795 15.166 19.0735 19.071C18.8858 19.2585 18.6314 19.3638 18.3661 19.3637C18.1008 19.3636 17.8465 19.2581 17.659 19.0705C17.4714 18.8829 17.3662 18.6284 17.3663 18.3632C17.3663 18.0979 17.4718 17.8435 17.6595 17.656C19.1595 16.1557 20.0022 14.1211 20.0022 11.9995C20.0022 9.87795 19.1595 7.84327 17.6595 6.34301C17.472 6.15548 17.3667 5.90117 17.3667 5.63601C17.3667 5.37084 17.472 5.11653 17.6595 4.92901ZM7.75945 7.75701C7.94793 7.57471 8.20046 7.47373 8.46266 7.47582C8.72486 7.47792 8.97575 7.58291 9.16129 7.76819C9.34683 7.95346 9.45218 8.20421 9.45464 8.4664C9.4571 8.7286 9.35648 8.98128 9.17445 9.17001C8.803 9.54144 8.50834 9.98241 8.30731 10.4677C8.10628 10.953 8.00281 11.4732 8.00281 11.9985C8.00281 12.5238 8.10628 13.044 8.30731 13.5293C8.50834 14.0146 8.803 14.4556 9.17445 14.827C9.35661 15.0156 9.45741 15.2682 9.45513 15.5304C9.45285 15.7926 9.34768 16.0434 9.16227 16.2288C8.97686 16.4142 8.72605 16.5194 8.46385 16.5217C8.20166 16.524 7.94906 16.4232 7.76045 16.241C6.63532 15.1158 6.00323 13.5897 6.00323 11.9985C6.00323 10.4073 6.63532 8.88121 7.76045 7.75601M14.8315 7.75601C15.019 7.56853 15.2733 7.46322 15.5385 7.46322C15.8036 7.46322 16.0579 7.56853 16.2455 7.75601C17.3706 8.88121 18.0027 10.4073 18.0027 11.9985C18.0027 13.5897 17.3706 15.1158 16.2455 16.241C16.0569 16.4232 15.8042 16.524 15.5421 16.5217C15.2799 16.5194 15.029 16.4142 14.8436 16.2288C14.6582 16.0434 14.5531 15.7926 14.5508 15.5304C14.5485 15.2682 14.6493 15.0156 14.8315 14.827C15.2029 14.4556 15.4976 14.0146 15.6986 13.5293C15.8996 13.044 16.0031 12.5238 16.0031 11.9985C16.0031 11.4732 15.8996 10.953 15.6986 10.4677C15.4976 9.98241 15.2029 9.54144 14.8315 9.17001C14.644 8.98248 14.5387 8.72817 14.5387 8.46301C14.5387 8.19784 14.644 7.94353 14.8315 7.75601ZM12.0005 10.5C12.3983 10.5 12.7798 10.658 13.0611 10.9393C13.3424 11.2206 13.5005 11.6022 13.5005 12C13.5005 12.3978 13.3424 12.7794 13.0611 13.0607C12.7798 13.342 12.3983 13.5 12.0005 13.5C11.6026 13.5 11.2211 13.342 10.9398 13.0607C10.6585 12.7794 10.5005 12.3978 10.5005 12C10.5005 11.6022 10.6585 11.2206 10.9398 10.9393C11.2211 10.658 11.6026 10.5 12.0005 10.5Z"
+                        fill="white" />
+                </svg>
+            </div>
+            <h3 class="text-lg text-white">Ubah Username</h3>
+        </div>
+        <button id="btn-close-userRename" onclick="closeCard()" class="">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M16.6673 16.6667L3.33398 3.33334M16.6673 3.33334L3.33398 16.6667" stroke="#C2C2C2" stroke-width="2" stroke-linecap="round" />
+            </svg>
+        </button>
+    </div>
+    <h1 class="text-white mt-5">Masukkan Username</h1>
+    <p class="text-sm mb-5">Masukkan username baru anda</p>
+
+    <form action="{{ route('profile.rename') }}" method="POST">
+        @csrf
+        @method('PATCH')
+
+        <div class="mb-5">
+            <input
+                type="text"
+                name="new_username"
+                placeholder="Contoh: Pranandito"
+                class="w-full rounded-xl border border-zinc-700 bg-[#262626] px-4 py-3 text-white placeholder:text-zinc-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition"
+                required>
+
+            <input
+                type="hidden"
+                name="user_id"
+                value="{{ auth()->user()->id }}">
+        </div>
+
+        <button type="submit"
+            class="block text-center w-full text-sm rounded-full border border-zinc-700 py-1 text-[#979797] hover:bg-zinc-800 transition">
+            Ubah
+        </button>
+    </form>
+</div>
+
+<div id="deviceRename-Card" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#171717] rounded-2xl shadow-3xl p-6 w-full max-w-[350px] lg:max-w-md z-[1112] text-zinc-400">
+    <div class="flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center text-zinc-300">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M4.93045 4.92901C5.11796 4.74137 5.37233 4.6359 5.6376 4.6358C5.90287 4.63571 6.15731 4.741 6.34495 4.92851C6.53259 5.11601 6.63806 5.37038 6.63816 5.63565C6.63825 5.90092 6.53296 6.15537 6.34545 6.34301C4.84538 7.84327 4.00266 9.87795 4.00266 11.9995C4.00266 14.1211 4.84538 16.1557 6.34545 17.656C6.53309 17.8435 6.63856 18.0979 6.63866 18.3632C6.63875 18.6284 6.53346 18.8829 6.34595 19.0705C6.15844 19.2581 5.90408 19.3636 5.63881 19.3637C5.37354 19.3638 5.11909 19.2585 4.93145 19.071C1.02545 15.166 1.02545 8.83401 4.93145 4.92901M17.6595 4.92901C17.847 4.74153 18.1013 4.63622 18.3665 4.63622C18.6316 4.63622 18.8859 4.74153 19.0735 4.92901C22.9795 8.83401 22.9795 15.166 19.0735 19.071C18.8858 19.2585 18.6314 19.3638 18.3661 19.3637C18.1008 19.3636 17.8465 19.2581 17.659 19.0705C17.4714 18.8829 17.3662 18.6284 17.3663 18.3632C17.3663 18.0979 17.4718 17.8435 17.6595 17.656C19.1595 16.1557 20.0022 14.1211 20.0022 11.9995C20.0022 9.87795 19.1595 7.84327 17.6595 6.34301C17.472 6.15548 17.3667 5.90117 17.3667 5.63601C17.3667 5.37084 17.472 5.11653 17.6595 4.92901ZM7.75945 7.75701C7.94793 7.57471 8.20046 7.47373 8.46266 7.47582C8.72486 7.47792 8.97575 7.58291 9.16129 7.76819C9.34683 7.95346 9.45218 8.20421 9.45464 8.4664C9.4571 8.7286 9.35648 8.98128 9.17445 9.17001C8.803 9.54144 8.50834 9.98241 8.30731 10.4677C8.10628 10.953 8.00281 11.4732 8.00281 11.9985C8.00281 12.5238 8.10628 13.044 8.30731 13.5293C8.50834 14.0146 8.803 14.4556 9.17445 14.827C9.35661 15.0156 9.45741 15.2682 9.45513 15.5304C9.45285 15.7926 9.34768 16.0434 9.16227 16.2288C8.97686 16.4142 8.72605 16.5194 8.46385 16.5217C8.20166 16.524 7.94906 16.4232 7.76045 16.241C6.63532 15.1158 6.00323 13.5897 6.00323 11.9985C6.00323 10.4073 6.63532 8.88121 7.76045 7.75601M14.8315 7.75601C15.019 7.56853 15.2733 7.46322 15.5385 7.46322C15.8036 7.46322 16.0579 7.56853 16.2455 7.75601C17.3706 8.88121 18.0027 10.4073 18.0027 11.9985C18.0027 13.5897 17.3706 15.1158 16.2455 16.241C16.0569 16.4232 15.8042 16.524 15.5421 16.5217C15.2799 16.5194 15.029 16.4142 14.8436 16.2288C14.6582 16.0434 14.5531 15.7926 14.5508 15.5304C14.5485 15.2682 14.6493 15.0156 14.8315 14.827C15.2029 14.4556 15.4976 14.0146 15.6986 13.5293C15.8996 13.044 16.0031 12.5238 16.0031 11.9985C16.0031 11.4732 15.8996 10.953 15.6986 10.4677C15.4976 9.98241 15.2029 9.54144 14.8315 9.17001C14.644 8.98248 14.5387 8.72817 14.5387 8.46301C14.5387 8.19784 14.644 7.94353 14.8315 7.75601ZM12.0005 10.5C12.3983 10.5 12.7798 10.658 13.0611 10.9393C13.3424 11.2206 13.5005 11.6022 13.5005 12C13.5005 12.3978 13.3424 12.7794 13.0611 13.0607C12.7798 13.342 12.3983 13.5 12.0005 13.5C11.6026 13.5 11.2211 13.342 10.9398 13.0607C10.6585 12.7794 10.5005 12.3978 10.5005 12C10.5005 11.6022 10.6585 11.2206 10.9398 10.9393C11.2211 10.658 11.6026 10.5 12.0005 10.5Z"
+                        fill="white" />
+                </svg>
+            </div>
+            <h3 class="text-lg text-white">Ubah Username</h3>
+        </div>
+        <button id="btn-close-deviceRename" onclick="closeCard()" class="">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M16.6673 16.6667L3.33398 3.33334M16.6673 3.33334L3.33398 16.6667" stroke="#C2C2C2" stroke-width="2" stroke-linecap="round" />
+            </svg>
+        </button>
+    </div>
+    <h1 class="text-white mt-5">Masukkan Nama Device</h1>
+    <p class="text-sm mb-5">Masukkan nama device baru</p>
+
+    <form action="{{ route('device.rename') }}" method="POST">
+        @csrf
+        @method('PATCH')
+
+        <div class="mb-5">
+            <input
+                type="text"
+                name="new_devicename"
+                placeholder="Contoh: Gerobak-1"
+                class="w-full rounded-xl border border-zinc-700 bg-[#262626] px-4 py-3 text-white placeholder:text-zinc-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition"
+                required>
+
+            <input
+                type="hidden"
+                name="device_id"
+                id="rename-deviceId">
+        </div>
+
+        <button type="submit"
+            class="block text-center w-full text-sm rounded-full border border-zinc-700 py-1 text-[#979797] hover:bg-zinc-800 transition">
+            Ubah
+        </button>
+    </form>
+</div>
+
 <div id="addDevice-Card" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#171717] rounded-2xl shadow-3xl p-6 w-full max-w-[350px] lg:max-w-md z-[1112] text-zinc-400">
     <div class="flex justify-between items-center">
         <div class="flex items-center gap-3">
@@ -203,14 +297,16 @@
                 <div>
                     <div class="flex gap-2 items-baseline">
                         <h1 class="text-3xl text-white">{{ auth()->user()->name }}</h1>
-                        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M11.8675 1.25751L13.7425 3.13251L12.3131 4.56251L10.4381 2.68751L11.8675 1.25751ZM5 10H6.875L11.4294 5.44563L9.55438 3.57063L5 8.12501V10Z"
-                                fill="#979797" />
-                            <path
-                                d="M11.875 11.875H5.09875C5.0825 11.875 5.06563 11.8813 5.04938 11.8813C5.02875 11.8813 5.00813 11.8756 4.98688 11.875H3.125V3.125H7.40438L8.65438 1.875H3.125C2.43562 1.875 1.875 2.435 1.875 3.125V11.875C1.875 12.565 2.43562 13.125 3.125 13.125H11.875C12.2065 13.125 12.5245 12.9933 12.7589 12.7589C12.9933 12.5245 13.125 12.2065 13.125 11.875V6.4575L11.875 7.7075V11.875Z"
-                                fill="#979797" />
-                        </svg>
+                        <button id="btn-close-userRename" onclick="openUserRename()">
+                            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M11.8675 1.25751L13.7425 3.13251L12.3131 4.56251L10.4381 2.68751L11.8675 1.25751ZM5 10H6.875L11.4294 5.44563L9.55438 3.57063L5 8.12501V10Z"
+                                    fill="#979797" />
+                                <path
+                                    d="M11.875 11.875H5.09875C5.0825 11.875 5.06563 11.8813 5.04938 11.8813C5.02875 11.8813 5.00813 11.8756 4.98688 11.875H3.125V3.125H7.40438L8.65438 1.875H3.125C2.43562 1.875 1.875 2.435 1.875 3.125V11.875C1.875 12.565 2.43562 13.125 3.125 13.125H11.875C12.2065 13.125 12.5245 12.9933 12.7589 12.7589C12.9933 12.5245 13.125 12.2065 13.125 11.875V6.4575L11.875 7.7075V11.875Z"
+                                    fill="#979797" />
+                            </svg>
+                        </button>
                     </div>
                     <p>{{ auth()->user()->email }}</p>
                 </div>
@@ -344,10 +440,48 @@
                                             {{ $device->serial_number }}
                                         </p>
                                     </div>
-                                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-xl {{ $device->online_status ? 'bg-[#00A451]/5' : 'bg-[#DC2626]/5' }}">
-                                        <!-- Blinking/Static Green Dot -->
-                                        <span class="w-2 h-2 rounded-full {{ $device->online_status ? 'bg-[#00A451]' : 'bg-[#DC2626]' }}"></span>
-                                        <span class="{{ $device->online_status ? 'text-[#00A451]' : 'text-[#DC2626]' }} text-sm"> {{ $device->online_status ? 'Online' : 'Offline' }}</span>
+                                    <div class="flex items-center">
+                                        <div class="inline-flex items-center gap-2 mr-2 px-3 py-1 rounded-xl {{ $device->online_status ? 'bg-[#00A451]/5' : 'bg-[#DC2626]/5' }}">
+                                            <span class="w-2 h-2 rounded-full {{ $device->online_status ? 'bg-[#00A451]' : 'bg-[#DC2626]' }}"></span>
+                                            <span class="{{ $device->online_status ? 'text-[#00A451]' : 'text-[#DC2626]' }} text-sm"> {{ $device->online_status ? 'Online' : 'Offline' }}</span>
+                                        </div>
+                                        <div class="inline-block text-left" data-dropdown>
+                                            <button type="button"
+                                                onclick="event.preventDefault(); event.stopPropagation(); toggleDropdown(this)"
+                                                class="text-gray-500 hover:text-gray-300 w-6 h-8 flex items-center justify-center rounded-md hover:bg-white/5 ml-auto">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                                    <circle cx="12" cy="5" r="1.5" />
+                                                    <circle cx="12" cy="12" r="1.5" />
+                                                    <circle cx="12" cy="19" r="1.5" />
+                                                </svg>
+                                            </button>
+                                            <div class="hidden w-36 rounded-lg border border-white/10 bg-[#1a1a1a] shadow-lg overflow-hidden" data-menu>
+                                                <button type="button" data-device-id="{{ $device->id }}" onclick="openDeviceRenameCard()"
+                                                    class="btnOpenDeviceRenameCard w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-white/5">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M12 20h9" />
+                                                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                                                    </svg>
+                                                    Ubah nama
+                                                </button>
+                                                <form action="{{ route('device.remove') }}" method="POST">
+                                                    @csrf
+                                                    @method('PATCH')
+
+                                                    <input type="hidden" name="device_id" value="{{ $device->id }}">
+                                                    <button type="submit"
+                                                        class="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-white/5">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                            <polyline points="3 6 5 6 21 6" />
+                                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                                            <line x1="10" y1="11" x2="10" y2="17" />
+                                                            <line x1="14" y1="11" x2="14" y2="17" />
+                                                        </svg>
+                                                        Hapus
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="mt-8 space-y-2 text-sm">
@@ -402,13 +536,15 @@
                                     <h1>{{$device->device_name}}</h1>
                                     <p class="text-[#C5C5C5] text-xs">{{$device->device_config->location}}</p>
                                 </div>
-                                <a href="" class="p-1 rounded-lg bg-white">
-                                    <svg width="20" height="20" viewBox="0 0 12 12" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
+                                <button
+                                    type="button"
+                                    class="gps-point p-1 rounded-lg bg-white"
+                                    data-lat="{{ $device->device_config->lat }}"
+                                    data-lng="{{ $device->device_config->long }}"
+                                    aria-label="Go to {{ $device->device_name }} location">
+                                    <svg width="20" height="20" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <g clip-path="url(#clip0_332_1698)">
-                                            <path
-                                                d="M6 4C4.895 4 4 4.895 4 6C4 7.105 4.895 8 6 8C7.105 8 8 7.105 8 6C8 4.895 7.105 4 6 4ZM10.47 5.5C10.3567 4.48606 9.90208 3.54077 9.18065 2.81935C8.45923 2.09792 7.51394 1.64326 6.5 1.53V0.5H5.5V1.53C4.48606 1.64326 3.54077 2.09792 2.81935 2.81935C2.09792 3.54077 1.64326 4.48606 1.53 5.5H0.5V6.5H1.53C1.64326 7.51394 2.09792 8.45923 2.81935 9.18065C3.54077 9.90208 4.48606 10.3567 5.5 10.47V11.5H6.5V10.47C7.51394 10.3567 8.45923 9.90208 9.18065 9.18065C9.90208 8.45923 10.3567 7.51394 10.47 6.5H11.5V5.5H10.47ZM6 9.5C4.065 9.5 2.5 7.935 2.5 6C2.5 4.065 4.065 2.5 6 2.5C7.935 2.5 9.5 4.065 9.5 6C9.5 7.935 7.935 9.5 6 9.5Z"
-                                                fill="#121212" />
+                                            <path d="M6 4C4.895 4 4 4.895 4 6C4 7.105 4.895 8 6 8C7.105 8 8 7.105 8 6C8 4.895 7.105 4 6 4ZM10.47 5.5C10.3567 4.48606 9.90208 3.54077 9.18065 2.81935C8.45923 2.09792 7.51394 1.64326 6.5 1.53V0.5H5.5V1.53C4.48606 1.64326 3.54077 2.09792 2.81935 2.81935C2.09792 3.54077 1.64326 4.48606 1.53 5.5H0.5V6.5H1.53C1.64326 7.51394 2.09792 8.45923 2.81935 9.18065C3.54077 9.90208 4.48606 10.3567 5.5 10.47V11.5H6.5V10.47C7.51394 10.3567 8.45923 9.90208 9.18065 9.18065C9.90208 8.45923 10.3567 7.51394 10.47 6.5H11.5V5.5H10.47ZM6 9.5C4.065 9.5 2.5 7.935 2.5 6C2.5 4.065 4.065 2.5 6 2.5C7.935 2.5 9.5 4.065 9.5 6C9.5 7.935 7.935 9.5 6 9.5Z" fill="#121212" />
                                         </g>
                                         <defs>
                                             <clipPath id="clip0_332_1698">
@@ -416,7 +552,7 @@
                                             </clipPath>
                                         </defs>
                                     </svg>
-                                </a>
+                                </button>
                             </div>
                         </div>
                     </a>
@@ -437,11 +573,12 @@
                         position: 'bottomright'
                     }).addTo(map);
 
-                    L.tileLayer(
-                        'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                            maxZoom: 20,
-                        }
-                    ).addTo(map);
+
+                    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png?key=cb1_2fz2_1_a235180b6236030d085af705', {
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                        subdomains: 'abcd',
+                        maxZoom: 20
+                    }).addTo(map);
 
                     function buatIconNavPulse(warna = '#007AFF') {
                         return L.divIcon({
@@ -493,6 +630,30 @@
                         const group = new L.featureGroup(markerGroup);
                         map.fitBounds(group.getBounds().pad(0.2));
                     }
+                </script>
+                <script>
+                    document.querySelectorAll('.gps-point').forEach(btn => {
+                        btn.addEventListener('click', function(e) {
+                            e.preventDefault(); // cegah <a> parent ikut navigasi
+                            e.stopPropagation();
+
+                            const lat = parseFloat(this.dataset.lat);
+                            const lng = parseFloat(this.dataset.lng);
+
+                            if (isNaN(lat) || isNaN(lng)) return;
+
+                            map.flyTo([lat, lng], 18, {
+                                duration: 1.2
+                            });
+
+                            // opsional: buka popup marker yang sesuai
+                            const target = markerGroup.find(m => {
+                                const p = m.getLatLng();
+                                return p.lat === lat && p.lng === lng;
+                            });
+                            if (target) target.openPopup();
+                        });
+                    });
                 </script>
             </div>
 
@@ -555,6 +716,9 @@
     const btnClose_addDevice = document.getElementById('btn-close-addDevice');
     const addDevice_Card = document.getElementById('addDevice-Card');
 
+    const userRename_Card = document.getElementById('userRename-Card');
+    const deviceRename_Card = document.getElementById('deviceRename-Card');
+
     function openSidebar() {
         sidebar.classList.remove('-translate-x-full');
         sidebar.classList.add('translate-x-0');
@@ -566,10 +730,22 @@
         sidebar.classList.remove('translate-x-0');
         overlay.classList.add('hidden');
         addDevice_Card.classList.add('hidden');
+        userRename_Card.classList.add('hidden');
+        deviceRename_Card.classList.add('hidden');
     }
 
     function openAddDevice() {
         addDevice_Card.classList.remove('hidden');
+        overlay.classList.remove('hidden');
+    }
+
+    function openUserRename() {
+        userRename_Card.classList.remove('hidden');
+        overlay.classList.remove('hidden');
+    }
+
+    function openDeviceRenameCard() {
+        deviceRename_Card.classList.remove('hidden');
         overlay.classList.remove('hidden');
     }
 
@@ -581,6 +757,101 @@
     btnClose_addDevice.addEventListener('click', closeCard);
 
     overlay.addEventListener('click', closeCard);
+
+    document.querySelectorAll('.btnOpenDeviceRenameCard').forEach(button => {
+        button.addEventListener('click', function() {
+            const deviceId = this.dataset.deviceId;
+            document.getElementById('rename-deviceId').value = deviceId;
+            openDeviceRenameCard();
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('[data-dropdown]').forEach((wrapper) => {
+            const menu = wrapper.querySelector('[data-menu]');
+            if (!menu) return;
+
+            menu.classList.add('fixed', 'z-[9999]');
+            wrapper._menu = menu; // simpan referensi biar gampang dicari lagi
+            document.body.appendChild(menu);
+        });
+    });
+
+    function toggleDropdown(button) {
+        const wrapper = button.closest('[data-dropdown]');
+        const menu = wrapper._menu || wrapper.querySelector('[data-menu]');
+        if (!menu) return;
+
+        const isOpen = !menu.classList.contains('hidden');
+
+        // Tutup semua dropdown lain dulu
+        document.querySelectorAll('[data-menu]').forEach((m) => {
+            m.classList.add('hidden');
+        });
+
+        if (isOpen) return; // klik ulang tombol yang sama -> cukup ditutup
+
+        // Hitung posisi berdasarkan posisi tombol titik tiga di layar
+        const rect = button.getBoundingClientRect();
+        const menuWidth = menu.offsetWidth || 144; // fallback w-36 = 144px
+        const menuHeight = menu.offsetHeight || 90;
+
+        let left = rect.right - menuWidth; // rata kanan ke tombol
+        let top = rect.bottom + 4;
+
+        // Jaga biar nggak keluar layar kiri/kanan
+        if (left < 8) left = 8;
+        if (left + menuWidth > window.innerWidth - 8) {
+            left = window.innerWidth - menuWidth - 8;
+        }
+
+        // Kalau ruang di bawah nggak cukup, buka ke atas tombol
+        if (top + menuHeight > window.innerHeight - 8) {
+            top = rect.top - menuHeight - 4;
+        }
+
+        menu.style.left = `${left}px`;
+        menu.style.top = `${top}px`;
+        menu.classList.remove('hidden');
+    }
+
+    // Tutup dropdown kalau klik di luar tombol maupun menu-nya
+    // (menu sekarang ada di <body>, jadi cek dua-duanya terpisah)
+    document.addEventListener('click', function(event) {
+        const clickedInsideMenu = event.target.closest('[data-menu]');
+        const clickedTrigger = event.target.closest('[data-dropdown]');
+        if (!clickedInsideMenu && !clickedTrigger) {
+            document.querySelectorAll('[data-menu]').forEach((m) => {
+                m.classList.add('hidden');
+            });
+        }
+    });
+
+    // Tutup dropdown saat scroll (termasuk scroll horizontal card list)
+    document.addEventListener('scroll', function() {
+        document.querySelectorAll('[data-menu]').forEach((m) => {
+            m.classList.add('hidden');
+        });
+    }, true);
+
+    function btnOpenRenameCard(button) {
+        const deviceId = button.dataset.deviceId;
+        button.closest('[data-menu]').classList.add('hidden');
+
+        const modal = document.getElementById('renameDeviceModal');
+        const input = document.getElementById('renameDeviceInput');
+        const form = document.getElementById('renameDeviceForm');
+
+        if (modal && input && form) {
+            input.value = '';
+            form.action = `/devices/${deviceId}/rename`; // sesuaikan route-nya
+            modal.classList.remove('hidden');
+        } else {
+            console.warn('Rename modal tidak ditemukan di DOM untuk device', deviceId);
+        }
+    }
 </script>
 
 </html>

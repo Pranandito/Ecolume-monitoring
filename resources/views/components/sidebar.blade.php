@@ -1,5 +1,5 @@
 @props([
-'devices'
+'devices' => null
 ])
 
 <aside id="sidebar" class="fixed left-0 top-0 bottom-0 h-lvh w-[400px] bg-[#171717]  z-[1114] p-11 flex flex-col justify-between  -translate-x-full transition-transform duration-300">
@@ -19,6 +19,26 @@
         </div>
         <hr class="my-8 -m-11 border-[#333333]">
         <p class="text-[#979797]">Menu</p>
+
+        @if(auth()->user()->role === 'admin')
+        <a href="{{ route('admin.dashboard') }}" class="block mb-2">
+            <div class="group flex items-center gap-[10px] px-3 py-2 hover:bg-[#2A2A2A] text-[#979797] hover:text-white rounded-xl">
+                <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" class="fill-[#979797] group-hover:fill-white">
+                    <path d="M9.16639 17.4167V12.8333H12.8331V17.4167C12.8331 17.9208 13.2456 18.3333 13.7497 18.3333H16.4997C17.0039 18.3333 17.4164 17.9208 17.4164 17.4167V11H18.9747C19.3964 11 19.5981 10.4775 19.2772 10.2025L11.6139 3.3C11.2656 2.98834 10.7339 2.98834 10.3856 3.3L2.72222 10.2025C2.41056 10.4775 2.60306 11 3.02472 11H4.58306V17.4167C4.58306 17.9208 4.99556 18.3333 5.49972 18.3333H8.24972C8.75389 18.3333 9.16639 17.9208 9.16639 17.4167Z" />
+                </svg>
+                <h1>Dashboard</h1>
+            </div>
+        </a>
+        <a href="{{ route('admin.dashboard') }}" class="block">
+            <div class="group flex items-center gap-[10px] px-3 py-2 hover:bg-[#2A2A2A] text-[#979797] hover:text-white rounded-xl">
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" class="group-hover:stroke-white stroke-[#979797]">
+                    <path d="M0.75 16.75V2.75C0.75 2.21957 0.960714 1.71086 1.33579 1.33579C1.71086 0.960714 2.21957 0.75 2.75 0.75H13.922C14.4524 0.750113 14.961 0.960901 15.336 1.336L18.164 4.164C18.5391 4.53899 18.7499 5.04761 18.75 5.578V16.75C18.75 17.2804 18.5393 17.7891 18.1642 18.1642C17.7891 18.5393 17.2804 18.75 16.75 18.75H2.75C2.21957 18.75 1.71086 18.5393 1.33579 18.1642C0.960714 17.7891 0.75 17.2804 0.75 16.75Z" stroke="" stroke-width="1.5" />
+                    <path d="M6.35 6.75H13.15C13.3091 6.75 13.4617 6.68679 13.5743 6.57426C13.6868 6.46174 13.75 6.30913 13.75 6.15V1.35C13.75 1.19087 13.6868 1.03826 13.5743 0.925736C13.4617 0.813214 13.3091 0.75 13.15 0.75H6.35C6.19087 0.75 6.03826 0.813214 5.92574 0.925736C5.81321 1.03826 5.75 1.19087 5.75 1.35V6.15C5.75 6.30913 5.81321 6.46174 5.92574 6.57426C6.03826 6.68679 6.19087 6.75 6.35 6.75ZM3.75 11.35V18.75H15.75V11.35C15.75 11.1909 15.6868 11.0383 15.5743 10.9257C15.4617 10.8132 15.3091 10.75 15.15 10.75H4.35C4.19087 10.75 4.03826 10.8132 3.92574 10.9257C3.81321 11.0383 3.75 11.1909 3.75 11.35Z" stroke="" stroke-width="1.5" />
+                </svg>
+                <h1>Penyimpanan</h1>
+            </div>
+        </a>
+        @else
         <a href="{{ route('beranda') }}" class="block mb-3">
             <div class="group flex items-center gap-[10px] px-3 py-2 hover:bg-[#2A2A2A] text-[#979797] hover:text-white rounded-xl">
                 <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" class="fill-[#979797] group-hover:fill-white">
@@ -108,6 +128,7 @@
                 </div>
             </div>
         </div>
+        @endif
     </div>
     <div>
         <hr class="my-6 border-[#333333] -m-11">
@@ -116,7 +137,7 @@
                 <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
                     alt="Profile picture" class="w-10 h-10 rounded-full object-cover border border-zinc-700">
                 <div class="flex flex-col">
-                    <span class="text-xs text-zinc-100">{{ auth()->user()->name }}</span>
+                    <span class="text-xs text-zinc-100">{{ auth()->user()->role === 'admin' ? 'Admin - ' : '' }}{{ auth()->user()->name }}</span>
                     <span class="text-[10px] text-zinc-400">{{ auth()->user()->email }}</span>
                 </div>
             </div>

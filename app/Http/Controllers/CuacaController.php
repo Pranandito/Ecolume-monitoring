@@ -13,8 +13,16 @@ class CuacaController extends Controller
     {
         $dev_id = $device_id;
         $dev_name = $device_name;
+        if (Auth::user()->role === 'admin') {
+            $device = Device::select('id', 'owner_id')->where('id', $dev_id)->first();
+            $user_id = $device->owner_id;
+        } else {
+            $user_id = Auth::id();
+        }
+
         $devices = Device::select('id', 'owner_id', 'serial_number', 'device_name', 'online_status')
-            ->where('owner_id', Auth::id())->with(['device_config' => function ($querry) {
+            ->where('owner_id', $user_id)
+            ->with(['device_config' => function ($querry) {
                 $querry->select('id', 'device_id', 'location');
             }, 'today_weather' => function ($querry) {
                 $querry->select('id', 'device_id', 'weather_code', 'temperature_mean');

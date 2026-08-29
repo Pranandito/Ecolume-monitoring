@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Device;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use RikoDEV\InfluxDB\Facades\InfluxDB;
+
+use function Clue\StreamFilter\fun;
 
 class DashboardController extends Controller
 {
@@ -274,29 +277,52 @@ class DashboardController extends Controller
         return $result[0]->records[0]->values["_value"];
     }
 
-    public function index($device_name, $device_id)
+    public function index($device_name = null, $device_id = null)
     {
+        if ($device_name === null && $device_id === null) {
+            return redirect()->route('beranda');
+        }
+
         $device = Device::where("id", $device_id)
             ->select('id', 'owner_id', 'device_name', 'online_status', 'serial_number', 'created_at')
-            ->with('device_config', 'today_weather')->first();
-        $sunDuration =  Carbon::parse($device->today_weather->sunrise)
-            ->diffInMinute($device->today_weather->sunset);
+            ->with([
+                'device_config',
+                'today_weather',
+                'user' => function ($query) {
+                    $query->select('id', 'name', 'email');
+                }
+            ])->first();
 
-        $device->today_weather->sun_duration_h = floor($sunDuration / 60);
-        $device->today_weather->sun_duration_m = $sunDuration % 60;
+        if ($device->owner_id != Auth::user()->id && Auth::user()->role !== 'admin') {
+            return redirect()->route('beranda');
+        }
+
+        if ($device->today_weather) {
+            $sunDuration =  Carbon::parse($device->today_weather->sunrise)
+                ->diffInMinute($device->today_weather->sunset);
+
+            $device->today_weather->sun_duration_h = floor($sunDuration / 60);
+            $device->today_weather->sun_duration_m = $sunDuration % 60;
+        }
 
         $logs   = $this->getDailyLogs($device_id);
 
         $latestFull = $this->getLatestData($device_id);
-        $stop = new \DateTime((string) $latestFull['_time']);
-        $start = (clone $stop)->modify('-1 day');
 
-        $stopRawValues = array_intersect_key($latestFull, array_flip(self::CUMULATIVE_FIELDS));
-        $delta = $this->getGuardedDelta($device_id, $start, $stop, $stopRawValues);
-        $first = $this->reconstructFirst($latestFull, $delta);
+        $today = null;
+        $avgSuhu = null;
+        $first =  null;
+        if ($latestFull) {
+            $stop = new \DateTime((string) $latestFull['_time']);
+            $start = (clone $stop)->modify('-1 day');
 
-        $today   = $this->calculateDiff($latestFull, $first); // = $delta, tapi dihitung ulang biar konsisten sama view lama
-        $avgSuhu = $this->getAvgSuhu($latestFull['_time'], $device_id);
+            $stopRawValues = array_intersect_key($latestFull, array_flip(self::CUMULATIVE_FIELDS));
+            $delta = $this->getGuardedDelta($device_id, $start, $stop, $stopRawValues);
+            $first = $this->reconstructFirst($latestFull, $delta);
+
+            $today   = $this->calculateDiff($latestFull, $first); // = $delta, tapi dihitung ulang biar konsisten sama view lama
+            $avgSuhu = $this->getAvgSuhu($latestFull['_time'], $device_id);
+        }
 
         $devices = Device::select('id', 'owner_id', 'serial_number', 'device_name', 'online_status')->where('owner_id', Auth::id())->get();
         $id   = $device_id;

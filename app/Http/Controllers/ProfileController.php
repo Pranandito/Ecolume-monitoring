@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -35,6 +36,20 @@ class ProfileController extends Controller
         $request->user()->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
+    }
+
+    public function rename(Request $request)
+    {
+        $validated  = $request->validate([
+            'user_id' => 'required|integer|exists:users,id',
+            'new_username' => 'required|string|max:12'
+        ]);
+
+        $update = User::where('id', $validated['user_id'])->update([
+            "name" => $validated['new_username']
+        ]);
+
+        return redirect()->back();
     }
 
     /**

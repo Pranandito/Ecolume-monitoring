@@ -42,6 +42,18 @@
             scrollbar-width: thin;
             scrollbar-color: #373737 transparent;
         }
+
+        .hide-scrollbar {
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE dan Edge lama */
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+            /* Chrome, Safari, Edge baru */
+        }
     </style>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
@@ -202,68 +214,37 @@
     </form>
 </div>
 
-<section id="overlay" class="hidden fixed top-0 bottom-0 left-0 right-0 bg-black/50 z-[1111]"></section>
-<aside id="sidebar" class="fixed left-0 top-0 bottom-0 h-lvh w-[400px] bg-[#171717]  z-[1114] p-11 flex flex-col justify-between  -translate-x-full transition-transform duration-300">
-    <div>
-        <div class=" flex items-center justify-between">
-            <div class="flex items-center gap-4 text-2xl">
-                <img src="{{ asset('images/ecolume-logo.svg') }}" alt="" class="w-8">
-                <h1>Ecolume</h1>
-            </div>
-            <button id="btn-close-sidebar" class="p-1.5 text-white hover:text-white rounded-md hover:bg-zinc-800 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                    <line x1="9" y1="3" x2="9" y2="21"></line>
-                </svg>
+<div id="delDevConfirm-card" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#171717] rounded-2xl shadow-3xl p-6 w-full max-w-[350px] lg:max-w-md z-[1112] text-zinc-400">
+    <h1 class="text-white text-center">Konfirmasi Penghapusan</h1>
+    <p class="text-sm mb-4 mt-2 text-center">
+        Apakah Anda yakin ingin menghapus perangkat
+    </p>
+
+    <form action="{{ route('device.delete') }}" method="POST">
+        @csrf
+        @method('DELETE')
+
+        <input type="hidden" name="device_id" id="delDevInput">
+        <div class="flex gap-3">
+            <button type="button" onclick="closeDelDevConfirmCard()"
+                class="block text-center w-full text-sm rounded-full border border-zinc-700 py-2 text-[#979797] hover:bg-zinc-800 transition">
+                Batal
+            </button>
+            <button type="submit"
+                class="block text-center w-full text-sm rounded-full border border-red-900 py-2 text-red-500 bg-red-500/10 hover:bg-red-500/20 transition">
+                Hapus
             </button>
         </div>
-        <hr class="my-8 -m-11 border-[#333333]">
-        <p class="text-[#979797]">Menu</p>
-        <a href="{{ route('admin.dashboard') }}" class="block mb-2">
-            <div class="group flex items-center gap-[10px] px-3 py-2 hover:bg-[#2A2A2A] text-[#979797] hover:text-white rounded-xl">
-                <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" class="fill-[#979797] group-hover:fill-white">
-                    <path d="M9.16639 17.4167V12.8333H12.8331V17.4167C12.8331 17.9208 13.2456 18.3333 13.7497 18.3333H16.4997C17.0039 18.3333 17.4164 17.9208 17.4164 17.4167V11H18.9747C19.3964 11 19.5981 10.4775 19.2772 10.2025L11.6139 3.3C11.2656 2.98834 10.7339 2.98834 10.3856 3.3L2.72222 10.2025C2.41056 10.4775 2.60306 11 3.02472 11H4.58306V17.4167C4.58306 17.9208 4.99556 18.3333 5.49972 18.3333H8.24972C8.75389 18.3333 9.16639 17.9208 9.16639 17.4167Z" />
-                </svg>
-                <h1>Dashboard</h1>
-            </div>
-        </a>
-        <a href="{{ route('admin.dashboard') }}" class="block">
-            <div class="group flex items-center gap-[10px] px-3 py-2 hover:bg-[#2A2A2A] text-[#979797] hover:text-white rounded-xl">
-                <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" class="group-hover:stroke-white stroke-[#979797]">
-                    <path d="M0.75 16.75V2.75C0.75 2.21957 0.960714 1.71086 1.33579 1.33579C1.71086 0.960714 2.21957 0.75 2.75 0.75H13.922C14.4524 0.750113 14.961 0.960901 15.336 1.336L18.164 4.164C18.5391 4.53899 18.7499 5.04761 18.75 5.578V16.75C18.75 17.2804 18.5393 17.7891 18.1642 18.1642C17.7891 18.5393 17.2804 18.75 16.75 18.75H2.75C2.21957 18.75 1.71086 18.5393 1.33579 18.1642C0.960714 17.7891 0.75 17.2804 0.75 16.75Z" stroke="" stroke-width="1.5" />
-                    <path d="M6.35 6.75H13.15C13.3091 6.75 13.4617 6.68679 13.5743 6.57426C13.6868 6.46174 13.75 6.30913 13.75 6.15V1.35C13.75 1.19087 13.6868 1.03826 13.5743 0.925736C13.4617 0.813214 13.3091 0.75 13.15 0.75H6.35C6.19087 0.75 6.03826 0.813214 5.92574 0.925736C5.81321 1.03826 5.75 1.19087 5.75 1.35V6.15C5.75 6.30913 5.81321 6.46174 5.92574 6.57426C6.03826 6.68679 6.19087 6.75 6.35 6.75ZM3.75 11.35V18.75H15.75V11.35C15.75 11.1909 15.6868 11.0383 15.5743 10.9257C15.4617 10.8132 15.3091 10.75 15.15 10.75H4.35C4.19087 10.75 4.03826 10.8132 3.92574 10.9257C3.81321 11.0383 3.75 11.1909 3.75 11.35Z" stroke="" stroke-width="1.5" />
-                </svg>
-                <h1>Penyimpanan</h1>
-            </div>
-        </a>
-    </div>
-    <div>
-        <hr class="my-6 border-[#333333] -m-11">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center gap-5">
-                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                    alt="Profile picture" class="w-10 h-10 rounded-full object-cover border border-zinc-700">
-                <div class="flex flex-col">
-                    <span class="text-xs text-zinc-100">{{ auth()->user()->name }}</span>
-                    <span class="text-[10px] text-zinc-400">{{ auth()->user()->email }}</span>
-                </div>
-            </div>
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="p-1.5 text-white hover:text-white rounded-md hover:bg-zinc-800 transition-colors">
-                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M5.83333 24.5C5.19167 24.5 4.64256 24.2717 4.186 23.8152C3.72944 23.3586 3.50078 22.8091 3.5 22.1667V5.83333C3.5 5.19167 3.72867 4.64256 4.186 4.186C4.64333 3.72944 5.19244 3.50078 5.83333 3.5H14V5.83333H5.83333V22.1667H14V24.5H5.83333ZM18.6667 19.8333L17.0625 18.1417L20.0375 15.1667H10.5V12.8333H20.0375L17.0625 9.85833L18.6667 8.16667L24.5 14L18.6667 19.8333Z" fill="#979797" />
-                    </svg>
-                </button>
-            </form>
-        </div>
-    </div>
-</aside>
+    </form>
+</div>
+
+<section id="overlay" class="hidden fixed top-0 bottom-0 left-0 right-0 bg-black/50 z-[1111]"></section>
+
+<x-sidebar />
 
 <body class="lg:my-12 my-6 lg:mx-16 mx-3 text-white">
     <x-navbar>
-        Dashboard
+        Dashboard Admin
     </x-navbar>
 
     <hr class="my-5 border-[#373737]">
@@ -448,19 +429,21 @@
         </div>
     </div>
 
-    <div class="overflow-x-auto rounded-2xl border border-white/10">
-        <table class="w-full text-left border-collapse">
+    <div class="overflow-x-auto rounded-2xl border border-white/10 hide-scrollbar">
+        <table class="w-full text-left border-collapse min-w-[1450px]">
             <thead>
                 <tr class="bg-[#171717] text-gray-400 text-sm">
                     <th class="px-6 py-4 font-medium">Id</th>
                     <th class="px-6 py-4 font-medium">Device</th>
+                    <th class="px-6 py-4 font-medium">Firmware</th>
                     <th class="px-6 py-4 font-medium">Serial Number</th>
                     <th class="px-6 py-4 font-medium">Api key</th>
                     <th class="px-6 py-4 font-medium">Konektivitas</th>
                     <th class="px-6 py-4 font-medium">Operasional</th>
                     <th class="px-6 py-4 font-medium">Owner</th>
                     <th class="px-6 py-4 font-medium">Update Terakhir</th>
-                    <th class="px-6 py-4 font-medium"></th>
+                    <th class="px-6 py-4 font-medium">Ditambahkan Pada</th>
+                    <th class="px-6 py-4 font-medium sticky right-0 bg-[#171717] z-10"></th>
                 </tr>
             </thead>
             <tbody id="table-body" class="text-sm text-[#979797] divide-y divide-white/10">
@@ -468,6 +451,7 @@
                 <tr class="hover:bg-white/[0.03] transition">
                     <td class="px-6 py-4 whitespace-nowrap text-gray-300">{{ $dev->id }}</td>
                     <td class="px-6 py-4 whitespace-nowrap">{{$dev->device_name}}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{$dev->firmware_version}}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-gray-300">
                         <div class="flex items-center gap-2">
                             <span>{{ $dev->serial_number }}</span>
@@ -498,13 +482,13 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium 
-                        @if ($dev->operational_status === 'Anomaly')
-                            bg-[#F59E0B]/5 text-[#F59E0B]
-                        @elseif ($dev->operational_status == 'Off')
-                            bg-[#DC2626]/5 text-[#DC2626]
-                        @else
-                            bg-[#00A451]/5 text-[#00A451]
-                        @endif">
+                    @if ($dev->operational_status === 'Anomaly')
+                        bg-[#F59E0B]/5 text-[#F59E0B]
+                    @elseif ($dev->operational_status == 'Off')
+                        bg-[#DC2626]/5 text-[#DC2626]
+                    @else
+                        bg-[#00A451]/5 text-[#00A451]
+                    @endif">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
                                 stroke="currentColor" stroke-width="2" stroke-dasharray="4 4" stroke-linecap="round"
                                 stroke-linejoin="round">
@@ -515,8 +499,9 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-gray-300">{{ $dev->user->name ?? '-' }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-gray-300">{{ $dev->last_seen ?? '-' }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right">
-                        <div class="relative inline-block text-left" data-dropdown>
+                    <td class="px-6 py-4 whitespace-nowrap text-gray-300">{{ $dev->created_at ?? '-' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right sticky right-0 bg-[#121212] z-10">
+                        <div class="inline-block text-left" data-dropdown>
                             <button type="button" onclick="toggleDropdown(this)" class="text-gray-500 hover:text-gray-300 w-8 h-8 flex items-center justify-center rounded-md hover:bg-white/5 ml-auto">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                                     <circle cx="12" cy="5" r="1.5" />
@@ -524,15 +509,16 @@
                                     <circle cx="12" cy="19" r="1.5" />
                                 </svg>
                             </button>
-                            <div class="hidden absolute right-0 z-10 mt-1 w-36 rounded-lg border border-white/10 bg-[#1a1a1a] shadow-lg overflow-hidden" data-menu>
-                                <a href="#" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-white/5">
+                            <div class="hidden w-36 rounded-lg border border-white/10 bg-[#1a1a1a] shadow-lg overflow-hidden" data-menu>
+                                <a href="{{ route('dashboard', ['device_name' => $dev->device_name, 'device_id' => $dev->id]) }}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-white/5">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
                                         <circle cx="12" cy="12" r="3" />
                                     </svg>
                                     Lihat
                                 </a>
-                                <button type="button" class="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-white/5">
+                                <button type="button" data-device-id="{{ $dev->id }}"
+                                    class="btnOpenDeviceConfirmCard w-full flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-white/5">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <polyline points="3 6 5 6 21 6" />
                                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
@@ -827,6 +813,9 @@
     const btnCloseAddDevice = document.getElementById('btn-close-addDevice');
     const addDeviceCard = document.getElementById('addDevice-Card');
 
+    const deleteDeviceConfirmCard = document.getElementById('delDevConfirm-card');
+    const btnOpenDeviceConfirmCard = document.getElementById('openDelDevConfirm-btn');
+
     function openSidebar() {
         sidebar.classList.remove('-translate-x-full');
         sidebar.classList.add('translate-x-0');
@@ -840,6 +829,7 @@
 
         addAdminCard.classList.add('hidden');
         addDeviceCard.classList.add('hidden');
+        deleteDeviceConfirmCard.classList.add('hidden');
     }
 
     function openAddAdminCard() {
@@ -862,6 +852,16 @@
         overlay.classList.add('hidden');
     }
 
+    function openDelDevConfirmCard() {
+        deleteDeviceConfirmCard.classList.remove('hidden');
+        overlay.classList.remove('hidden');
+    }
+
+    function closeDelDevConfirmCard() {
+        deleteDeviceConfirmCard.classList.add('hidden');
+        overlay.classList.add('hidden');
+    }
+
     btnOpenSidebar.addEventListener('click', openSidebar);
     btnCloseSidebar.addEventListener('click', closeCard);
 
@@ -872,6 +872,14 @@
     btnCloseAddDevice.addEventListener('click', closeAddDeviceCard);
 
     overlay.addEventListener('click', closeCard);
+
+    document.querySelectorAll('.btnOpenDeviceConfirmCard').forEach(button => {
+        button.addEventListener('click', function() {
+            const deviceId = this.dataset.deviceId;
+            document.getElementById('delDevInput').value = deviceId;
+            openDelDevConfirmCard();
+        });
+    });
 </script>
 
 <script>
@@ -981,4 +989,71 @@
             }, 300);
         }, 1500);
     }
+</script>
+
+<script>
+    function toggleDropdown(btn) {
+        const menu = btn.nextElementSibling;
+        const isCurrentlyOpen = menu.dataset.open === 'true';
+
+        // tutup semua dropdown yang sedang terbuka
+        document.querySelectorAll('[data-menu]').forEach(m => {
+            if (m.dataset.open === 'true') {
+                m.dataset.open = 'false';
+                m.classList.add('hidden');
+                if (m._originalParent) {
+                    m._originalParent.insertBefore(m, m._originalNextSibling);
+                }
+            }
+        });
+
+        if (isCurrentlyOpen) return; // klik ke-2 pada tombol yang sama = tutup
+
+        // simpan parent asli sekali saja
+        if (!menu._originalParent) {
+            menu._originalParent = menu.parentElement;
+            menu._originalNextSibling = menu.nextSibling;
+        }
+
+        // ⭐ FIX: unhide dulu (tapi sembunyikan via opacity) baru ukur, baru pindah
+        menu.classList.remove('hidden');
+        menu.style.visibility = 'hidden'; // sembunyikan sementara saat mengukur
+        document.body.appendChild(menu);
+
+        const rect = btn.getBoundingClientRect();
+        const menuWidth = menu.offsetWidth; // sekarang terukur benar karena sudah ter-render
+
+        let left = rect.right - menuWidth;
+        let top = rect.bottom + 4;
+
+        // jaga-jaga biar tidak keluar layar
+        if (left < 8) left = 8;
+        if (top + menu.offsetHeight > window.innerHeight) {
+            top = rect.top - menu.offsetHeight - 4; // buka ke atas kalau mepet bawah
+        }
+
+        menu.style.position = 'fixed';
+        menu.style.top = `${top}px`;
+        menu.style.left = `${left}px`;
+        menu.style.zIndex = '9999';
+        menu.style.visibility = 'visible';
+        menu.dataset.open = 'true';
+    }
+
+    document.addEventListener('click', (e) => {
+        const clickedInsideAnyMenu = e.target.closest('[data-menu]');
+        const clickedToggleBtn = e.target.closest('[data-dropdown] > button');
+
+        if (!clickedInsideAnyMenu && !clickedToggleBtn) {
+            document.querySelectorAll('[data-menu]').forEach(m => {
+                if (m.dataset.open === 'true') {
+                    m.dataset.open = 'false';
+                    m.classList.add('hidden');
+                    if (m._originalParent) {
+                        m._originalParent.insertBefore(m, m._originalNextSibling);
+                    }
+                }
+            });
+        }
+    });
 </script>

@@ -17,15 +17,17 @@ class Logger
             "createDevice" => "Menambahkan Device",
             "deleteDevice" => "Menghapus Device",
             "newUser" => "Akun Baru Terdaftar",
-            "deviceClaim" => "Device Terhubung ke User",
+            "claimDevice" => "Device Terhubung ke User",
+            "removeDevice" => "Device Dilepas User",
             "addAdmin" => "Penambahan Admin"
         ];
 
         $descMap = [
             "createDevice" => fn() => "{$data['admin_name']} menambahkan device - ID: {$data['device_id']}",
-            "deleteDevice" => fn() => "{$data['admin_name']} menghapus device dari sistem",
+            "deleteDevice" => fn() => "{$data['admin_name']} menghapus device dari sistem - ID: {$data['device_id']}",
             "newUser" => fn() => "Akun baru atas nama {$data['new_username']} telah dibuat",
-            "deviceClaim" => fn() => "{$data['device_serial_number']} dihubungkan ke akun {$data['username']}",
+            "claimDevice" => fn() => "{$data['device_serial_number']} dihubungkan ke akun {$data['username']}",
+            "removeDevice" => fn() => "{$data['username']} melepas perangkat {$data['device_serial_number']}",
             "addAdmin" => fn() => "{$data['added_admin_name']} ditingkatkan menjadi admin oleh {$data['admin_name']}",
         ];
 
