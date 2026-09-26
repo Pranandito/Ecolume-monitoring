@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\DailyWeatherForecast;
 use App\Models\Device;
+use App\Models\DeviceConfig;
 use App\Models\HourlyWeatherForecast;
 use App\Models\TodayWeather;
+use App\Services\MQTTPublish;
+use App\Services\StatusUpdate;
 use Carbon\Carbon;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
@@ -87,14 +90,37 @@ class EspController extends Controller
         ], 404);
     }
 
-    public function tes2()
-    {
-        $update = Device::where('id', 1)->update([
-            "online_status" => 1,
-            "last_seen" => Carbon::now(),
-            "oprational_status" => "On"
-        ]);
+    public function __construct(
+        protected StatusUpdate $statusUpdate
+    ) {}
 
-        return $update;
+    public function tes2($device_id, $message)
+    {
+        $device = Device::where('id', $device_id)->select('id', 'online_status')
+            ->with(['device_config' => function ($querry) {
+                $querry->select('id', 'device_id', 'job_id', 'job_confirmed', 'mode', 'volume_progress', 'volume_limit', 'timer_start', 'timer_end');
+            }])->first();
+
+        // return $device;
+
+        // $deviceConfig = DeviceConfig::where('device_id', $device_id)
+        //     ->select('device_id', 'job_id', 'job_confirmed', 'mode', 'volume_progress', 'volume_limit', 'timer_start', 'timer_end')
+        //     ->first();
+
+        if ($device->device_config && $message == $device->device_config->job_id) {
+            $updated = DeviceConfig::where('device_id', $device_id)
+                ->update([
+                    'job_confirmed' => 1
+                ]);
+        } else {
+            $updated = false;
+            // $this->mqttPublish->publishMode($device_id, $serial_number, $device->device_config, 1);
+        }
+
+        if ($device->online_status == 0) {
+            $this->statusUpdate->DeviceOnlineStatusUpdate($device_id);
+        }
+
+        return $updated;
     }
 }

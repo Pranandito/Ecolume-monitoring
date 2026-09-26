@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\ArchiveController;
 use App\Http\Controllers\BerandaController;
 use App\Http\Controllers\CarbonController;
 use App\Http\Controllers\CuacaController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\DeviceModeController;
 use App\Http\Controllers\EspController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\StorageController as AdminStorageController;
 use Illuminate\Support\Facades\Route;
 
 use Illuminate\Support\Facades\Auth;
@@ -44,19 +46,27 @@ Route::middleware('auth')->group(function () {
 });
 
 
-Route::get('/device/tes', [EspController::class, 'tes2']);
+Route::get('/device/tes/{device_id}/{message}', [EspController::class, 'tes2']);
 
 Route::get('/device/test/{device_id}', [DashboardController::class, 'getHeatMapData']);
 Route::get('/device/line-chart/{device_id}', [DashboardController::class, 'getChartData'])->name('dashboard.line-chart');
 Route::get('/device/{device_id}/kinerja-baseline', [DashboardController::class, 'kinerjaBaseline'])->name('kinerja.baseline');
 Route::get('/device/{device_id}/session-baseline', [DashboardController::class, 'sessionBaseline'])->name('device.session-baseline');
 
+Route::get('/device/admin-chart', [AdminDashboardController::class, 'getChartData'])->name('admin.chart');
+
 Route::post('/device/mode/{device_id}/{serial_number}', [DeviceModeController::class, 'update'])->name('device.mode');
 
 
 Route::middleware('auth', 'admin')->group(function () {
     Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin/storage', [AdminStorageController::class, 'index'])->name('admin.storage');
+    Route::get('/admin/metrics/storage', [AdminStorageController::class, 'storageMetrics'])->name('admin.storage.metrics');
+    Route::get('/admin/metrics/mqtt', [AdminStorageController::class, 'mqttMetrics'])->name('admin.mqtt.metrics');
     Route::post('/admin/add', [AdminController::class, 'addAdmin'])->name('admin.add');
+
+    Route::delete('/folder/delete', [ArchiveController::class, 'delete'])->name('folder.delete');
+    Route::post('/folder/create', [ArchiveController::class, 'create'])->name('folder.create');
 
     Route::delete('/device/delete', [DeviceController::class, 'delete'])->name('device.delete');
     Route::post('/device/create', [DeviceController::class, 'create'])->name('device.create');

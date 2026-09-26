@@ -24,7 +24,8 @@ class User extends Authenticatable
         'password',
         'carbon_factor',
         'role',
-        'role_updated_at'
+        'role_updated_at',
+        'last_seen'
     ];
 
     /**
@@ -48,6 +49,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'role_updated_at' => 'datetime',
+            'last_seen' => 'datetime',
         ];
     }
 

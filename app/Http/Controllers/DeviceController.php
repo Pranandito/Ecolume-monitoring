@@ -50,7 +50,7 @@ class DeviceController extends Controller
             "device_id" => $device->id
         ];
 
-        $this->log->create(Auth::id(), "createDevice", "Device", $device->id, $data);
+        $this->log->create(Auth::id(), "createDevice", "device", $device->id, $data);
 
         return redirect()->route('admin.dashboard');
     }

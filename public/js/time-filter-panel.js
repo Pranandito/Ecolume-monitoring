@@ -140,6 +140,7 @@
             const panel = this.els.panel;
             if (window.innerWidth < 1024) {
                 panel.classList.remove('absolute', 'right-0');
+                // panel.classList.add('fixed', 'top-1/2', 'left-1/2', '-translate-x-1/2', '-translate-y-1/2');
                 panel.classList.add('fixed', 'top-1/2', 'left-1/2', '-translate-x-1/2', '-translate-y-1/2');
             } else {
                 panel.classList.remove(...ALL_POSITION_CLASSES);
@@ -150,6 +151,9 @@
 
             this.viewDate = ctx.applied.start ? new Date(ctx.applied.start) : new Date();
             this.renderCalendar();
+            if (contextName == 'kinerja') {
+                panel.classList.add('-translate-x-full', 'mr-8');
+            }
             panel.classList.remove('hidden');
             this.els.overlay.classList.remove('hidden');
 
@@ -172,6 +176,9 @@
             }
             this.els.panel.classList.add('hidden');
             this.els.overlay.classList.add('hidden');
+            if (contextName === 'kinerja') {
+                panel.classList.remove('-translate-x-full', 'mr-8');
+            }
 
             const chartCtx = this.contexts['chart'];
             chartCtx?.container?.classList.add('z-[1111]');

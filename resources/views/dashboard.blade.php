@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Monitoring</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite('resources/css/app.css')
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
@@ -500,7 +500,7 @@
                 </div>
             </div>
 
-            <div class="flex justify-between items-end mb-10 px-1" id="kinerja-stats">
+            <div class="flex justify-between items-end px-1" id="kinerja-stats">
                 <div>
                     <div class="flex items-baseline text-white">
                         <span class="text-2xl" id="stat-volume">{{ number_format(($today['Volume'] ?? 0), 1) }}</span>
@@ -525,9 +525,17 @@
                     <div class="text-sm text-gray-400 mt-1">Operasional</div>
                 </div>
             </div>
+            <h1 id="date-filter" class="text-gray-600 mb-5 mt-3 text-end"> {{ data_get($latest, '_time')
+                    ? \Carbon\Carbon::parse(data_get($latest, '_time'), 'UTC')
+                        ->timezone('Asia/Jakarta')
+                        ->locale('id')
+                        ->translatedFormat('d/m/y')
+                    : '-' }}</h1>
             <x-dashboard.pump-usage :device="$device" />
         </div>
     </div>
+
+    <!-- render gauge chart -->
     <script>
         (function() {
             const canvasEl = document.getElementById('gauge');
@@ -889,7 +897,7 @@
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M2.5 5H17.5V15H2.5V5ZM10 7.5C10.663 7.5 11.2989 7.76339 11.7678 8.23223C12.2366 8.70107 12.5 9.33696 12.5 10C12.5 10.663 12.2366 11.2989 11.7678 11.7678C11.2989 12.2366 10.663 12.5 10 12.5C9.33696 12.5 8.70107 12.2366 8.23223 11.7678C7.76339 11.2989 7.5 10.663 7.5 10C7.5 9.33696 7.76339 8.70107 8.23223 8.23223C8.70107 7.76339 9.33696 7.5 10 7.5ZM5.83333 6.66667C5.83333 7.10869 5.65774 7.53262 5.34518 7.84518C5.03262 8.15774 4.60869 8.33333 4.16667 8.33333V11.6667C4.60869 11.6667 5.03262 11.8423 5.34518 12.1548C5.65774 12.4674 5.83333 12.8913 5.83333 13.3333H14.1667C14.1667 12.8913 14.3423 12.4674 14.6548 12.1548C14.9674 11.8423 15.3913 11.6667 15.8333 11.6667V8.33333C15.3913 8.33333 14.9674 8.15774 14.6548 7.84518C14.3423 7.53262 14.1667 7.10869 14.1667 6.66667H5.83333Z" fill="#979797" />
                     </svg>
-                    <h1>Penghematan biaya operasional</h1>
+                    <h1>Penghematan <span class="lg:inline-block hidden">biaya operasional</span></h1>
                 </div>
                 <h1>Rp. {{ number_format(round(($latest['Energi'] ?? 0) * 1.5386), 0, ',', '.') }}</h1>
             </div>
@@ -956,6 +964,7 @@
                 </div>
             </div>
 
+            <!-- render heatmap -->
             <script>
                 const deviceId = "{{ $id }}"
 
@@ -1093,6 +1102,8 @@
 
     <x-footer :devices=$devices />
 
+
+    <!-- pump performance -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
@@ -1127,6 +1138,51 @@
                 // updateGaugeChart(debit);
             }
 
+            // --- Format tanggal ala Carbon 'd/m/y' (Asia/Jakarta) ---
+            function formatDateID(input) {
+                if (!input) return '-';
+                const d = new Date(input);
+                if (isNaN(d.getTime())) return '-';
+
+                const parts = new Intl.DateTimeFormat('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: '2-digit',
+                    timeZone: 'Asia/Jakarta',
+                }).formatToParts(d);
+
+                const day = parts.find(p => p.type === 'day').value;
+                const month = parts.find(p => p.type === 'month').value;
+                const year = parts.find(p => p.type === 'year').value;
+
+                return `${day}/${month}/${year}`;
+            }
+
+            // --- Update teks #date-filter sesuai range aktif ---
+            function updateDateFilter(range, endTime, startTime = null) {
+                const el = document.getElementById('date-filter');
+                if (!el) return;
+
+                if (!endTime) {
+                    el.textContent = '-';
+                    return;
+                }
+
+                if (range === '1m') {
+                    // 1 minggu terakhir: tanggal akhir dikurangi 7 hari untuk tanggal awal
+                    const end = new Date(endTime);
+                    const start = new Date(end);
+                    start.setDate(start.getDate() - 7);
+                    el.textContent = `${formatDateID(start)} - ${formatDateID(end)}`;
+                } else if (range === 'custom' && startTime) {
+                    // Custom: pakai tanggal yang dipilih user
+                    el.textContent = `${formatDateID(startTime)} - ${formatDateID(endTime)}`;
+                } else {
+                    // Range lain: tampilkan satu tanggal saja
+                    el.textContent = formatDateID(endTime);
+                }
+            }
+
             async function refreshBaseline(range) {
                 const res = await fetch(`/device/${state.deviceId}/kinerja-baseline?range=${range}`);
                 const data = await res.json();
@@ -1135,6 +1191,7 @@
                 state.range = range;
                 renderStats();
                 renderGauge(state.latest.Debit);
+                updateDateFilter(range, state.latest?._time);
             }
 
             // --- Ganti filter ---
@@ -1144,6 +1201,13 @@
                 console.error('Element #kinerja-filter-group tidak ditemukan di DOM');
                 return;
             }
+
+            window.TimeFilterPanel.register('kinerja', {
+                container: filterGroup, // atau parent card element, untuk positionClasses/z-index handling
+                positionClasses: ['right-0'], // sesuaikan posisi dropdown panel relatif ke kartu kinerja
+                hasResolutionOption: false, // kartu kinerja kemungkinan tidak butuh pilihan resolusi
+                onApply: null, // boleh null karena kamu sudah handle lewat listener 'tf:apply' di bawah
+            });
 
             filterGroup.addEventListener('click', function(e) {
                 const btn = e.target.closest('.filter-btn');
@@ -1181,6 +1245,7 @@
                 state.range = 'custom';
                 renderStats();
                 renderGauge(state.latest.Debit);
+                updateDateFilter('custom', stopParam, startParam);
             }
 
             document.addEventListener('tf:apply', function(e) {
@@ -1202,6 +1267,7 @@
 
         });
     </script>
+    @stack('scripts')
 </body>
 
 <script>
@@ -1215,6 +1281,7 @@
     });
 </script>
 
+<!-- open close card -->
 <script>
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('overlay');
@@ -1282,6 +1349,8 @@
 
     overlay.addEventListener('click', overlayClick);
 </script>
+
+<!-- custom carbon koef -->
 <script>
     (function() {
         const step = 0.01;
@@ -1335,7 +1404,5 @@
         render();
     })();
 </script>
-
-@stack('scripts')
 
 </html>

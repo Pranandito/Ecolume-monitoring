@@ -12,14 +12,16 @@ class Logger
 {
     public function create($account_id = null, $action, $subject_type, $subject_id, $data, $data_record = null)
     {
-        // action = addDevice, newUser, deleteDevice, deviceClaim, addAdmin
+        // action = addDevice, newUser, deleteDevice, deviceClaim, addAdmin, addArchiveFolder, deleteArchiveFolder
         $titleMap = [
             "createDevice" => "Menambahkan Device",
             "deleteDevice" => "Menghapus Device",
             "newUser" => "Akun Baru Terdaftar",
             "claimDevice" => "Device Terhubung ke User",
             "removeDevice" => "Device Dilepas User",
-            "addAdmin" => "Penambahan Admin"
+            "addAdmin" => "Menambahkan Admin",
+            "addArchiveFolder" => "Menambahkan Folder Archive",
+            "deleteArchiveFolder" => "Menghapus Folder Archive"
         ];
 
         $descMap = [
@@ -29,6 +31,8 @@ class Logger
             "claimDevice" => fn() => "{$data['device_serial_number']} dihubungkan ke akun {$data['username']}",
             "removeDevice" => fn() => "{$data['username']} melepas perangkat {$data['device_serial_number']}",
             "addAdmin" => fn() => "{$data['added_admin_name']} ditingkatkan menjadi admin oleh {$data['admin_name']}",
+            "addArchiveFolder" => fn() => "{$data['admin_name']} menambahkan folder archive - {$data['folder_name']}",
+            "deleteArchiveFolder" => fn() => "{$data['admin_name']} menghapus folder archive - {$data['folder_name']}",
         ];
 
         $logging = ActivityLog::create([

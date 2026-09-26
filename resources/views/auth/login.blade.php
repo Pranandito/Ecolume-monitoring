@@ -14,27 +14,58 @@
         <!-- Email Address -->
         <div>
             <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full bg-[#262626] focus:bg-[#262626]" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+            <x-text-input
+                id="email"
+                class="block mt-1 w-full
+                        bg-[#262626]
+                        focus:bg-[#262626]
+                        [&:-webkit-autofill]:shadow-[inset_0_0_0_1000px_#262626]
+                        [&:-webkit-autofill]:[-webkit-text-fill-color:white]"
+                type="email"
+                name="email"
+                :value="old('email')"
+                required
+                autofocus
+                autocomplete="username" /> <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
         <!-- Password -->
         <div class="mt-4">
             <x-input-label for="password" :value="__('Password')" />
 
-            <x-text-input id="password" class="block mt-1 w-full"
+            <x-text-input
+                id="password"
+                class="block mt-1 w-full
+                    bg-[#262626] text-zinc-300
+                    focus:bg-[#262626]
+                    [&:-webkit-autofill]:shadow-[inset_0_0_0_1000px_#262626]
+                    [&:-webkit-autofill]:[-webkit-text-fill-color:#d4d4d8]"
                 type="password"
                 name="password"
-                required autocomplete="current-password" />
+                required
+                autocomplete="current-password" />
 
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
         <!-- Remember Me -->
         <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
+            <label for="remember_me" class="inline-flex items-center cursor-pointer">
+                <input
+                    id="remember_me"
+                    type="checkbox"
+                    class="rounded
+                        border-zinc-600
+                        bg-[#262626]
+                        text-indigo-600
+                        shadow-sm
+                        focus:ring-indigo-500
+                        focus:ring-offset-0"
+                    name="remember">
+
+                <span class="ms-2 text-sm text-zinc-400">
+                    {{ __('Remember me') }}
+                </span>
             </label>
         </div>
 
@@ -45,7 +76,7 @@
             </a>
             @endif -->
 
-            <a class="underline text-sm text-gray-600 hover:text-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('register') }}">
+            <a class="underline text-sm text-gray-600 hover:text-gray-400" href="{{ route('register') }}">
                 {{ __('Belum memiliki akun?') }}
             </a>
             <x-primary-button class="ms-3">

@@ -29,7 +29,7 @@
                 <h1>Dashboard</h1>
             </div>
         </a>
-        <a href="{{ route('admin.dashboard') }}" class="block">
+        <a href="{{ route('admin.storage') }}" class="block">
             <div class="group flex items-center gap-[10px] px-3 py-2 hover:bg-[#2A2A2A] text-[#979797] hover:text-white rounded-xl">
                 <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" class="group-hover:stroke-white stroke-[#979797]">
                     <path d="M0.75 16.75V2.75C0.75 2.21957 0.960714 1.71086 1.33579 1.33579C1.71086 0.960714 2.21957 0.75 2.75 0.75H13.922C14.4524 0.750113 14.961 0.960901 15.336 1.336L18.164 4.164C18.5391 4.53899 18.7499 5.04761 18.75 5.578V16.75C18.75 17.2804 18.5393 17.7891 18.1642 18.1642C17.7891 18.5393 17.2804 18.75 16.75 18.75H2.75C2.21957 18.75 1.71086 18.5393 1.33579 18.1642C0.960714 17.7891 0.75 17.2804 0.75 16.75Z" stroke="" stroke-width="1.5" />

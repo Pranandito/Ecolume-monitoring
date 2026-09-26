@@ -34,5 +34,18 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    'google_drive' => [
+        'credentials_path' => storage_path('app/private/gdrive-service.json'),
+    ],
+    'influxdb' => [
+        'host'        => env('INFLUXDB_HOST', 'localhost'),
+        'port'        => env('INFLUXDB_PORT', 8086),
+        'ssl'         => env('INFLUXDB_SSL', false),
+        'verify_ssl'  => env('INFLUXDB_VERIFY_SSL', false),
+        'timeout'     => env('INFLUXDB_TIMEOUT', 1),
+        'token'       => env('INFLUXDB_TOKEN'),
+        'org'         => env('INFLUXDB_ORG', env('INFLUXDB_ORGANISATION')),
+        'bucket'      => env('INFLUXDB_BUCKET', env('INFLUXDB_DEFAULT_BUCKET')),
+    ],
 
 ];

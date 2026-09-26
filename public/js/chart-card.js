@@ -229,6 +229,7 @@
                 legend: {
                     show: true,
                     position: 'bottom',
+                    offsetY: 25,
                     horizontalAlign: 'center',
                     fontSize: '14px',
                     fontFamily: 'inherit',

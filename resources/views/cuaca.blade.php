@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ramalan Cuaca</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite('resources/css/app.css')
     <link rel="icon" href="{{ asset('images/ecolume-logo.svg') }}" type="image/x-icon">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
@@ -16,7 +16,6 @@
             /* Warna background utama */
         }
     </style>
-
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         .apexcharts-tooltip {
@@ -563,11 +562,12 @@
             <div class="lg:flex justify-between items-center mb-3">
                 <h1 class="text-2xl">Lokasi Device Lainnya</h1>
                 @if(Auth::user()->role === 'user')
-                <button type="button" class="text-[#979797] text-sm cursor-pointer hover:underline">Lebih Banyak →</button>
+                <button type="button" id="btnLebihBanyak" class="text-[#979797] text-sm cursor-pointer hover:underline">Lebih Banyak →</button>
                 @else
                 <a href="{{ route('dashboard', ['device_id' => $device->id, 'device_name' => $device->device_name]) }}" class="text-[#979797] text-sm cursor-pointer hover:underline">Kembali ke dashboard →</a>
                 @endif
             </div>
+
             @foreach($devices->take(2) as $dev)
             <a href="{{ route('ramalan-cuaca', ['device_name' => $dev->device_name, 'device_id' => $dev->id]) }}">
                 <div class="bg-[#171717] hover:scale-[1.02] rounded-2xl p-6 flex justify-between {{ $dev_id == $dev->id ? 'border border-[#4A4A4A]' : '' }} mb-6">
@@ -589,6 +589,43 @@
             </a>
             @endforeach
 
+            <div id="modalAllDevices" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+                <div id="modalAllDevicesBackdrop" class="absolute inset-0 bg-black/70"></div>
+
+                <div class="relative bg-[#171717] rounded-2xl w-full max-w-2xl max-h-[80vh] flex flex-col">
+                    <div class="flex items-center justify-between p-6 border-b border-[#262626]">
+                        <h1 class="text-2xl">Semua Device</h1>
+                        <button type="button" id="btnCloseModalAllDevices" class="w-8 h-8 rounded-full bg-[#262626] flex items-center justify-center text-zinc-300 hover:bg-[#333] cursor-pointer">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M18 6L6 18M6 6L18 18" stroke="white" stroke-width="2" stroke-linecap="round" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="overflow-y-auto p-6">
+                        @foreach($devices as $dev)
+                        <a href="{{ route('ramalan-cuaca', ['device_name' => $dev->device_name, 'device_id' => $dev->id]) }}">
+                            <div class="bg-[#121212] hover:scale-[1.01] rounded-2xl p-6 flex justify-between {{ $dev_id == $dev->id ? 'border border-[#4A4A4A]' : '' }} mb-4">
+                                <div class="flex flex-col justify-between">
+                                    <div>
+                                        <p class="mb-4 text-[#979797]">{{ $dev->device_name }}</p>
+                                        <h1>{{ $dev->device_config->location }}</h1>
+                                    </div>
+                                    <p class="text-[#979797]">{{ $dev->today_weather->weather_code->label() }}</p>
+                                </div>
+                                <div class="place-items-end">
+                                    <img src="{{ asset('images/cerah_berawan.svg') }}" alt="" class="w-[64px] mb-6">
+                                    <div class="flex">
+                                        <h1 class="text-4xl">{{ $dev->today_weather->temperature_mean }}</h1>
+                                        <p>°C</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
             <div class="p-6 bg-[#171717] rounded-2xl mt-6">
                 <div class="flex items-center gap-5">
                     <div class="w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center text-zinc-300">
@@ -623,6 +660,37 @@
                 </div>
             </div>
         </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const btnOpen = document.getElementById('btnLebihBanyak');
+                const btnClose = document.getElementById('btnCloseModalAllDevices');
+                const backdrop = document.getElementById('modalAllDevicesBackdrop');
+                const modal = document.getElementById('modalAllDevices');
+
+                function openModal() {
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                    document.body.classList.add('overflow-hidden'); // cegah scroll background
+                }
+
+                function closeModal() {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                    document.body.classList.remove('overflow-hidden');
+                }
+
+                if (btnOpen) btnOpen.addEventListener('click', openModal);
+                if (btnClose) btnClose.addEventListener('click', closeModal);
+                if (backdrop) backdrop.addEventListener('click', closeModal);
+
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                        closeModal();
+                    }
+                });
+            });
+        </script>
     </div>
 
     <x-footer :devices=$devices />
