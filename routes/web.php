@@ -11,6 +11,7 @@ use App\Http\Controllers\DeviceModeController;
 use App\Http\Controllers\EspController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\OTAController;
 use App\Http\Controllers\Admin\StorageController as AdminStorageController;
 use Illuminate\Support\Facades\Route;
 
@@ -46,7 +47,7 @@ Route::middleware('auth')->group(function () {
 });
 
 
-Route::get('/device/tes/{device_id}/{message}', [EspController::class, 'tes2']);
+Route::post('/device/tes', [EspController::class, 'tes2']);
 
 Route::get('/device/test/{device_id}', [DashboardController::class, 'getHeatMapData']);
 Route::get('/device/line-chart/{device_id}', [DashboardController::class, 'getChartData'])->name('dashboard.line-chart');
@@ -60,10 +61,15 @@ Route::post('/device/mode/{device_id}/{serial_number}', [DeviceModeController::c
 
 Route::middleware('auth', 'admin')->group(function () {
     Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+    Route::post('/admin/add', [AdminController::class, 'addAdmin'])->name('admin.add');
+
     Route::get('/admin/storage', [AdminStorageController::class, 'index'])->name('admin.storage');
     Route::get('/admin/metrics/storage', [AdminStorageController::class, 'storageMetrics'])->name('admin.storage.metrics');
     Route::get('/admin/metrics/mqtt', [AdminStorageController::class, 'mqttMetrics'])->name('admin.mqtt.metrics');
-    Route::post('/admin/add', [AdminController::class, 'addAdmin'])->name('admin.add');
+
+    Route::get('/admin/ota-firmware', [OTAController::class, 'index'])->name('admin.ota-firmware');
+    Route::post('/admin/ota-firmware/create', [OTAController::class, 'create'])->name('admin.ota-firmware.create');
+    Route::get('/admin/ota-firmware/broadcast/{id}', [OTAController::class, 'broadcast'])->name('admin.ota-firmware.broadcast');
 
     Route::delete('/folder/delete', [ArchiveController::class, 'delete'])->name('folder.delete');
     Route::post('/folder/create', [ArchiveController::class, 'create'])->name('folder.create');

@@ -3,9 +3,6 @@
 namespace App\Services;
 
 use App\Models\ActivityLog;
-use App\Models\DeviceConfig;
-use App\Services\MQTTPublish;
-use App\Services\StatusUpdate;
 
 
 class Logger
@@ -21,7 +18,8 @@ class Logger
             "removeDevice" => "Device Dilepas User",
             "addAdmin" => "Menambahkan Admin",
             "addArchiveFolder" => "Menambahkan Folder Archive",
-            "deleteArchiveFolder" => "Menghapus Folder Archive"
+            "deleteArchiveFolder" => "Menghapus Folder Archive",
+            "addFirmware" => "Menambahkan Arsip Firmware",
         ];
 
         $descMap = [
@@ -33,6 +31,7 @@ class Logger
             "addAdmin" => fn() => "{$data['added_admin_name']} ditingkatkan menjadi admin oleh {$data['admin_name']}",
             "addArchiveFolder" => fn() => "{$data['admin_name']} menambahkan folder archive - {$data['folder_name']}",
             "deleteArchiveFolder" => fn() => "{$data['admin_name']} menghapus folder archive - {$data['folder_name']}",
+            "addFirmware" => fn() => "{$data['admin_name']} menambahkan asip firmware - {$data['file_name']}",
         ];
 
         $logging = ActivityLog::create([

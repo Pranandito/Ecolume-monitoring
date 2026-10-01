@@ -42,4 +42,9 @@ class Device extends Model
     {
         return $this->hasMany(HourlyWeatherForecast::class);
     }
+
+    public function firmware()
+    {
+        return $this->hasOne(Firmware::class);
+    }
 }
