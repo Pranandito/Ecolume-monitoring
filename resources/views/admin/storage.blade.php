@@ -15,6 +15,18 @@
             background-color: #121212;
             /* Warna background utama */
         }
+
+        .hide-scrollbar {
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE dan Edge lama */
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+            /* Chrome, Safari, Edge baru */
+        }
     </style>
 </head>
 
@@ -53,7 +65,7 @@
 </script>
 @endif
 
-<div id="addFolder-Card" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#171717] rounded-2xl shadow-3xl p-6 w-full max-w-[350px] lg:max-w-md z-[1113] text-zinc-400 max-h-[90vh] overflow-y-auto">
+<div id="addFolder-Card" class="hide-scrollbar hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#171717] rounded-2xl shadow-3xl p-6 w-full max-w-[350px] lg:max-w-md z-[1113] text-zinc-400 max-h-[90vh] overflow-y-auto">
     <div class="flex justify-between items-center">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center text-zinc-300 shrink-0">
@@ -112,10 +124,7 @@
             <span class="flex items-center justify-center w-5 h-5 rounded-full bg-blue-500/15 text-blue-400 text-xs shrink-0">3</span>
             <p class="text-sm text-zinc-200">Ambil ID folder</p>
         </div>
-        <ol class="list-decimal list-inside text-xs text-zinc-500 space-y-1 leading-relaxed">
-            <li>Buka folder di Google Drive.</li>
-            <li>Ambil bagian setelah <span class="text-zinc-300">/folders/</span>.</li>
-        </ol>
+        <p class="text-xs text-zinc-500">Buka folder di GDrive dan ambil bagian setelah <span class="text-zinc-300">/folders/</span>.</p>
         <p class="mt-2 text-[11px] text-zinc-600 break-all">
             Contoh: drive.google.com/drive/folders/<span class="text-blue-400">1Hz5sg_lJ4yNoWrpeOXhcOEv9tutZN29</span>
         </p>
@@ -433,6 +442,7 @@
             <div class="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 sm:gap-x-8 text-sm sm:text-base">
                 <a href="{{ route('admin.dashboard') }}" class="hover:underline">Dashboard</a>
                 <a href="{{ route('admin.storage') }}" class="hover:underline">Penyimpanan</a>
+                <a href="{{ route('admin.ota-firmware') }}" class="hover:underline">OTA Firmware</a>
             </div>
 
             <h1 class="hidden md:block text-xl">@Ecolume.id</h1>

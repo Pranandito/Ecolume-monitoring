@@ -403,7 +403,7 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6 relative">
         <div id="time-filter-panel"
-            class="hidden absolute right-0 lg:w-[475px] w-[350px] max-h-[665px] z-[1113] bg-[#171717] rounded-2xl p-6">
+            class="hidden absolute right-0 lg:w-[425px] w-[350px] max-h-[665px] z-[1113] bg-[#171717] rounded-2xl p-6">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center text-zinc-300">

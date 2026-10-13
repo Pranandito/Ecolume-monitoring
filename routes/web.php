@@ -47,7 +47,7 @@ Route::middleware('auth')->group(function () {
 });
 
 
-Route::post('/device/tes', [EspController::class, 'tes2']);
+Route::get('/device/tes', [AdminStorageController::class, 'storageMetrics']);
 
 Route::get('/device/test/{device_id}', [DashboardController::class, 'getHeatMapData']);
 Route::get('/device/line-chart/{device_id}', [DashboardController::class, 'getChartData'])->name('dashboard.line-chart');

@@ -30,9 +30,14 @@ class DashboardController extends Controller
 
         $adminList = User::where('role', 'admin')->select('id', 'name', 'email', 'role', 'role_updated_at')->get();
 
-        $deviceList = Device::with(['user' => function ($querry) {
-            $querry->select('id', 'name');
-        }])->paginate(5);
+        $deviceList = Device::with([
+            'user' => function ($querry) {
+                $querry->select('id', 'name');
+            },
+            'firmware' => function ($querry) {
+                $querry->select('id', 'firmware_ver');
+            },
+        ])->paginate(5);
 
 
         $activityLogs = ActivityLog::select('id', 'created_at', 'title', 'desc')->latest()->limit(10)->get();

@@ -489,7 +489,7 @@
                 series: [],
                 chart: {
                     id: 'admin-duration-chart',
-                    height: 500,
+                    height: '85%',
                     type: 'area',
                     fontFamily: 'inherit',
                     toolbar: {

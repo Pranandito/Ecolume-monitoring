@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('devices', function (Blueprint $table) {
-            $table->dropColumn('firmware_ver');
-            $table->string('firmware_id')->after('API_keys');
+            $table->dropColumn('firmware_id');
+            $table->unsignedBigInteger('firmware_id')->after('API_keys')->nullable();
             $table->foreign('firmware_id')->references('id')->on('firmwares')->nullOnDelete()->cascadeOnUpdate();
         });
     }

@@ -318,7 +318,7 @@
                 </div>
                 <div data-admin-duration-chart
                     data-config='{"endpoint":"/device/admin-chart","refreshIntervalMs":30000,"maxVisiblePoints":200}'
-                    class="bg-[#171717] rounded-2xl p-6 text-[#979797] lg:col-span-3 h-[650px] z-[1111]">
+                    class="bg-[#171717] rounded-2xl p-6 text-[#979797] lg:col-span-3 h-[750px] z-[1111]">
                     <div class="lg:flex block justify-between items-center gap-4 mb-8">
                         <div class="flex items-center gap-3 mb-3 lg:mb-0">
                             <div class="w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center text-zinc-300">
@@ -403,7 +403,7 @@
             </div>
         </div>
         <div id="time-filter-panel"
-            class="hidden absolute right-0 bottom-0 lg:w-[475px] w-[350px] max-h-[665px] z-[1113] bg-[#171717] rounded-2xl p-6">
+            class="hidden absolute lg:right-0 lg:bottom-10 lg:w-[425px] w-[350px] max-h-[700px] z-[1113] bg-[#171717] rounded-2xl p-6">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center text-zinc-300">
@@ -518,7 +518,7 @@
                 <tr class="hover:bg-white/[0.03] transition">
                     <td class="px-6 py-4 whitespace-nowrap text-gray-300">{{ $dev->id }}</td>
                     <td class="px-6 py-4 whitespace-nowrap">{{$dev->device_name}}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">{{$dev->firmware_version}}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">v{{$dev->firmware->firmware_ver}}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-gray-300">
                         <div class="flex items-center gap-2">
                             <span>{{ $dev->serial_number }}</span>
@@ -827,6 +827,7 @@
             <div class="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 sm:gap-x-8 text-sm sm:text-base">
                 <a href="{{ route('admin.dashboard') }}" class="hover:underline">Dashboard</a>
                 <a href="{{ route('admin.storage') }}" class="hover:underline">Penyimpanan</a>
+                <a href="{{ route('admin.ota-firmware') }}" class="hover:underline">OTA Firmware</a>
             </div>
 
             <h1 class="hidden md:block text-xl">@Ecolume.id</h1>

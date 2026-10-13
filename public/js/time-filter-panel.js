@@ -181,7 +181,7 @@
             }
 
             const chartCtx = this.contexts['chart'];
-            chartCtx?.container?.classList.add('z-[1111]');
+            chartCtx.container.classList.add('z-[1112]');
         }
 
         applyDraft() {

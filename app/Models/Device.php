@@ -10,7 +10,7 @@ class Device extends Model
         'owner_id',
         'device_name',
         'serial_number',
-        'firmware_version',
+        'firmware_id',
         'API_keys',
         'online_status',
         'operational_status',
@@ -45,6 +45,6 @@ class Device extends Model
 
     public function firmware()
     {
-        return $this->hasOne(Firmware::class);
+        return $this->belongsTo(Firmware::class);
     }
 }

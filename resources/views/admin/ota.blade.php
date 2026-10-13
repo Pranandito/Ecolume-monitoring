@@ -15,6 +15,18 @@
             background-color: #121212;
             /* Warna background utama */
         }
+
+        .hide-scrollbar {
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE dan Edge lama */
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+            /* Chrome, Safari, Edge baru */
+        }
     </style>
 </head>
 
@@ -277,6 +289,63 @@
     });
 </script>
 
+<div id="broadcast-Card" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#171717] rounded-2xl shadow-3xl p-6 w-full max-w-[350px] lg:max-w-md z-[1113] text-zinc-400 max-h-[90vh] overflow-y-auto">
+    <div class="flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center text-zinc-300 shrink-0">
+                <svg width="22" height="22" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6.57994 5.82705C6.57044 5.81492 6.55831 5.8051 6.54445 5.79835C6.53059 5.79159 6.51538 5.78809 6.49996 5.78809C6.48455 5.78809 6.46934 5.79159 6.45548 5.79835C6.44162 5.8051 6.42948 5.81492 6.41998 5.82705L4.99811 7.62598C4.98639 7.64095 4.97911 7.65891 4.97712 7.67782C4.97513 7.69673 4.9785 7.71582 4.98684 7.7329C4.99518 7.74998 5.00816 7.76437 5.0243 7.77443C5.04044 7.78448 5.05908 7.78979 5.07809 7.78975H6.01627V10.8671C6.01627 10.923 6.06198 10.9687 6.11784 10.9687H6.87955C6.93541 10.9687 6.98112 10.923 6.98112 10.8671V7.79102H7.92184C8.0069 7.79102 8.05387 7.69326 8.00182 7.62725L6.57994 5.82705Z"
+                        fill="white" />
+                    <path d="M10.301 4.65537C9.71953 3.12178 8.23799 2.03125 6.50254 2.03125C4.76709 2.03125 3.28555 3.12051 2.7041 4.6541C1.61611 4.93975 0.8125 5.93125 0.8125 7.10938C0.8125 8.51221 1.94873 9.64844 3.35029 9.64844H3.85938C3.91523 9.64844 3.96094 9.60273 3.96094 9.54688V8.78516C3.96094 8.7293 3.91523 8.68359 3.85938 8.68359H3.35029C2.92246 8.68359 2.52002 8.51348 2.22041 8.20498C1.92207 7.89775 1.76338 7.48389 1.77734 7.05479C1.78877 6.71963 1.90303 6.40479 2.10996 6.13945C2.32197 5.86904 2.61904 5.67227 2.94912 5.58467L3.43027 5.45898L3.60674 4.99434C3.71592 4.70488 3.86826 4.43447 4.05996 4.18945C4.24921 3.9466 4.47339 3.73312 4.7252 3.55596C5.24697 3.18906 5.86143 2.99482 6.50254 2.99482C7.14365 2.99482 7.75811 3.18906 8.27988 3.55596C8.53252 3.73369 8.75596 3.94697 8.94512 4.18945C9.13682 4.43447 9.28916 4.70615 9.39834 4.99434L9.57353 5.45771L10.0534 5.58467C10.7415 5.77002 11.2227 6.3959 11.2227 7.10938C11.2227 7.52959 11.0589 7.92568 10.7618 8.22275C10.6161 8.36929 10.4428 8.48548 10.2519 8.56458C10.061 8.64368 9.85634 8.68414 9.64971 8.68359H9.14062C9.08477 8.68359 9.03906 8.7293 9.03906 8.78516V9.54688C9.03906 9.60273 9.08477 9.64844 9.14062 9.64844H9.64971C11.0513 9.64844 12.1875 8.51221 12.1875 7.10938C12.1875 5.93252 11.3864 4.94229 10.301 4.65537Z"
+                        fill="white" />
+                </svg>
+            </div>
+            <h3 class="text-lg text-white font-medium">Konfirmasi Broadcast</h3>
+        </div>
+        <button type="button" onclick="closeBroadcastCard()" class="text-zinc-500 hover:text-white transition shrink-0">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M16.6673 16.6667L3.33398 3.33334M16.6673 3.33334L3.33398 16.6667" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
+        </button>
+    </div>
+
+    <form id="broadcastForm" action="" class="mt-5" onsubmit="return validateBroadcast(event)">
+        @csrf
+        <label class="block text-base text-white">Tulis Versi Firmware</label>
+        <label class="block text-sm mb-4">
+            Ketik versi <span id="broadcastTargetVer" class="text-white font-medium"></span> untuk mengonfirmasi broadcast ke seluruh perangkat.
+        </label>
+
+        <div class="flex items-center justify-center gap-3 mb-2">
+            <input type="text" inputmode="numeric" maxlength="3" data-ver-input
+                class="w-16 h-14 text-center text-xl rounded-xl border border-zinc-700 bg-[#262626] text-white placeholder:text-zinc-600 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition"
+                placeholder="0">
+            <span class="text-2xl text-zinc-500 select-none">.</span>
+            <input type="text" inputmode="numeric" maxlength="3" data-ver-input
+                class="w-16 h-14 text-center text-xl rounded-xl border border-zinc-700 bg-[#262626] text-white placeholder:text-zinc-600 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition"
+                placeholder="0">
+            <span class="text-2xl text-zinc-500 select-none">.</span>
+            <input type="text" inputmode="numeric" maxlength="3" data-ver-input
+                class="w-16 h-14 text-center text-xl rounded-xl border border-zinc-700 bg-[#262626] text-white placeholder:text-zinc-600 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition"
+                placeholder="0">
+        </div>
+
+        <p class="mb-4 px-2 text-center text-sm text-zinc-600">Format : Mayor . Minor . Patch</p>
+        <p id="broadcastError" class="mb-3 hidden px-2 text-center text-sm text-red-400"></p>
+
+        <div class="flex gap-3 justify-end">
+            <button type="button" onclick="closeBroadcastCard()"
+                class="block text-center w-fit text-sm rounded-xl border border-zinc-700 py-2 px-6 text-[#979797] hover:bg-zinc-800 transition">
+                Batalkan
+            </button>
+            <button type="submit" id="broadcastSubmit" disabled
+                class="w-fit flex items-center justify-center gap-2 bg-neutral-800 hover:bg-neutral-700 transition-colors text-neutral-200 text-sm rounded-xl py-2 px-6 disabled:opacity-40 disabled:cursor-not-allowed">
+                Broadcast
+            </button>
+        </div>
+    </form>
+</div>
+
 <section id="overlay" class="hidden fixed top-0 bottom-0 left-0 right-0 bg-black/50 z-[1112]"></section>
 
 <x-sidebar />
@@ -348,19 +417,18 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">{{ $firmware->uploader }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-white">{{ round($firmware->size/1000000, 2) }} MB</td>
-                        <td class="px-6 py-4 whitespace-nowrap">{{ $firmware->created_at }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ $firmware->created_at->locale('id')->translatedFormat('d F') }}</td>
                         <td class="px-2 py-1 whitespace-nowrap">
-                            <form action="{{ route('admin.ota-firmware.broadcast', $firmware->id) }}">
-                                @csrf
-                                <button type="submit" class="w-full flex items-center justify-center gap-2 bg-neutral-800 hover:bg-neutral-700 transition-colors text-neutral-200 text-sm rounded-xl py-2">
-                                    <svg width="18" height="18" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M6.57994 5.82705C6.57044 5.81492 6.55831 5.8051 6.54445 5.79835C6.53059 5.79159 6.51538 5.78809 6.49996 5.78809C6.48455 5.78809 6.46934 5.79159 6.45548 5.79835C6.44162 5.8051 6.42948 5.81492 6.41998 5.82705L4.99811 7.62598C4.98639 7.64095 4.97911 7.65891 4.97712 7.67782C4.97513 7.69673 4.9785 7.71582 4.98684 7.7329C4.99518 7.74998 5.00816 7.76437 5.0243 7.77443C5.04044 7.78448 5.05908 7.78979 5.07809 7.78975H6.01627V10.8671C6.01627 10.923 6.06198 10.9687 6.11784 10.9687H6.87955C6.93541 10.9687 6.98112 10.923 6.98112 10.8671V7.79102H7.92184C8.0069 7.79102 8.05387 7.69326 8.00182 7.62725L6.57994 5.82705Z"
-                                            fill="#949494" />
-                                        <path d="M10.301 4.65537C9.71953 3.12178 8.23799 2.03125 6.50254 2.03125C4.76709 2.03125 3.28555 3.12051 2.7041 4.6541C1.61611 4.93975 0.8125 5.93125 0.8125 7.10938C0.8125 8.51221 1.94873 9.64844 3.35029 9.64844H3.85938C3.91523 9.64844 3.96094 9.60273 3.96094 9.54688V8.78516C3.96094 8.7293 3.91523 8.68359 3.85938 8.68359H3.35029C2.92246 8.68359 2.52002 8.51348 2.22041 8.20498C1.92207 7.89775 1.76338 7.48389 1.77734 7.05479C1.78877 6.71963 1.90303 6.40479 2.10996 6.13945C2.32197 5.86904 2.61904 5.67227 2.94912 5.58467L3.43027 5.45898L3.60674 4.99434C3.71592 4.70488 3.86826 4.43447 4.05996 4.18945C4.24921 3.9466 4.47339 3.73312 4.7252 3.55596C5.24697 3.18906 5.86143 2.99482 6.50254 2.99482C7.14365 2.99482 7.75811 3.18906 8.27988 3.55596C8.53252 3.73369 8.75596 3.94697 8.94512 4.18945C9.13682 4.43447 9.28916 4.70615 9.39834 4.99434L9.57353 5.45771L10.0534 5.58467C10.7415 5.77002 11.2227 6.3959 11.2227 7.10938C11.2227 7.52959 11.0589 7.92568 10.7618 8.22275C10.6161 8.36929 10.4428 8.48548 10.2519 8.56458C10.061 8.64368 9.85634 8.68414 9.64971 8.68359H9.14062C9.08477 8.68359 9.03906 8.7293 9.03906 8.78516V9.54688C9.03906 9.60273 9.08477 9.64844 9.14062 9.64844H9.64971C11.0513 9.64844 12.1875 8.51221 12.1875 7.10938C12.1875 5.93252 11.3864 4.94229 10.301 4.65537Z" fill="#949494" />
-                                    </svg>
-                                    Broadcast
-                                </button>
-                            </form>
+                            <button type="button"
+                                onclick="openBroadcastCard('{{ route('admin.ota-firmware.broadcast', $firmware->id) }}', '{{ $firmware->firmware_ver }}')"
+                                class="w-full flex items-center justify-center gap-2 bg-neutral-800 hover:bg-neutral-700 transition-colors text-neutral-200 text-sm rounded-xl py-2">
+                                <svg width="18" height="18" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M6.57994 5.82705C6.57044 5.81492 6.55831 5.8051 6.54445 5.79835C6.53059 5.79159 6.51538 5.78809 6.49996 5.78809C6.48455 5.78809 6.46934 5.79159 6.45548 5.79835C6.44162 5.8051 6.42948 5.81492 6.41998 5.82705L4.99811 7.62598C4.98639 7.64095 4.97911 7.65891 4.97712 7.67782C4.97513 7.69673 4.9785 7.71582 4.98684 7.7329C4.99518 7.74998 5.00816 7.76437 5.0243 7.77443C5.04044 7.78448 5.05908 7.78979 5.07809 7.78975H6.01627V10.8671C6.01627 10.923 6.06198 10.9687 6.11784 10.9687H6.87955C6.93541 10.9687 6.98112 10.923 6.98112 10.8671V7.79102H7.92184C8.0069 7.79102 8.05387 7.69326 8.00182 7.62725L6.57994 5.82705Z"
+                                        fill="#949494" />
+                                    <path d="M10.301 4.65537C9.71953 3.12178 8.23799 2.03125 6.50254 2.03125C4.76709 2.03125 3.28555 3.12051 2.7041 4.6541C1.61611 4.93975 0.8125 5.93125 0.8125 7.10938C0.8125 8.51221 1.94873 9.64844 3.35029 9.64844H3.85938C3.91523 9.64844 3.96094 9.60273 3.96094 9.54688V8.78516C3.96094 8.7293 3.91523 8.68359 3.85938 8.68359H3.35029C2.92246 8.68359 2.52002 8.51348 2.22041 8.20498C1.92207 7.89775 1.76338 7.48389 1.77734 7.05479C1.78877 6.71963 1.90303 6.40479 2.10996 6.13945C2.32197 5.86904 2.61904 5.67227 2.94912 5.58467L3.43027 5.45898L3.60674 4.99434C3.71592 4.70488 3.86826 4.43447 4.05996 4.18945C4.24921 3.9466 4.47339 3.73312 4.7252 3.55596C5.24697 3.18906 5.86143 2.99482 6.50254 2.99482C7.14365 2.99482 7.75811 3.18906 8.27988 3.55596C8.53252 3.73369 8.75596 3.94697 8.94512 4.18945C9.13682 4.43447 9.28916 4.70615 9.39834 4.99434L9.57353 5.45771L10.0534 5.58467C10.7415 5.77002 11.2227 6.3959 11.2227 7.10938C11.2227 7.52959 11.0589 7.92568 10.7618 8.22275C10.6161 8.36929 10.4428 8.48548 10.2519 8.56458C10.061 8.64368 9.85634 8.68414 9.64971 8.68359H9.14062C9.08477 8.68359 9.03906 8.7293 9.03906 8.78516V9.54688C9.03906 9.60273 9.08477 9.64844 9.14062 9.64844H9.64971C11.0513 9.64844 12.1875 8.51221 12.1875 7.10938C12.1875 5.93252 11.3864 4.94229 10.301 4.65537Z" fill="#949494" />
+                                </svg>
+                                Broadcast
+                            </button>
                         </td>
                     </tr>
                     @empty
@@ -496,6 +564,13 @@
         const btnCloseAddFirmware = document.getElementById('btn-close-addFirmware');
         const addFirmwareCard = document.getElementById('addFirmware-Card');
 
+        const broadcastCard = document.getElementById('broadcast-Card');
+        const broadcastForm = document.getElementById('broadcastForm');
+        const broadcastInputs = broadcastCard.querySelectorAll('[data-ver-input]');
+        const broadcastSubmit = document.getElementById('broadcastSubmit');
+        const broadcastError = document.getElementById('broadcastError');
+        let broadcastTargetVersion = '';
+
         // const deleteDeviceConfirmCard = document.getElementById('delDevConfirm-card');
         // const btnOpenDelFolder = document.getElementById('btnOpenDelFolder');
 
@@ -511,6 +586,8 @@
             overlay.classList.add('hidden');
 
             addFirmwareCard.classList.add('hidden');
+            broadcastCard.classList.add('hidden');
+            resetBroadcastInputs();
             // deleteDeviceConfirmCard.classList.add('hidden');
         }
 
@@ -523,6 +600,85 @@
             addFirmwareCard.classList.add('hidden');
             overlay.classList.add('hidden');
         }
+
+        // ===== Broadcast =====
+        function openBroadcastCard(actionUrl, version) {
+            broadcastTargetVersion = String(version).trim();
+            broadcastForm.action = actionUrl;
+            document.getElementById('broadcastTargetVer').textContent = broadcastTargetVersion;
+            resetBroadcastInputs();
+            broadcastCard.classList.remove('hidden');
+            overlay.classList.remove('hidden');
+            broadcastInputs[0].focus();
+        }
+
+        function closeBroadcastCard() {
+            broadcastCard.classList.add('hidden');
+            overlay.classList.add('hidden');
+            resetBroadcastInputs();
+        }
+
+        function resetBroadcastInputs() {
+            broadcastInputs.forEach(i => i.value = '');
+            broadcastSubmit.disabled = true;
+            broadcastError.classList.add('hidden');
+        }
+
+        function currentBroadcastVersion() {
+            return Array.from(broadcastInputs).map(i => i.value).join('.');
+        }
+
+        function refreshBroadcastState() {
+            const allFilled = Array.from(broadcastInputs).every(i => i.value !== '');
+            broadcastSubmit.disabled = !allFilled;
+            broadcastError.classList.add('hidden');
+        }
+
+        function validateBroadcast(e) {
+            if (currentBroadcastVersion() !== broadcastTargetVersion) {
+                e.preventDefault();
+                broadcastError.textContent = 'Versi tidak sesuai dengan firmware yang akan di-broadcast.';
+                broadcastError.classList.remove('hidden');
+                return false;
+            }
+            return true;
+        }
+
+        broadcastInputs.forEach((input, idx) => {
+            input.addEventListener('input', () => {
+                input.value = input.value.replace(/\D/g, '');
+                if (input.value.length === input.maxLength && idx < broadcastInputs.length - 1) {
+                    broadcastInputs[idx + 1].focus();
+                }
+                refreshBroadcastState();
+            });
+
+            input.addEventListener('keydown', (e) => {
+                // ketik "." untuk pindah ke kolom berikutnya
+                if (e.key === '.' || e.key === ',') {
+                    e.preventDefault();
+                    if (input.value !== '' && idx < broadcastInputs.length - 1) broadcastInputs[idx + 1].focus();
+                }
+                // backspace di kolom kosong kembali ke kolom sebelumnya
+                if (e.key === 'Backspace' && input.value === '' && idx > 0) {
+                    broadcastInputs[idx - 1].focus();
+                }
+                if (e.key === 'ArrowLeft' && idx > 0) broadcastInputs[idx - 1].focus();
+                if (e.key === 'ArrowRight' && idx < broadcastInputs.length - 1) broadcastInputs[idx + 1].focus();
+            });
+
+            // paste "1.0.0" langsung terpecah ke 3 kolom
+            input.addEventListener('paste', (e) => {
+                const text = (e.clipboardData || window.clipboardData).getData('text').trim();
+                const parts = text.split('.');
+                if (parts.length === 3 && parts.every(p => /^\d{1,3}$/.test(p))) {
+                    e.preventDefault();
+                    parts.forEach((p, i) => broadcastInputs[i].value = p);
+                    broadcastInputs[2].focus();
+                    refreshBroadcastState();
+                }
+            });
+        });
 
         // function openDelFolderConfirmCard() {
         //     deleteDeviceConfirmCard.classList.remove('hidden');
@@ -541,6 +697,10 @@
         btnCloseAddFirmware.addEventListener('click', closeAddFirmwareCard);
 
         overlay.addEventListener('click', closeCard);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeCard();
+        });
 
         // document.querySelectorAll('.btnOpenDelFolder').forEach(button => {
         //     button.addEventListener('click', function() {

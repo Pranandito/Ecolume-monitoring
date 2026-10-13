@@ -84,31 +84,26 @@ class OTAController extends Controller
         );
     }
 
-    public function broadcast(Request $request, $id)
+    public function broadcast($id)
     {
-        $firmware = Firmware::findOrFail($id);
+        $fw = Firmware::where('is_prod', 1)->first();
 
-        $request->validate([
-            'confirm_version' => ['required', 'in:' . $firmware->firmware_ver],
-        ], [
-            'confirm_version.in' => 'Versi yang diketik tidak sesuai.',
+        if ($fw && $fw->id != $id) {
+            Firmware::where('id', $fw->id)->update([
+                'is_prod' => 0
+            ]);
+        }
+
+        Firmware::where('id', $id)->update([
+            'is_prod' => 1
         ]);
 
-        // Ganti firmware produksi secara atomik: hanya satu yang is_prod = 1
-        DB::transaction(function () use ($firmware) {
-            Firmware::where('is_prod', 1)
-                ->where('id', '!=', $firmware->id)
-                ->update(['is_prod' => 0]);
-
-            if (! $firmware->is_prod) {
-                $firmware->update(['is_prod' => 1]);
-            }
-        });
+        $latest = Firmware::where('id', $id)->first();
 
         return back()->with([
             'status' => 'success',
             'title' => 'Berhasil Dipublish!🎉',
-            'desc' => "Berhasil mempublish firmware versi {$firmware->firmware_ver}. Tunggu beberapa saat untuk hardware mengupdate firmware.",
+            'desc' => "Berhasil mempublish firmware versi {$latest->firmware_ver}. Tunggu beberapa saat untuk hardware mengupdate firmware."
         ]);
     }
 
